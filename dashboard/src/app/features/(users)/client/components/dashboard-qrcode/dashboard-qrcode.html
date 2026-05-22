@@ -1,0 +1,47 @@
+<app-surface classes="max-w-[32.6875rem] w-full">
+  <app-surface-title
+    title="Seu QR Code"
+    description="Compartilhe seu perfil digital instantaneamente"
+  >
+  </app-surface-title>
+
+  <section class="flex gap-x-[2rem] pt-[2.1875rem]">
+    <div>
+      <img src="/images/qr-code.svg" alt="imagem do qrcode" />
+      <app-button
+        variant="default"
+        sizeH="sm"
+        class="w-[9.1875rem] mt-[1.5rem]"
+        (click)="copyToClipboard()"
+      >
+        Baixar QR Code
+      </app-button>
+    </div>
+
+    <div class="flex-1 space-y-[1.5rem]">
+      <span class="block font-urbanist font-semibold text-[1.25rem]">Link personalizado</span>
+      <div class="flex border border-neutral-soft rounded-[.625rem]">
+        <p
+          class="flex items-center justify-center font-manrope font-semibold bg-[#F5F5F5] text-neutral-medium border-r border-neutral-soft max-w-[7.75rem] w-full h-[2.375rem] rounded-l-[.625rem]"
+        >
+          rencard.app/
+        </p>
+        <p
+          class="flex items-center justify-center font-manrope font-semibold border-l border-neutral-soft text-neutral-soft w-full h-[2.375rem] rounded-r-[.625rem]"
+        >
+          {{ username() }}
+        </p>
+      </div>
+
+      <app-button
+        variant="default"
+        sizeH="sm"
+        class="w-full flex justify-center items-center gap-2"
+        (click)="copyToClipboard()"
+      >
+        <ng-icon name="lucideCopy" size="16" class="text-w"></ng-icon>
+        <p>Copiar</p>
+      </app-button>
+    </div>
+  </section>
+</app-surface>

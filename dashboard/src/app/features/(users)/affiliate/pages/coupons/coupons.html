@@ -1,0 +1,41 @@
+<section>
+  @if (isInitialLoading()) {
+    <div class="flex items-center justify-center min-h-[50vh]">
+      <app-loader></app-loader>
+    </div>
+  } @else {
+    <app-dashboard-title
+      title="Meus Cupons"
+      description="Acompanhe seus códigos de indicação e compartilhe para ganhar comissões"
+    ></app-dashboard-title>
+
+    @for (coupon of coupons().results; track coupon) {
+      <app-surface classes="flex justify-between bg-white">
+        <div class="space-y-4 font-semibold font-urbanist">
+          <div class="flex gap-x-4.5">
+            <p class="text-[1.5rem]">{{ coupon.code }}</p>
+            <p
+              class="text-[.875rem] rounded-[.625rem] py-2 px-4 bg-neutral-extra-soft text-neutral-medium"
+            >
+              {{ coupon.discount_label }}
+            </p>
+          </div>
+
+          <p class="font-manrope text-neutral-medium">
+            {{ coupon.total_uses }} uso(s) • Válido até {{ coupon.ends_at | localDate: 'short' }}
+          </p>
+        </div>
+
+        <app-button>Copiar</app-button>
+      </app-surface>
+    }
+
+    <app-pagination
+      [config]="paginationConfig()"
+      [pageSizeOptions]="pageSizeOptions"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+      class="block mt-[2.5625rem]"
+    />
+  }
+</section>

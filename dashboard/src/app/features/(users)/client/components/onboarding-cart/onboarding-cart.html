@@ -1,0 +1,24 @@
+<app-surface>
+  <!-- Título -->
+  <div class="flex items-center gap-[.8125rem] mb-[2rem]">
+    <ng-icon name="lucideStore" size="24"></ng-icon>
+    <p class="font-urbanist text-red text-[1.25rem] font-semibold">Seu pedido</p>
+  </div>
+
+  @if (isEmpty()) {
+    <p class="text-neutral-medium text-center font-manrope">Nenhum produto selecionado ainda</p>
+  }
+
+  @if (items()) {
+    <ul class="space-y-[1.5rem]">
+      @for (item of items(); track item) {
+        <li class="border-b border-neutral-extra-soft pb-[0.5rem] mb-4">
+          <span class="text-neutral-medium font-semibold text-[1.25rem] font-urbanist">{{
+            item.label
+          }}</span>
+          <p class="font-urbanist text-[1.25rem] font-semibold">{{ item.value }}</p>
+        </li>
+      }
+    </ul>
+  }
+</app-surface>

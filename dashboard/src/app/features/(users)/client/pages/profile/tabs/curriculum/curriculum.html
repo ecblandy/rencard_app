@@ -1,0 +1,51 @@
+<app-surface>
+  <app-surface-title title="Currículo" description="Faça upload do seu currículo em PDF" />
+
+  @if (curriculum().enabled) {
+    <div class="flex flex-col gap-y-[1rem] mt-[3.5rem]">
+      <span class="font-manrope font-semibold text-neutral-medium">Arquivo em PDF</span>
+
+      <label
+        class="text-center h-[7.625rem] border border-neutral-soft rounded-[.625rem] cursor-pointer"
+        [class.border-primary]="selectedFile()"
+      >
+        <div class="flex flex-col items-center justify-center gap-[.75rem] h-full">
+          <ng-icon name="bootstrapCloudUpload" size="24"></ng-icon>
+          <span class="text-neutral-medium">
+            {{ selectedFile() ? selectedFile()!.name : 'Arraste ou anexe para enviar' }}
+          </span>
+        </div>
+        <input
+          type="file"
+          accept=".pdf"
+          name="curriculum"
+          class="hidden"
+          (change)="onFileChange($event)"
+        />
+      </label>
+
+      <p class="text-neutral-medium font-manrope font-medium">
+        O botão "Baixar currículo" aparecerá automaticamente no seu perfil quando um arquivo for
+        enviado.
+      </p>
+    </div>
+  }
+
+  <div class="bg-[#e2e2e2] w-full rounded-[.625rem] px-[1rem] py-[1.5rem] h-auto mt-[3.5rem]">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-[.75rem]">
+        <ng-icon [name]="curriculum().icon" size="20"></ng-icon>
+        <span class="font-urbanist font-semibold text-[1.25rem]">{{ curriculum().label }}</span>
+      </div>
+
+      <app-switch-button
+        [checked]="curriculum().enabled"
+        (checkedChange)="toggleEnabled($event)"
+      ></app-switch-button>
+    </div>
+  </div>
+
+  <app-button type="button" class="w-full mt-[3.5rem]" (click)="onSubmit()"
+    >Salvar alterações</app-button
+  >
+</app-surface>

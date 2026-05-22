@@ -1,0 +1,32 @@
+<app-dashboard-title
+  title="Personalizar Perfil"
+  description="Configure cada detalhe do seu cartão digital."
+/>
+<div class="flex gap-x-[3.375rem]">
+  <nav class="tabs flex flex-col gap-y-[1rem]">
+    @for (tab of tabs(); track tab.key) {
+      <button
+        type="button"
+        sizeH="xl"
+        (click)="selectTab(tab.key)"
+        [class.active-tab]="tab.key === activeTabKey()"
+        class="flex items-center gap-x-[.5rem] font-manrope font-medium whitespace-nowrap w-[13.5625rem] h-[3.125rem] rounded-[.5rem] px-[1.25rem] border border-neutral-soft"
+      >
+        <ng-icon [name]="tab.icon" size="18"></ng-icon>
+        {{ tab.label }}
+      </button>
+    }
+  </nav>
+
+  <section class="flex-1">
+    @if (isLoaded()) {
+      @for (tab of tabs(); track tab.key) {
+        <div [class.hidden]="tab.key !== activeTabKey()">
+          <ng-container *ngComponentOutlet="tab.component"></ng-container>
+        </div>
+      }
+    }
+  </section>
+
+  <app-preview class="flex-1 max-w-77.25 w-full"></app-preview>
+</div>

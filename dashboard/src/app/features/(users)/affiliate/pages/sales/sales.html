@@ -1,0 +1,47 @@
+<section>
+  @if (isInitialLoading()) {
+    <div class="flex items-center justify-center min-h-[50vh]">
+      <app-loader></app-loader>
+    </div>
+  } @else {
+    <app-dashboard-title
+      title="Minhas vendas"
+      description="Acompanhe as vendas que você gerou com seu cupom"
+    ></app-dashboard-title>
+
+    @for (sale of sales().results; track sale) {
+      <app-surface classes="flex justify-between bg-white">
+        <div class="space-y-4 font-semibold font-urbanist">
+          <p class="text-[1.5rem]">{{ sale.product_names }}</p>
+          <p class="text-[1.25rem] text-neutral-medium">
+            {{ sale.sale_date | localDate: 'short' }}
+          </p>
+          <p class="font-manrope text-neutral-strong">{{ sale.status_description }}</p>
+        </div>
+
+        <div class="space-y-4 font-semibold">
+          <p
+            class="uppercase py-2 px-4 rounded-[10px] font-manrope"
+            [ngClass]="[
+              getStatusStyles(sale.sale_status).bgColor,
+              getStatusStyles(sale.sale_status).textColor,
+            ]"
+          >
+            {{ sale.sale_status }}
+          </p>
+          <p class="text-center font-urbanist text-[1.25rem]">
+            {{ formatPrice(sale.commission_cents) }}
+          </p>
+        </div>
+      </app-surface>
+    }
+
+    <app-pagination
+      [config]="paginationConfig()"
+      [pageSizeOptions]="pageSizeOptions"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+      class="block mt-[2.5625rem]"
+    />
+  }
+</section>

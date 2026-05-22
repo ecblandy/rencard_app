@@ -1,0 +1,77 @@
+<div class="mx-auto px-[1.25rem] mb-[3.75rem] max-w-[79.875rem] w-full h-full">
+  <app-onboarding-step [currentStep]="currentStep()"></app-onboarding-step>
+  <app-onboarding-title
+    title="Entenda sua compra"
+    description="Leia atentamente as informações abaixo antes de prosseguir."
+  ></app-onboarding-title>
+
+  <section class="flex gap-x-[1.5rem]">
+    <!-- Container left -->
+    <div>
+      <!-- How With Works -->
+      <div class="max-w-[58.375rem] w-full border border-neutral-extra-soft rounded-[.625rem]">
+        <!-- Title -->
+        <div
+          class="flex items-center gap-[1rem] py-[1rem] px-[1.5rem] bg-neutral-extra-soft rounded-t-[.625rem]"
+        >
+          <div
+            class="flex items-center justify-center h-[2rem] w-[2rem] rounded-[.25rem] bg-neutral-strong"
+          >
+            <ng-icon name="lucideHandshake" size="16" color="white"></ng-icon>
+          </div>
+          <h2 class="font-urbanist font-semibold text-[1.5rem]">Como funciona o Rencard</h2>
+        </div>
+
+        <!-- Infos -->
+        <ul class="space-y-[1.5rem] px-[1.5rem] py-[1rem]">
+          @for (step of steps(); track step) {
+            <li class="flex gap-x-[1rem]">
+              <div
+                class="flex items-center justify-center h-[2rem] w-[2rem] rounded-[.25rem] bg-neutral-strong text-white"
+              >
+                {{ step.step }}
+              </div>
+              <div class="flex-1 flex items-center font-manrope">
+                {{ step.message }}
+              </div>
+            </li>
+          }
+        </ul>
+
+        <!-- Footer -->
+        <div
+          class="flex items-center gap-[1rem] py-[1rem] px-[1.5rem] bg-[#F5F5F5] rounded-b-[.625rem] border-t border-neutral-extra-soft"
+        >
+          <div>
+            <ng-icon name="lucideTriangleAlert" size="22" color="#7a7a7a"></ng-icon>
+          </div>
+          <p class="font-manrope text-[.875rem] text-neutral-medium">
+            Seu cartão físico e tag NFC funcionarão normalmente. A assinatura é para você poder
+            editar e ter acesso a todos os recursos disponíveis no plano que você escolher.
+          </p>
+        </div>
+      </div>
+
+      <!-- Accept terms -->
+      <app-surface classes="my-[2.5rem] max-w-[58.375rem] w-full">
+        <label for="terms" class="flex items-center gap-x-[1rem] font-manrope font-semibold">
+          <input type="checkbox" id="terms" class="h-[1.25rem] w-[1.25rem] rounded-[.625rem]" />
+          Li e entendi como funciona o uso do Rencard e do perfil digital.
+        </label>
+      </app-surface>
+
+      <!-- Actions Buttons -->
+      <div class="flex gap-x-[1rem]">
+        <app-button variant="outline" class="w-full">Voltar</app-button>
+        <app-button class="w-full" (click)="onCreateOrder()">Pagar</app-button>
+      </div>
+
+      <span class="block text-neutral-soft font-manrope text-center mt-[.5rem]"
+        >Você precisa aceitar os termos para continuar</span
+      >
+    </div>
+
+    <!-- Container Right -->
+    <app-onboarding-cart [items]="cartItems()"></app-onboarding-cart>
+  </section>
+</div>

@@ -1,0 +1,114 @@
+<section>
+  @if (isLoadingUser()) {
+    <div class="flex items-center justify-center min-h-[50vh]">
+      <app-loader></app-loader>
+    </div>
+  } @else {
+    <!-- Container -->
+    <div class="flex flex-col gap-y-10">
+      <button
+        (click)="goBack()"
+        class="flex items-center gap-x-2 font-manrope cursor-pointer hover:opacity-80 transition-opacity"
+      >
+        <ng-icon name="bootstrapArrowLeft" size="20"></ng-icon>
+        <p>Voltar para afiliados</p>
+      </button>
+
+      <div class="flex items-center gap-x-6">
+        <span class="font-urbanist font-bold text-[2.5rem]">{{ affiliate().full_name }}</span>
+        <p class="bg-black text-white rounded-[.625rem] px-4 py-2 capitalize">
+          {{ affiliate().affiliate_active }}
+        </p>
+      </div>
+
+      <!-- Status -->
+      <app-surface classes="block space-y-6 bg-white">
+        <app-surface-title title="Status do parceiro" class="block mb-6"></app-surface-title>
+
+        <div class="font-manrope">
+          <span class="text-neutral-medium">Status atual</span>
+          <p class="font-semibold capitalize">{{ affiliate().is_active }}</p>
+        </div>
+
+        <form>
+          <div>
+            <app-label>Alterar status</app-label>
+            <div class="relative w-full">
+              <select
+                class="w-full h-[2.5rem] appearance-none bg-white border border-neutral-soft px-4 py-1 pr-10 rounded-lg text-sm text-neutral-800 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-neutral-medium transition-all cursor-pointer"
+              >
+                <option value="">Selecione novo status</option>
+                <option value="in_production">Em produção</option>
+                <option value="delivered">Entregue</option>
+                <option value="shipped">Enviado</option>
+              </select>
+
+              <!-- Arrow -->
+              <span
+                class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
+              >
+                <ng-icon name="lucideChevronDown" size="18"></ng-icon>
+              </span>
+            </div>
+          </div>
+
+          <app-button class="mt-6 w-full">Salvar alterações</app-button>
+        </form>
+      </app-surface>
+
+      <!-- About -->
+      <app-surface classes="block space-y-6 bg-white">
+        <app-surface-title title="Resumo do parceiro" class="block mb-6"></app-surface-title>
+
+        <div class="font-manrope">
+          <span class="text-neutral-medium">Tipo</span>
+          <p class="font-semibold capitalize">Afiliado</p>
+        </div>
+
+        <div class="font-manrope">
+          <span class="text-neutral-medium">E-mail</span>
+          <p class="font-semibold capitalize">{{ affiliate().email }}</p>
+        </div>
+      </app-surface>
+
+      <app-surface classes="block space-y-6 bg-white">
+        <app-surface-title title="Resumo de performace" class="block mb-6"></app-surface-title>
+
+        <div class="flex justify-between items-center font-manrope">
+          <span class="text-neutral-medium">Total de vendas</span>
+          <p class="font-semibold uppercase">{{ affiliate().confirmed_sales_count }}</p>
+        </div>
+
+        <div class="flex justify-between items-center font-manrope">
+          <span class="text-neutral-medium">Receita atribuída</span>
+          <p class="font-semibold uppercase">
+            {{ formatPrice(affiliate().attributed_revenue_cents || 0) }}
+          </p>
+        </div>
+
+        <div class="flex justify-between items-center font-manrope">
+          <span class="text-neutral-medium">Comissão total</span>
+          <p class="font-semibold uppercase">
+            {{ formatPrice(affiliate().available_commission_cents || 0) }}
+          </p>
+        </div>
+      </app-surface>
+
+      <app-surface classes="block space-y-6 bg-white">
+        <app-surface-title title="Dados para pagamento" class="block mb-6"></app-surface-title>
+
+        <div class="font-manrope">
+          <span class="text-neutral-medium">Tipo de chave PIX</span>
+          <p class="font-semibold uppercase">{{ affiliate().pix_key_type }}</p>
+        </div>
+
+        <div class="font-manrope">
+          <span class="text-neutral-medium">Chave PIX</span>
+          <p class="font-semibold">{{ affiliate().pix_key }}</p>
+        </div>
+
+        <app-button class="w-full">Copiar</app-button>
+      </app-surface>
+    </div>
+  }
+</section>

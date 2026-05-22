@@ -1,0 +1,39 @@
+<app-surface>
+  <app-surface-title
+    title="Formulário de contato"
+    description="Permita que visitantes enviem mensagens diretamente para seu e-mail"
+  />
+
+  <div class="bg-[#e2e2e2] w-full rounded-[.625rem] px-[1rem] py-[1.5rem] h-auto mt-[3.5rem]">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-[.75rem]">
+        <ng-icon name="lucideFileText" size="20"></ng-icon>
+        <span class="font-urbanist font-semibold text-[1.25rem]">Exibir formulário de contato</span>
+      </div>
+
+      <app-switch-button
+        [checked]="effectiveEnabled()"
+        (checkedChange)="toggleEnabled()"
+      ></app-switch-button>
+    </div>
+  </div>
+
+  @if (effectiveEnabled()) {
+    <div class="mt-[1.875rem]">
+      <h5 class="font-urbanist font-semibold text-[1.25rem] mb-[.5rem]">
+        Campos em exibição no formulário
+      </h5>
+      <ul class="ml-[1.25rem] max-w-[15.875rem] w-full space-y-[.5rem]">
+        @for (formLabel of formLabels(); track formLabel) {
+          <li class="text-neutral-extra-soft list-disc">{{ formLabel }}</li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (hasChanges()) {
+    <app-button sizeH="sm" class="w-full mt-[3.5rem]" (click)="save()" [disabled]="isSaving()">
+      {{ isSaving() ? 'Salvando...' : 'Salvar alterações' }}
+    </app-button>
+  }
+</app-surface>

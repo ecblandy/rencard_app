@@ -1,0 +1,41 @@
+<aside
+  class="fixed left-0 top-0 max-lg:hidden px-[.625rem] w-[14.8125rem] py-[1.4375rem] min-h-full h-auto bg-[linear-gradient(270deg,#FBFBFB_35%,#F5F5F5_100%)]"
+>
+  <!-- Logo -->
+  <img src="/images/rencard-logo.svg" alt="Rencard logo" width="145" height="36" class="mx-auto" />
+
+  <!-- Links -->
+  <nav aria-label="Navegação principal" class="mt-[1.4375rem]">
+    <ul class="space-y-[1.5rem] border-y border-[#C2C2C2] py-[1.875rem]">
+      @for (link of links(); track link.path) {
+        <li>
+          <a
+            [routerLink]="link.path"
+            routerLinkActive
+            #rla="routerLinkActive"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="flex items-center gap-[0.5rem] h-[3.125rem] w-full px-[1.25rem] rounded-lg font-manrope font-medium transition-colors"
+            [ngClass]="
+              rla.isActive
+                ? 'bg-black text-white'
+                : 'text-zinc-600 hover:bg-zinc-200 hover:text-black'
+            "
+          >
+            <ng-icon [name]="link.icon" size="25"></ng-icon>
+            {{ link.label }}
+          </a>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <!-- Logout -->
+  <button
+    type="button"
+    (click)="onLogout()"
+    class="cursor-pointer flex items-center gap-[0.5rem] h-[3.125rem] w-full mt-[1.5rem] px-[1.25rem] rounded-lg font-manrope font-medium text-zinc-500 transition-colors hover:bg-zinc-200 hover:text-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400"
+  >
+    <ng-icon name="lucideLogOut" size="22"></ng-icon>
+    Sair
+  </button>
+</aside>

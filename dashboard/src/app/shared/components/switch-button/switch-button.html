@@ -1,0 +1,13 @@
+<button
+  type="button"
+  (click)="toggleSwitch()"
+  [disabled]="disabled()"
+  class="relative w-[3rem] h-[1.5rem] rounded-full transition-colors bg-neutral-soft"
+  [class.isChecked]="checked()"
+  [class.isDisabled]="disabled()"
+  [attr.aria-pressed]="checked()"
+>
+  <span
+    class="absolute top-[0.125rem] left-[0.125rem] w-[1.25rem] h-[1.25rem] bg-white rounded-full transition-transform"
+  ></span>
+</button>

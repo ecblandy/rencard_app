@@ -1,0 +1,131 @@
+<app-surface classes="bg-white border border-neutral-soft">
+  <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+    <!-- Left: Info and Page Size -->
+    <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
+      <!-- Results Info -->
+      <p class="font-manrope text-sm text-neutral-700 whitespace-nowrap">
+        Mostrando
+        <span class="font-semibold text-neutral-900">
+          {{ getDisplayRange().start }}
+        </span>
+        -
+        <span class="font-semibold text-neutral-900">
+          {{ getDisplayRange().end }}
+        </span>
+        de
+        <span class="font-semibold text-neutral-900">{{ config().totalCount }}</span>
+        resultados
+      </p>
+
+      <!-- Page Size Selector -->
+      <div class="relative">
+        <select
+          [value]="config().pageSize"
+          (change)="changePageSize(+$any($event.target).value)"
+          class="appearance-none bg-white border border-neutral-300 px-4 py-2 pr-10 rounded-lg text-sm text-neutral-900 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:border-neutral-400"
+        >
+          @for (option of pageSizeOptions(); track option) {
+            <option [value]="option">{{ option }} por página</option>
+          }
+        </select>
+        <span
+          class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
+        >
+          <ng-icon name="lucideChevronDown" size="16"></ng-icon>
+        </span>
+      </div>
+    </div>
+
+    <!-- Right: Navigation -->
+    <div class="flex items-center gap-2">
+      <!-- First Page -->
+      <button
+        (click)="goToPage(1)"
+        [disabled]="!config().hasPrevious"
+        class="flex items-center justify-center w-10 h-10 rounded-lg border bg-white text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 disabled:bg-neutral-100 disabled:border-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed transition-all"
+        [class.border-neutral-300]="config().hasPrevious"
+        [class.border-neutral-200]="!config().hasPrevious"
+        title="Primeira página"
+      >
+        <ng-icon name="lucideChevronsLeft" size="18"></ng-icon>
+      </button>
+
+      <!-- Previous Page -->
+      <button
+        (click)="previousPage()"
+        [disabled]="!config().hasPrevious"
+        class="flex items-center gap-2 px-4 h-10 rounded-lg border bg-white text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 disabled:bg-neutral-100 disabled:border-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed transition-all font-manrope text-sm font-medium"
+        [class.border-neutral-300]="config().hasPrevious"
+        [class.border-neutral-200]="!config().hasPrevious"
+      >
+        <ng-icon name="lucideChevronLeft" size="18"></ng-icon>
+        <span class="hidden sm:inline">Anterior</span>
+      </button>
+
+      <!-- Page Numbers (desktop only) -->
+      <div class="hidden md:flex items-center gap-1">
+        @for (page of getPageNumbers(); track $index) {
+          @if (page === '...') {
+            <span class="px-3 h-10 flex items-center font-manrope text-sm text-neutral-500">
+              {{ page }}
+            </span>
+          } @else {
+            <button
+              (click)="goToPage(+page)"
+              [class.bg-black]="config().currentPage === +page"
+              [class.text-white]="config().currentPage === +page"
+              [class.font-bold]="config().currentPage === +page"
+              [class.shadow-sm]="config().currentPage === +page"
+              [class.border-primary]="config().currentPage === +page"
+              [class.bg-white]="config().currentPage !== +page"
+              [class.text-neutral-700]="config().currentPage !== +page"
+              [class.border-neutral-300]="config().currentPage !== +page"
+              [class.hover:bg-neutral-100]="config().currentPage !== +page"
+              [class.hover:border-neutral-400]="config().currentPage !== +page"
+              class="min-w-[2.5rem] h-10 px-3 rounded-lg border transition-all font-manrope text-sm font-medium"
+            >
+              {{ page }}
+            </button>
+          }
+        }
+      </div>
+
+      <!-- Current Page (mobile only) - CORRIGIDO -->
+      <div
+        [class.bg-primary]="config().totalPages > 1"
+        [class.text-white]="config().totalPages > 1"
+        [class.border-primary]="config().totalPages > 1"
+        [class.bg-neutral-100]="config().totalPages <= 1"
+        [class.text-neutral-900]="config().totalPages <= 1"
+        [class.border-neutral-300]="config().totalPages <= 1"
+        class="md:hidden px-4 h-10 flex items-center font-manrope text-sm font-medium rounded-lg border"
+      >
+        {{ config().currentPage }} / {{ config().totalPages }}
+      </div>
+
+      <!-- Next Page -->
+      <button
+        (click)="nextPage()"
+        [disabled]="!config().hasNext"
+        class="flex items-center gap-2 px-4 h-10 rounded-lg border bg-white text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 disabled:bg-neutral-100 disabled:border-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed transition-all font-manrope text-sm font-medium"
+        [class.border-neutral-300]="config().hasNext"
+        [class.border-neutral-200]="!config().hasNext"
+      >
+        <span class="hidden sm:inline">Próximo</span>
+        <ng-icon name="lucideChevronRight" size="18"></ng-icon>
+      </button>
+
+      <!-- Last Page -->
+      <button
+        (click)="goToPage(config().totalPages)"
+        [disabled]="!config().hasNext"
+        class="flex items-center justify-center w-10 h-10 rounded-lg border bg-white text-neutral-700 hover:bg-neutral-100 hover:border-neutral-400 disabled:bg-neutral-100 disabled:border-neutral-200 disabled:text-neutral-400 disabled:cursor-not-allowed transition-all"
+        [class.border-neutral-300]="config().hasNext"
+        [class.border-neutral-200]="!config().hasNext"
+        title="Última página"
+      >
+        <ng-icon name="lucideChevronsRight" size="18"></ng-icon>
+      </button>
+    </div>
+  </div>
+</app-surface>

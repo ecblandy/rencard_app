@@ -1,0 +1,125 @@
+<section>
+  <app-dashboard-title
+    title="Bem-vindo ao seu painel"
+    description="Acompanhe os principais indicadores do Rencard"
+  ></app-dashboard-title>
+
+  <div class="flex flex-col gap-[2.5625rem]">
+    <!-- Period filter -->
+    <app-period-filter [(period)]="period"></app-period-filter>
+
+    <!-- Metrics -->
+    <div class="grid grid-cols-2 gap-[1.3125rem]">
+      @for (metric of metricsSignal(); track metric) {
+        <app-surface classes="flex bg-white flex-col gap-[.5rem] border border-neutral-soft">
+          <div
+            class="flex w-[2.5rem] h-[2.5rem] rounded-[.5rem] items-center justify-center bg-neutral-extra-soft"
+          >
+            <ng-icon [name]="metric.icon"></ng-icon>
+          </div>
+
+          <span class="font-manrope font-semibold text-neutral-soft">{{ metric.label }}</span>
+
+          <strong class="font-urbanist font-bold text-[2.5rem]">{{
+            metric.isPrice ? formatPrice(metric.value) : metric.value
+          }}</strong>
+
+          <p class="font-manrope text-neutral-soft">{{ metric.description }}</p>
+        </app-surface>
+      }
+    </div>
+
+    <!-- Growth Chart -->
+    <div>
+      <h2 class="mb-[2.0625rem] font-urbanist font-semibold text-[1.5rem]">
+        Crescimento da plataforma
+      </h2>
+
+      <app-surface classes="bg-white" class="mb-[6.25rem]">
+        <app-surface-title
+          title="Evolução anual de assinaturas e novos usuários"
+        ></app-surface-title>
+        <app-multi-axis-chart [data]="dashboardData()"></app-multi-axis-chart>
+      </app-surface>
+    </div>
+
+    <!-- Coupons & Influencers -->
+    <app-surface classes="bg-white flex flex-col gap-[2.0625rem] border border-neutral-soft">
+      <div class="flex justify-between items-center">
+        <app-surface-title
+          title="Cupons & Influenciadores"
+          description="Gerencie cupons promocionais e parcerias"
+        ></app-surface-title>
+
+        <app-button class="flex items-center gap-x-2" [routerLink]="['/admin/coupons']">
+          <ng-icon name="lucidePlus"></ng-icon>
+          Criar cupom
+        </app-button>
+      </div>
+
+      <!-- Metric Cards -->
+      <div class="grid grid-cols-2 gap-[1.3125rem]">
+        @for (metric of couponsMetric(); track metric) {
+          <app-surface classes="flex flex-col gap-[.5rem] border border-neutral-soft">
+            <div
+              class="flex w-[2.5rem] h-[2.5rem] rounded-[.5rem] items-center justify-center bg-neutral-extra-soft"
+            >
+              <ng-icon [name]="metric.icon"></ng-icon>
+            </div>
+
+            <span class="font-manrope font-semibold text-neutral-soft">{{ metric.label }}</span>
+
+            <strong class="font-urbanist font-bold text-[2.5rem]">{{
+              metric.isPrice ? formatPrice(metric.value) : metric.value
+            }}</strong>
+
+            <p class="font-manrope text-neutral-soft">{{ metric.description }}</p>
+          </app-surface>
+        }
+      </div>
+
+      <!-- Recent Coupons -->
+      <div>
+        <h3 class="mb-4 font-urbanist font-semibold text-[20px] text-neutral-medium">
+          Cupons recentes
+        </h3>
+
+        <!-- Recent Coupons List -->
+        <div class="flex flex-col gap-y-7">
+          @if (recentCoupons().length === 0) {
+            <p class="font-manrope text-neutral-soft text-center">
+              Nenhum cupom recente encontrado.
+            </p>
+          } @else {
+            @for (coupon of recentCoupons(); track coupon) {
+              <app-surface
+                classes="bg-white flex justify-between items-center border border-neutral-soft"
+              >
+                <div class="bg-white flex items-center gap-4">
+                  <div
+                    class="flex w-[2.5rem] h-[2.5rem] rounded-[.5rem] items-center justify-center bg-neutral-extra-soft"
+                  >
+                    <ng-icon name="bootstrapTicketPerforated"></ng-icon>
+                  </div>
+                  <div>
+                    <strong class="font-urbanist text-[20px]">{{ coupon.code }}</strong>
+                    <p class="font-manrope text-neutral-soft">{{ coupon.influencer }}</p>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                  <span class="font-manrope font-semibold text-neutral-soft">
+                    {{ coupon.uses }}</span
+                  >
+                  <span class="font-semibold font-urbanist text-[20px]">{{
+                    formatPrice(coupon.revenueGenerated)
+                  }}</span>
+                </div>
+              </app-surface>
+            }
+          }
+        </div>
+      </div>
+    </app-surface>
+  </div>
+</section>

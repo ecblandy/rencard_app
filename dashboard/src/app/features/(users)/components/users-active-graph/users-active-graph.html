@@ -1,0 +1,15 @@
+<div class="mt-[.75rem]">
+  @if (hasData()) {
+    <canvas
+      baseChart
+      [type]="chartConfig.type"
+      [data]="chartConfig.data"
+      [options]="chartConfig.options"
+    ></canvas>
+  } @else {
+    <div class="flex flex-col items-center justify-center gap-2 py-10 text-neutral-soft">
+      <ng-icon name="lucideChartNoAxesColumn" class="text-[2rem]"></ng-icon>
+      <p class="font-manrope text-sm">Nenhuma visualização no período selecionado.</p>
+    </div>
+  }
+</div>

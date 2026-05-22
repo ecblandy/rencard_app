@@ -1,0 +1,137 @@
+<app-auth-form
+  title="Endereço"
+  subtitle="Informe seu endereço para continuarmos com o cadastro"
+  (submitForm)="onSubmit($event)"
+>
+  <!-- CEP and City fields -->
+  <div class="flex gap-[.75rem]">
+    <!-- CEP -->
+    <div class="flex flex-col gap-[.5rem] w-full">
+      <app-label variant="auth" for="cep">CEP</app-label>
+      <app-input
+        variant="default"
+        id="cep"
+        type="text"
+        [mask]="'00000-000'"
+        placeholder="Digite seu cep"
+        sizeH="xl"
+        (input)="onCepChange($event)"
+        [formField]="signupAddressForm.cep"
+      />
+      <!-- CEP error message -->
+      @if (signupAddressForm.cep().touched() && signupAddressForm.cep().invalid()) {
+        <ul>
+          @for (error of signupAddressForm.cep().errors(); track error.message) {
+            <li class="text-error">{{ error.message }}</li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- Neighborhood -->
+    <div class="flex flex-col gap-[.5rem] w-full">
+      <app-label variant="auth" for="neighborhood">Bairro</app-label>
+      <app-input
+        variant="default"
+        id="neighborhood"
+        type="text"
+        placeholder="Digite seu estado"
+        sizeH="xl"
+        [formField]="signupAddressForm.neighborhood"
+      />
+      <!-- Neighborhood error message -->
+      @if (
+        signupAddressForm.neighborhood().touched() && signupAddressForm.neighborhood().invalid()
+      ) {
+        <ul>
+          @for (error of signupAddressForm.neighborhood().errors(); track error.message) {
+            <li class="text-error">{{ error.message }}</li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+
+  <!-- City and State fields -->
+  <div class="flex gap-[.75rem]">
+    <!-- State -->
+    <div class="flex flex-col gap-[.5rem] w-full">
+      <app-label variant="auth" for="state">Estado</app-label>
+      <app-input
+        variant="default"
+        id="state"
+        type="text"
+        placeholder="Digite seu estado"
+        sizeH="xl"
+        [formField]="signupAddressForm.state"
+      />
+      <!-- State error message -->
+      @if (signupAddressForm.state().touched() && signupAddressForm.state().invalid()) {
+        <ul>
+          @for (error of signupAddressForm.state().errors(); track error.message) {
+            <li class="text-error">{{ error.message }}</li>
+          }
+        </ul>
+      }
+    </div>
+
+    <!-- City -->
+    <div class="flex flex-col gap-[.5rem] w-full">
+      <app-label variant="auth" for="city">Cidade</app-label>
+      <app-input
+        variant="default"
+        id="city"
+        type="text"
+        placeholder="Digite sua cidade"
+        sizeH="xl"
+        [formField]="signupAddressForm.city"
+      />
+      <!-- City error message -->
+      @if (signupAddressForm.city().touched() && signupAddressForm.city().invalid()) {
+        <ul>
+          @for (error of signupAddressForm.city().errors(); track error) {
+            <li class="text-error">{{ error.message }}</li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+
+  <!-- Number -->
+  <div class="flex flex-col gap-[.5rem]">
+    <app-label variant="auth" for="number">Número</app-label>
+    <app-input
+      variant="default"
+      id="number"
+      [mask]="'00000'"
+      type="number"
+      placeholder="Digite o número"
+      sizeH="xl"
+      [formField]="signupAddressForm.number"
+    />
+
+    <!-- City error message -->
+    @if (signupAddressForm.number().touched() && signupAddressForm.number().invalid()) {
+      <ul>
+        @for (error of signupAddressForm.number().errors(); track error.message) {
+          <li class="text-error">{{ error.message }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Complement -->
+  <div class="flex flex-col gap-[.5rem]">
+    <app-label variant="auth" for="complement">Complemento (opcional)</app-label>
+    <app-input
+      variant="default"
+      id="complement"
+      type="text"
+      placeholder="Digite o complemento"
+      sizeH="xl"
+      [formField]="signupAddressForm.complement!"
+    />
+  </div>
+
+  <app-button type="submit" class="w-full" sizeH="xl">Próximo</app-button>
+</app-auth-form>

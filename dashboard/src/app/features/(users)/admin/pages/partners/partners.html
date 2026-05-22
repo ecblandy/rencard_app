@@ -1,0 +1,54 @@
+@if (isInitialLoading()) {
+  <div class="flex items-center justify-center min-h-[50vh]">
+    <app-loader></app-loader>
+  </div>
+} @else {
+  <section>
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <app-dashboard-title
+        title="Parceiros"
+        description="Gerencie suas parcerias "
+      ></app-dashboard-title>
+
+      <!-- Add partner -->
+      <app-button class="flex items-center gap-[.5rem]">
+        <ng-icon name="lucidePlus" size="20"></ng-icon>
+        <p>Cadastrar parceiro</p>
+      </app-button>
+    </div>
+
+    <!-- Filter -->
+    <div class="mb-10">
+      <app-input placeholder="Buscar parceiro" sizeH="xl" [formField]="searchForm.q"></app-input>
+    </div>
+
+    <div class="flex flex-wrap gap-x-[.5rem] gap-y-[3rem] w-full mb-6">
+      @for (affiliate of userAffiliate(); track affiliate) {
+        <app-surface classes="block space-y-6 max-w-[21.75rem] w-full bg-white">
+          <div class="flex items-center justify-between">
+            <span class="font-urbanist font-bold text-[1.25rem]">{{ affiliate.full_name }}</span>
+            <p class="bg-black rounded-[.625rem] px-4 py-2 text-white">
+              {{ affiliate.is_active }}
+            </p>
+          </div>
+
+          <div class="font-manrope">
+            <span class="text-neutral-medium">Afiliado</span>
+            <p class="font-semibold">{{ affiliate.email }}</p>
+          </div>
+
+          <app-button variant="outline" class="w-full" (click)="viewPhysicalDetails(affiliate.id)"
+            >Ver detalhes</app-button
+          >
+        </app-surface>
+      }
+    </div>
+    <app-pagination
+      [config]="paginationConfig()"
+      [pageSizeOptions]="pageSizeOptions"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
+  </section>
+}

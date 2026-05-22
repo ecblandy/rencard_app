@@ -1,0 +1,94 @@
+<app-surface>
+  <app-surface-title
+    title="Portfolio"
+    description="Adicione imagens e vídeos dos seus trabalhos."
+  />
+
+  <!-- Imagens -->
+  <div class="bg-[#e2e2e2] w-full rounded-[.625rem] px-[1rem] py-[1.5rem] h-auto mt-[3.5rem]">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-[.75rem]">
+        <ng-icon name="lucideImages" size="20"></ng-icon>
+        <span class="font-urbanist font-semibold text-[1.25rem]">Imagens</span>
+      </div>
+      <app-switch-button
+        [checked]="imagesEnabled()"
+        (checkedChange)="toggleImages($event)"
+      ></app-switch-button>
+    </div>
+
+    @if (imagesEnabled()) {
+      <div class="mt-[1.1875rem]">
+        <span class="font-manrope text-[.75rem] text-neutral-medium">(máx. 6)</span>
+        <ul class="grid grid-cols-3 gap-[.75rem] mt-[.75rem]">
+          @for (image of selectedImages(); track image; let i = $index) {
+            <li class="relative aspect-square rounded-[.625rem] overflow-hidden">
+              <img
+                [src]="image.preview"
+                alt="Imagem {{ i + 1 }}"
+                class="w-full h-full object-cover"
+              />
+              <button
+                type="button"
+                (click)="removeImage(i)"
+                class="absolute top-[.25rem] right-[.25rem] bg-black/60 text-white rounded-full w-[1.25rem] h-[1.25rem] flex items-center justify-center"
+              >
+                <ng-icon name="lucideX" size="12"></ng-icon>
+              </button>
+            </li>
+          }
+
+          @if (selectedImages().length < 6) {
+            <li
+              class="aspect-square rounded-[.625rem] border-2 border-dashed border-neutral-extra-soft flex items-center justify-center cursor-pointer"
+              (click)="fileInput.click()"
+            >
+              <ng-icon name="lucidePlus" size="24" class="text-neutral-medium"></ng-icon>
+            </li>
+          }
+        </ul>
+
+        <input
+          #fileInput
+          type="file"
+          accept="image/*"
+          multiple
+          class="hidden"
+          (change)="onImagesSelected($event)"
+        />
+      </div>
+
+      <app-button sizeH="sm" class="w-full mt-[1.5rem]" (click)="submitImages()">
+        Salvar imagens
+      </app-button>
+    }
+  </div>
+
+  <!-- Vídeo -->
+  <div class="bg-[#e2e2e2] w-full rounded-[.625rem] px-[1rem] py-[1.5rem] h-auto mt-[2rem]">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-[.75rem]">
+        <ng-icon name="lucideYoutube" size="20"></ng-icon>
+        <span class="font-urbanist font-semibold text-[1.25rem]">Vídeo</span>
+      </div>
+      <app-switch-button
+        [checked]="videoEnabled()"
+        (checkedChange)="toggleVideo($event)"
+      ></app-switch-button>
+    </div>
+
+    @if (videoEnabled()) {
+      <input
+        type="text"
+        placeholder="Link do Youtube"
+        class="block w-full mt-[1.1875rem] px-[.75rem] h-[2.375rem] rounded-[.625rem] bg-white border border-neutral-extra-soft font-manrope text-[.875rem] outline-none"
+        [value]="youtubeUrl()"
+        (input)="youtubeUrl.set($any($event.target).value)"
+      />
+
+      <app-button sizeH="sm" class="w-full mt-[1.5rem]" (click)="submitVideo()">
+        Salvar vídeo
+      </app-button>
+    }
+  </div>
+</app-surface>

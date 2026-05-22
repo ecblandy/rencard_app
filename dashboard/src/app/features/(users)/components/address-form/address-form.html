@@ -1,0 +1,159 @@
+@if (isInitialLoading()) {
+  <div class="flex items-center justify-center min-h-[50vh]">
+    <app-loader></app-loader>
+  </div>
+} @else {
+  <app-dashboard-title
+    title="Minha conta"
+    description="Gerencie as informações da sua conta"
+  ></app-dashboard-title>
+
+  <app-surface classes="max-w-[66.3125rem] w-full">
+    <app-surface-title title="Endereço" description="Gerencie seus dados"></app-surface-title>
+
+    <form class="mt-[1.5rem]" (submit)="onSubmit($event)">
+      <fieldset class="space-y-[1.5rem]">
+        <!-- CEP && Rua -->
+        <div class="grid grid-cols-2 gap-[1.125rem] max-md:grid-cols-1">
+          <div class="min-w-0">
+            <app-label for="cep">CEP</app-label>
+            <app-input
+              id="cep"
+              type="text"
+              placeholder="00000-000"
+              sizeH="sm"
+              (input)="onCepChange($event)"
+              [formField]="addressForm.cep"
+            />
+
+            @if (addressForm.cep().touched() && addressForm.cep().invalid()) {
+              <ul>
+                @for (error of addressForm.cep().errors(); track error) {
+                  <li class="text-error">{{ error.message }}</li>
+                }
+              </ul>
+            }
+          </div>
+
+          <div class="min-w-0">
+            <app-label for="street">Rua</app-label>
+            <app-input
+              id="street"
+              type="text"
+              placeholder="Nome da rua"
+              sizeH="sm"
+              [formField]="addressForm.street"
+            />
+
+            @if (addressForm.street().touched() && addressForm.street().invalid()) {
+              <ul>
+                @for (error of addressForm.street().errors(); track error) {
+                  <li class="text-error">{{ error.message }}</li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+
+        <!-- Bairro && Número -->
+        <div class="grid grid-cols-2 gap-[1.125rem] max-md:grid-cols-1">
+          <div class="min-w-0">
+            <app-label for="neighborhood">Bairro</app-label>
+            <app-input
+              id="neighborhood"
+              type="text"
+              placeholder="Nome do bairro"
+              sizeH="sm"
+              [formField]="addressForm.neighborhood"
+            />
+
+            @if (addressForm.neighborhood().touched() && addressForm.neighborhood().invalid()) {
+              <ul>
+                @for (error of addressForm.neighborhood().errors(); track error) {
+                  <li class="text-error">{{ error.message }}</li>
+                }
+              </ul>
+            }
+          </div>
+
+          <div class="min-w-0">
+            <app-label for="number">Número</app-label>
+            <app-input
+              id="number"
+              type="text"
+              placeholder="Número"
+              sizeH="sm"
+              [formField]="addressForm.number"
+            />
+
+            @if (addressForm.number().touched() && addressForm.number().invalid()) {
+              <ul>
+                @for (error of addressForm.number().errors(); track error) {
+                  <li class="text-error">{{ error.message }}</li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+
+        <!-- Complemento && Cidade && Estado -->
+        <div class="grid grid-cols-3 gap-[1.125rem] max-lg:grid-cols-2 max-md:grid-cols-1">
+          <div class="min-w-0">
+            <app-label for="complement">Complemento</app-label>
+            <app-input
+              id="complement"
+              type="text"
+              placeholder="Complemento (opcional)"
+              sizeH="sm"
+              [formField]="addressForm.complement"
+            />
+          </div>
+
+          <div class="min-w-0">
+            <app-label for="city">Cidade</app-label>
+            <app-input
+              id="city"
+              type="text"
+              placeholder="Cidade"
+              sizeH="sm"
+              [formField]="addressForm.city"
+            />
+
+            @if (addressForm.city().touched() && addressForm.city().invalid()) {
+              <ul>
+                @for (error of addressForm.city().errors(); track error) {
+                  <li class="text-error">{{ error.message }}</li>
+                }
+              </ul>
+            }
+          </div>
+
+          <div class="min-w-0">
+            <app-label for="state">Estado</app-label>
+            <app-input
+              id="state"
+              type="text"
+              placeholder="Estado"
+              sizeH="sm"
+              [formField]="addressForm.state"
+            />
+            @if (addressForm.state().touched() && addressForm.state().invalid()) {
+              <ul>
+                @for (error of addressForm.state().errors(); track error) {
+                  <li class="text-error">{{ error.message }}</li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+
+        <app-button
+          [disabled]="addressForm().invalid() || !addressForm().dirty()"
+          type="submit"
+          class="w-full"
+          >Salvar alterações</app-button
+        >
+      </fieldset>
+    </form>
+  </app-surface>
+}

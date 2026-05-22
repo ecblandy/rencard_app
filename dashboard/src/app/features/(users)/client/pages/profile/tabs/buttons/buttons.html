@@ -1,0 +1,52 @@
+<app-surface classes="flex flex-1 flex-col gap-[3.5rem]">
+  <app-surface-title
+    title="Botões"
+    description="Configure os botões de ação do seu perfil"
+  ></app-surface-title>
+
+  <form (submit)="onSubmit($event)">
+    <ul class="space-y-[2rem]">
+      @for (button of buttons(); track button; let i = $index) {
+        <li class="bg-[#e2e2e2] w-full rounded-[.625rem] px-[1rem] py-[1.5rem] h-auto">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-[.75rem]">
+              <ng-icon [name]="button.icon" size="20"></ng-icon>
+              <span class="font-urbanist font-semibold text-[1.25rem]">{{ button.label }}</span>
+            </div>
+
+            <app-switch-button
+              [checked]="button.enabled"
+              (checkedChange)="toggleEnabled(i, $event)"
+            ></app-switch-button>
+          </div>
+
+          @if (button.enabled) {
+            @let field = buttonsForm[button.key]();
+
+            <app-input
+              [placeholder]="button.placeholder"
+              sizeH="sm"
+              class="block mt-[1.1875rem]"
+              type="text"
+              placeholder="Digite seu telefone"
+              variant="default"
+              sizeH="sm"
+              [mask]="'(00) 00000-0000'"
+              [formField]="buttonsForm[button.key]"
+            ></app-input>
+
+            @if (field.touched() && field.invalid()) {
+              <ul>
+                @for (error of field.errors(); track error) {
+                  <li class="text-error">{{ error.message }}</li>
+                }
+              </ul>
+            }
+          }
+        </li>
+      }
+    </ul>
+
+    <app-button type="submit" sizeH="sm" class="w-full mt-[3.5rem]">Salvar alterações</app-button>
+  </form>
+</app-surface>

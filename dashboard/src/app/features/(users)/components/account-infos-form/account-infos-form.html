@@ -1,0 +1,108 @@
+@if (isInitialLoading()) {
+  <div class="flex items-center justify-center min-h-[50vh]">
+    <app-loader></app-loader>
+  </div>
+} @else {
+  <app-surface classes="max-w-[66.3125rem] w-full">
+    <app-surface-title
+      title="Informações da conta"
+      description="Gerencie suas credenciais "
+    ></app-surface-title>
+
+    <form class="mt-[1.5rem]">
+      <fieldset class="flex flex-col space-y-[1.5rem]">
+        <!-- Fullname -->
+
+        <div class="min-w-0">
+          <app-label for="full_name">Nome completo</app-label>
+          <app-input
+            id="full_name"
+            type="text"
+            placeholder="Seu nome completo"
+            sizeH="sm"
+            [formField]="accountInfosForm.full_name"
+          />
+        </div>
+
+        <div class="min-w-0">
+          <app-label for="cpf_cnpj">CPF/CNPJ</app-label>
+          <app-input
+            id="cpf_cnpj"
+            type="text"
+            placeholder="Digite seu cpf ou cnpj"
+            variant="default"
+            sizeH="sm"
+            [mask]="'CPF_CNPJ'"
+            [formField]="accountInfosForm.cpf_cnpj"
+          />
+        </div>
+
+        <!-- Phone Number -->
+        <div class="flex flex-col gap-[.5rem]">
+          <app-label for="phone_number">Telefone</app-label>
+          <app-input
+            id="phone_number"
+            type="text"
+            placeholder="Digite seu telefone"
+            variant="default"
+            sizeH="sm"
+            [mask]="'(00) 00000-0000'"
+            [formField]="accountInfosForm.phone_number"
+          />
+        </div>
+
+        <div class="flex flex-col gap-[.5rem]">
+          <app-label for="email">Email</app-label>
+          <div class="flex items-center gap-x-[2.75rem]">
+            <app-input
+              id="email"
+              disabled="true"
+              placeholder="Digite seu email"
+              type="text"
+              sizeH="sm"
+              [formField]="accountInfosForm.email"
+              class="w-full"
+            />
+            <app-button variant="outline" class="w-[8.875rem]" (click)="openEmailModal()"
+              >Alterar e-mail</app-button
+            >
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-[.5rem]">
+          <app-label for="password">Senha</app-label>
+          <div class="flex items-center gap-x-[2.75rem]">
+            <app-input
+              id="password"
+              disabled="true"
+              placeholder="••••••••"
+              type="text"
+              sizeH="sm"
+              [formField]="accountInfosForm.password"
+              class="w-full"
+            />
+            <app-button variant="outline" class="w-[8.875rem]" (click)="openPasswordModal()"
+              >Alterar senha</app-button
+            >
+          </div>
+        </div>
+
+        <app-button
+          [disabled]="!accountInfosForm().valid() || !accountInfosForm().dirty()"
+          type="submit"
+          class="w-full"
+          >Salvar alterações</app-button
+        >
+      </fieldset>
+    </form>
+
+    <!-- Modal change email -->
+    <app-change-email-modal [isOpen]="emailModalOpen()" (close)="emailModalOpen.set(false)" />
+
+    <!-- Modal change password -->
+    <app-change-password-modal
+      [isOpen]="passwordModalOpen()"
+      (close)="passwordModalOpen.set(false)"
+    />
+  </app-surface>
+}

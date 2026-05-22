@@ -1,0 +1,102 @@
+<section>
+  @if (isInitialLoading()) {
+    <div class="flex items-center justify-center mt-[6.25rem]">
+      <app-loader></app-loader>
+    </div>
+  } @else {
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+      <app-dashboard-title
+        title="Cupons"
+        description="Gerencie cupons promocionais "
+      ></app-dashboard-title>
+
+      <app-button (click)="open()" class="flex items-center gap-[.5rem]">
+        <ng-icon name="lucidePlus" size="20"></ng-icon>
+        <p>Criar cupon</p></app-button
+      >
+    </div>
+
+    <!-- Filters -->
+
+    <div class="mb-[2.5625rem]">
+      <app-input
+        placeholder="Buscar por código ou influenciador..."
+        sizeH="xl"
+        [formField]="couponForm.q"
+      ></app-input>
+    </div>
+
+    @if (isLoadingCupons()) {
+      <!-- Loading -->
+      <div class="flex items-center justify-center mt-[6.25rem]">
+        <app-loader></app-loader>
+      </div>
+    } @else {
+      @if (coupons().results.length > 0) {
+        <!-- Coupon List -->
+        <div class="flex flex-wrap gap-x-[.5rem] gap-y-[3rem] w-full">
+          @for (coupon of coupons().results; track coupon) {
+            <app-surface classes="w-[21.75rem] bg-white">
+              <!-- Header -->
+              <div class="flex items-center justify-between mb-[1.5rem]">
+                <span class="font-urbanist font-bold text-[1.25rem]">{{ coupon.code }}</span>
+                <span
+                  class="bg-black text-white rounded-[.625rem] px-[1rem] py-[.5rem] capitalize font-manrope"
+                  >{{ coupon.status_label }}</span
+                >
+              </div>
+
+              <!-- Body -->
+              <div class="space-y-[1.5rem]">
+                <!-- Affiliate -->
+                <div class="font-manrope">
+                  <h2 class="text-neutral-medium">Afiliado</h2>
+                  <p class="font-semibold">{{ coupon.affiliate_name }}</p>
+                </div>
+
+                <div class="flex items-center justify-between">
+                  <!-- discount -->
+                  <div>
+                    <h2 class="text-neutral-medium">Desconto</h2>
+                    <p class="font-semibold">{{ formatDiscount(coupon) }}</p>
+                  </div>
+
+                  <!-- commission -->
+                  <div>
+                    <h2 class="text-neutral-medium">Comissão</h2>
+                    <p class="font-semibold">{{ formatCommission(coupon) }}</p>
+                  </div>
+                </div>
+
+                <app-button variant="outline" class="w-full" (click)="viewCouponDetails(coupon.id)"
+                  >Ver detalhes</app-button
+                >
+              </div>
+            </app-surface>
+          }
+        </div>
+
+        <!-- Pagination - only show when there are results -->
+        <app-pagination
+          [config]="paginationConfig()"
+          [pageSizeOptions]="pageSizeOptions"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
+          class="block mt-[2.5625rem]"
+        />
+      } @else {
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center mt-[6.25rem] text-center">
+          <p class="font-manrope text-neutral-medium text-lg">Nenhum cupom encontrado</p>
+        </div>
+      }
+    }
+  }
+
+  <app-create-coupon
+    [isOpen]="modalOpen()"
+    (close)="close()"
+    (couponCreated)="onCouponCreated()"
+  ></app-create-coupon>
+</section>

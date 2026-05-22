@@ -1,0 +1,46 @@
+<app-surface classes="flex flex-1 flex-col gap-[3.5rem]">
+  <app-surface-title
+    title="Música"
+    description="Configure sua música ou playlist"
+  ></app-surface-title>
+
+  <form (submit)="onSubmit($event)">
+    <div class="bg-[#e2e2e2] w-full rounded-[.625rem] px-[1rem] py-[1.5rem] h-auto">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-[.75rem]">
+          <ng-icon [name]="music().icon" size="20"></ng-icon>
+          <span class="font-urbanist font-semibold text-[1.25rem]">{{ music().label }}</span>
+        </div>
+
+        <app-switch-button
+          [checked]="profileStore.profile().music?.enabled ?? false"
+          (checkedChange)="toggleEnabled($event)"
+        ></app-switch-button>
+      </div>
+
+      @if (music().enabled) {
+        @let field = musicForm['music']();
+
+        <app-input
+          placeholder="Cole o link da sua música"
+          sizeH="sm"
+          class="block mt-[1.1875rem]"
+          [formField]="musicForm['music']"
+        ></app-input>
+
+        @if (field.touched() && field.invalid()) {
+          <ul>
+            @for (error of field.errors(); track error) {
+              <li class="text-error">{{ error.message }}</li>
+            }
+          </ul>
+        }
+      }
+    </div>
+    <p class="font-manrope text-[.75rem] text-neutral-medium mt-[.5rem]">
+      No Spotify, clique em <strong>··· → Compartilhar → Copiar link da música</strong> e cole aqui.
+    </p>
+
+    <app-button type="submit" sizeH="sm" class="w-full mt-[3.5rem]">Salvar alterações</app-button>
+  </form>
+</app-surface>

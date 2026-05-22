@@ -1,0 +1,88 @@
+<div class="mx-auto px-[1.25rem] mb-[3.75rem] max-w-[79.875rem] w-full h-full">
+  <app-onboarding-step [currentStep]="currentStep()"></app-onboarding-step>
+  <app-onboarding-title
+    title="Escolha como você quer se apresentar"
+    description=" O Rencard se adapta ao seu objetivo. Escolha o perfil ideal para você."
+  ></app-onboarding-title>
+
+  @if (isInitialLoading()) {
+    <!-- Loading -->
+    <div class="flex flex-col items-center justify-center mt-[6.25rem]">
+      <app-loader></app-loader>
+      <p class="mt-4 text-gray-600">Carregando seus estilos, aguarde...</p>
+    </div>
+  } @else {
+    <div class="flex gap-[1.5rem]">
+      <!-- Plans -->
+      <!-- Plans -->
+      <ul class="flex gap-[1.5rem] items-start">
+        @for (plan of plans(); track plan) {
+          <li
+            class="p-6 border max-w-[28.125rem] w-full rounded-[1.25rem] h-auto transition-all"
+            [class.pro]="plan.type === 'pro'"
+            [class.border-neutral-medium]="plan.type !== 'pro'"
+            [class.ring-2]="selectedProfile()?.id === plan.id"
+            [class.ring-purple-500]="selectedProfile()?.id === plan.id"
+          >
+            <!-- Titles -->
+            <div class="space-y-[1rem] font-urbanist mb-[2.375rem]">
+              <h2 class="text-[2.5rem] font-bold text-[2rem]">{{ plan.name }}</h2>
+              <p
+                class="font-semibold text-[1.25rem]"
+                [class.text-neutral-medium]="plan.type !== 'pro'"
+              >
+                {{ plan.description }}
+              </p>
+            </div>
+
+            <!-- Features -->
+            <ul class="space-y-[2rem]">
+              @for (feature of plan.features; track feature) {
+                <li class="flex items-center gap-[.75rem]">
+                  <ng-icon
+                    name="lucideCheck"
+                    size="22"
+                    [class.text-neutral-strong]="plan.type !== 'pro'"
+                  ></ng-icon>
+                  <p
+                    class="font-semibold font-manrope"
+                    [class.text-neutral-strong]="plan.type !== 'pro'"
+                  >
+                    {{ feature }}
+                  </p>
+                </li>
+              }
+            </ul>
+
+            <app-button
+              variant="custom"
+              sizeH="xl"
+              class="w-full py-[.5625rem] rounded-[.625rem] mt-[2.375rem]"
+              [class.proButton]="plan.type === 'pro'"
+              [class.galeraButton]="plan.type !== 'pro'"
+              (click)="choosePlan(plan)"
+              >Escolher {{ plan.name }}</app-button
+            >
+          </li>
+        }
+      </ul>
+
+      <!-- Cart -->
+      <app-onboarding-cart class="flex-1" [items]="cartItems()"></app-onboarding-cart>
+    </div>
+
+    <div class="flex flex-col mt-[2.5rem] space-y-[2.5rem]">
+      <span class="text-center font-urbanist text-[1.25rem] text-neutral-medium"
+        >Todos os perfis incluem acesso inicial para configuração do perfil</span
+      >
+      <div class="flex flex-col justify-center space-y-[.5rem]">
+        <app-button class="w-full" (click)="goToProduct()" [disabled]="!selectedProfile()"
+          >Continuar</app-button
+        >
+        <span class="text-center font-manrope text-[1.25rem] text-neutral-medium"
+          >Selecione um perfil para continuar</span
+        >
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,48 @@
+<div>
+  <app-dashboard-title title="Assinatura" description="Gerencie seu plano, renovação e pagamentos">
+  </app-dashboard-title>
+
+  <!-- Plano Atual -->
+  <div class="mb-[2.5625rem]">
+    <h2 class="font-urbanist font-semibold text-[1.5rem] text-neutral-medium uppercase mb-[2rem]">
+      Plano Atual
+    </h2>
+
+    <app-surface classes="flex justify-between">
+      <div>
+        <h3 class="font-urbanist font-bold text-[2rem]">Rencard Pro</h3>
+        <span class="font-urbanist font-semibold text-[1.25rem] text-neutral-medium"
+          >Renova em 12 Ago. 2024</span
+        >
+      </div>
+
+      <div class="flex flex-col items-end">
+        <app-button variant="outline" color="primary" size="md" (click)="goToChangePlan()">
+          Alterar plano
+        </app-button>
+        <p class="font-manrope text-neutral-medium mt-[.5625rem]">Alterar forma de pagamento</p>
+      </div>
+    </app-surface>
+  </div>
+
+  <div>
+    <h2 class="font-urbanist font-semibold text-[1.5rem] text-neutral-medium uppercase mb-[2rem]">
+      Plano Atual
+    </h2>
+
+    <app-surface classes="flex justify-between">
+      <ul class="grid grid-cols-2 gap-y-[1.25rem] w-full">
+        @for (feature of user()?.active_plan?.features; track feature) {
+          <li class="flex items-center gap-x-[1.0625rem]">
+            <ng-icon
+              name="bootstrapCheckCircleFill"
+              class="text-green-500 w-5 h-5 inline-block mr-2"
+            ></ng-icon>
+            <p class="font-manrope">{{ feature }}</p>
+          </li>
+        }
+      </ul>
+    </app-surface>
+  </div>
+</div>
+<router-outlet />

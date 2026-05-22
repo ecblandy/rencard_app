@@ -1,0 +1,24 @@
+<section>
+  <app-dashboard-title
+    title="Bem-vindo ao seu painel"
+    description="Gerencie seu cartão digital, acompanhe métricas e configure cada detalhe do seu perfil."
+  ></app-dashboard-title>
+
+  <div class="flex flex-col gap-[2.5625rem]">
+    <app-period-filter [(period)]="period"></app-period-filter>
+
+    <app-metric-card [metrics]="metricsSignal()"></app-metric-card>
+
+    <div>
+      <h2 class="mb-[2.0625rem] font-urbanist font-semibold text-[1.5rem]">Métricas detalhadas</h2>
+
+      <app-surface [classes]="'max-w-[32.6875rem] w-full'" class="mb-[6.25rem]">
+        <app-surface-title title="Visitas" description="Relatório do tráfego"></app-surface-title>
+        <!-- Passa os dados reais para o gráfico -->
+        <app-users-active-graph [data]="viewsByDay()"></app-users-active-graph>
+      </app-surface>
+    </div>
+
+    <app-dashboard-qrcode [profile]="profile()"></app-dashboard-qrcode>
+  </div>
+</section>

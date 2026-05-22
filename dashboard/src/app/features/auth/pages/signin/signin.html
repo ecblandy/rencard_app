@@ -1,0 +1,67 @@
+<app-auth-form
+  title="Entrar"
+  subtitle="Acesse sua conta e gerencie seu Rencard"
+  (submitForm)="onSubmit($event)"
+>
+  <!-- Email -->
+  <div class="flex flex-col gap-[.5rem]">
+    <app-label variant="auth" for="email">Email</app-label>
+    <app-input
+      variant="default"
+      id="email"
+      type="email"
+      placeholder="Digite seu email"
+      sizeH="xl"
+      [formField]="signinForm.email"
+    />
+    <!-- Email error message -->
+    @if (signinForm.email().touched() && signinForm.email().invalid()) {
+      <ul>
+        @for (error of signinForm.email().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Password -->
+  <div class="flex flex-col gap-[.5rem]">
+    <app-label variant="auth" for="password">Senha</app-label>
+    <app-input
+      id="password"
+      type="password"
+      placeholder="Digite sua senha"
+      variant="default"
+      sizeH="xl"
+      [formField]="signinForm.password"
+    />
+
+    <!-- Password error message -->
+    @if (signinForm.password().touched() && signinForm.password().invalid()) {
+      <ul>
+        @for (error of signinForm.password().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+        }
+      </ul>
+    }
+
+    <!-- Forgot Password -->
+    <a
+      [routerLink]="['/auth/forgot-password']"
+      class="self-end font-urbanist font-semibold text-[1.25rem] max-sm:text-[1rem] text-neutral-strong hover:underline hover:text-neutral-soft transition-colors duration-300"
+      >Esqueci a senha</a
+    >
+  </div>
+
+  <app-button type="submit" class="w-full" sizeH="xl">Login</app-button>
+
+  <!-- Register -->
+  <p class="text-center mt-[3.125rem] max-sm:mt-0 font-manrope text-neutral-strong">
+    Não tem uma conta?
+    <a
+      [routerLink]="['/auth/signup']"
+      class="text-black font-semibold hover:text-neutral-strong hover:underline transition-colors duration-300"
+      >Criar conta</a
+    >
+  </p>
+</app-auth-form>

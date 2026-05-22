@@ -1,0 +1,262 @@
+<div class="mx-auto px-[1.25rem] mb-[3.75rem] max-w-[79.875rem] w-full h-full">
+  <app-onboarding-step [currentStep]="currentStep()"></app-onboarding-step>
+  <app-onboarding-title
+    title="Agora escolha como você quer compartilhar seu Rencard"
+    description="Você pode optar por um produto físico conectado ao seu perfil ou usar apenas a versão digital."
+  ></app-onboarding-title>
+
+  @if (isInitialLoading()) {
+    <div class="flex flex-col items-center justify-center mt-[6.25rem]">
+      <app-loader></app-loader>
+      <p class="mt-4 text-gray-600">Carregando produtos, aguarde...</p>
+    </div>
+  } @else {
+    <div>
+      <h2 class="uppercase mb-[1.5rem] font-urbanist font-semibold text-[1.5rem] text-neutral-soft">
+        Produtos físicos
+      </h2>
+
+      <section class="flex flex-col gap-y-[1.5rem]">
+        <div class="flex gap-[1.625rem]">
+          <ul class="flex justify-between max-w-[58.4375rem] w-full">
+            @for (product of products(); track product) {
+              <li
+                class="rounded-xl transition-all self-start"
+                [class.ring-2]="isSelected(product.id.toString())"
+                [class.ring-blue-500]="isSelected(product.id.toString())"
+              >
+                <app-surface classes="bg-[#F5F5F5]">
+                  <img
+                    src="{{ product.image }}"
+                    alt="{{ product.name }}"
+                    class="w-full max-w-[22.5rem] h-[13.75rem]"
+                  />
+
+                  <div class="my-[2.5rem] space-y-[1rem]">
+                    <span
+                      class="block font-manrope font-medium text-[.875rem] text-neutral-medium"
+                      >{{ product.subtitle }}</span
+                    >
+                    <h3 class="font-urbanist font-semibold text-[1.5rem]">{{ product.name }}</h3>
+                    <p class="font-manrope text-neutral-medium">{{ product.description }}</p>
+                    <p class="font-manrope text-neutral-medium">
+                      {{ formatPrice(product.price_cents) }}
+                    </p>
+                  </div>
+
+                  <app-button
+                    variant="default"
+                    sizeH="sm"
+                    class="w-full"
+                    (click)="selectItem({ id: product.id.toString(), price: product.price_cents })"
+                  >
+                    {{
+                      isSelected(product.id.toString()) ? 'Selecionado' : 'Selecionar'
+                    }}</app-button
+                  >
+                </app-surface>
+              </li>
+            }
+          </ul>
+
+          <div>
+            <app-onboarding-cart class="flex-1" [items]="cartItems()"></app-onboarding-cart>
+
+            @if (selectedItems().length > 0) {
+              <!-- Opções de frete -->
+              @if (shippingOptions().length > 0) {
+                <div class="mt-[1rem] space-y-[0.5rem]">
+                  <p class="text-sm font-medium text-gray-600">Escolha o frete:</p>
+
+                  @for (option of shippingOptions(); track option.service_code) {
+                    <div
+                      class="flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-colors"
+                      [class.border-primary]="
+                        selectedShipping()?.service_code === option.service_code
+                      "
+                      [class.border-gray-200]="
+                        selectedShipping()?.service_code !== option.service_code
+                      "
+                      (click)="selectShipping(option)"
+                    >
+                      <div class="flex items-center gap-2">
+                        <div
+                          class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                          [class.border-primary]="
+                            selectedShipping()?.service_code === option.service_code
+                          "
+                          [class.border-gray-300]="
+                            selectedShipping()?.service_code !== option.service_code
+                          "
+                        >
+                          @if (selectedShipping()?.service_code === option.service_code) {
+                            <div class="h-2 w-2 rounded-full bg-primary"></div>
+                          }
+                        </div>
+
+                        <div>
+                          <p class="text-sm font-medium">{{ option.service_name }}</p>
+                          <p class="text-xs text-gray-500">{{ option.deadline_days }} dias úteis</p>
+                        </div>
+                      </div>
+
+                      <p class="text-sm font-semibold">{{ formatPrice(option.price_cents) }}</p>
+                    </div>
+                  }
+                </div>
+              }
+
+              <!-- Campo de cupom -->
+              <div class="mt-[1rem]">
+                <p class="text-sm font-medium text-gray-600 mb-[0.5rem]">Cupom de desconto</p>
+
+                <div class="flex gap-2">
+                  <div class="relative flex-1">
+                    <input
+                      type="text"
+                      placeholder="Digite seu cupom"
+                      class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors"
+                      [class.border-gray-200]="
+                        couponStatus() === 'idle' || couponStatus() === 'loading'
+                      "
+                      [class.border-green-500]="couponStatus() === 'valid'"
+                      [class.border-red-500]="couponStatus() === 'invalid'"
+                      [value]="couponCode()"
+                      (input)="couponCode.set($any($event.target).value); couponStatus.set('idle')"
+                    />
+
+                    @if (couponStatus() === 'valid') {
+                      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-sm"
+                        >✓</span
+                      >
+                    } @else if (couponStatus() === 'invalid') {
+                      <span class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-sm"
+                        >✕</span
+                      >
+                    }
+                  </div>
+
+                  <app-button
+                    variant="outline"
+                    sizeH="sm"
+                    [disabled]="!couponCode().trim() || couponStatus() === 'loading'"
+                    (click)="applyCoupon()"
+                  >
+                    {{ couponStatus() === 'loading' ? 'Validando...' : 'Aplicar' }}
+                  </app-button>
+                </div>
+
+                @if (couponStatus() === 'valid') {
+                  <p class="text-xs text-green-600 mt-1">Cupom aplicado!</p>
+                } @else if (couponStatus() === 'invalid') {
+                  <p class="text-xs text-red-500 mt-1">Cupom inválido ou expirado.</p>
+                }
+              </div>
+
+              <!-- Botão calcular frete -->
+              <div class="mt-[1.5rem] space-y-[1rem]">
+                <app-button
+                  variant="default"
+                  sizeH="sm"
+                  class="w-full"
+                  [disabled]="!canCalculateShipping()"
+                  (click)="calculateShipping()"
+                >
+                  Calcular Frete
+                </app-button>
+              </div>
+            }
+          </div>
+        </div>
+
+        @for (additional of aditionalProducts(); track additional) {
+          <app-surface
+            classes="flex items-center gap-x-[1rem] max-w-[58.4375rem] w-full bg-[#F5F5F5]"
+          >
+            <input
+              type="checkbox"
+              class="h-[34px] w-[2.125rem]"
+              (change)="selectItem({ id: additional.id.toString(), price: additional.price_cents })"
+            />
+            <div class="font-manrope space-y-[.5rem]">
+              <h3 class="font-semibold">Adicionar personalização com logo</h3>
+              <p class="text-neutral-medium">{{ formatPrice(additional.price_cents) }}</p>
+            </div>
+          </app-surface>
+        }
+
+        @for (digital of digitalProducts(); track digital) {
+          <div>
+            <h2
+              class="uppercase mb-[1.5rem] font-urbanist font-semibold text-[1.5rem] text-neutral-soft"
+            >
+              Somente digital
+            </h2>
+
+            <app-surface
+              [classes]="
+                'max-w-[58.4375rem] w-full bg-[#F5F5F5] ' +
+                (isSelected(digital.id.toString())
+                  ? 'ring-2 ring-blue-500 border-transparent'
+                  : 'border-neutral-medium')
+              "
+            >
+              <div class="mb-[2.5rem] space-y-[1rem]">
+                <h4 class="font-urbanist font-semibold text-[1.5rem]">{{ digital.name }}</h4>
+                <p class="font-manrope text-neutral-medium">{{ digital.description }}</p>
+              </div>
+
+              <div class="flex flex-col gap-y-[.5rem]">
+                <app-button
+                  variant="default"
+                  sizeH="sm"
+                  class="w-full"
+                  (click)="selectItem({ id: digital.id.toString(), price: digital.price_cents })"
+                >
+                  {{ isSelected(digital.id.toString()) ? 'Selecionado' : 'Selecionar' }}</app-button
+                >
+                <span
+                  class="block text-center text-neutral-medium text-[.875rem] font-manrope font-medium"
+                >
+                  Você pode adicionar um produto físico depois, se quiser.
+                </span>
+              </div>
+            </app-surface>
+          </div>
+        }
+
+        <span
+          class="block text-center text-neutral-soft text-[1.25rem] font-semibold font-urbanist"
+        >
+          Todos os produtos físicos incluem acesso inicial para configuração do perfil
+        </span>
+
+        <div>
+          <div class="flex gap-x-[1rem]">
+            <app-button variant="outline" sizeH="sm" class="w-full" (click)="previousPage()"
+              >Voltar</app-button
+            >
+            <app-button
+              variant="default"
+              sizeH="sm"
+              class="w-full"
+              [disabled]="!canContinue()"
+              (click)="nextPage()"
+            >
+              Continuar
+            </app-button>
+          </div>
+          <span class="block text-center text-neutral-soft font-manrope mt-[.5rem]">
+            {{
+              !selectedItems().length
+                ? 'Selecione um produto para continuar'
+                : selectedShipping() === null
+                  ? 'Selecione uma opção de frete para continuar'
+                  : ''
+            }}
+          </span>
+        </div>
+      </section>
+    </div>
+  }
+</div>

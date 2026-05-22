@@ -1,0 +1,157 @@
+<app-auth-form
+  title="Dados Pessoais"
+  subtitle="Preencha suas informações para continuar o cadastro"
+  (submitForm)="onSubmit($event)"
+>
+  <!-- Fullname -->
+  <div class="flex flex-col gap-[.5rem]">
+    <app-label variant="auth" for="full_name">Nome completo</app-label>
+    <app-input
+      variant="default"
+      id="full_name"
+      type="text"
+      placeholder="Digite seu nome"
+      sizeH="xl"
+      [formField]="signupPersonalForm.full_name"
+    />
+    <!-- Fullname error message -->
+    @if (signupPersonalForm.full_name().touched() && signupPersonalForm.full_name().invalid()) {
+      <ul>
+        @for (error of signupPersonalForm.full_name().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Email -->
+  <div class="flex flex-col gap-[.5rem]">
+    <app-label variant="auth" for="email">Email</app-label>
+    <app-input
+      variant="default"
+      id="email"
+      type="email"
+      placeholder="Digite seu email"
+      sizeH="xl"
+      [formField]="signupPersonalForm.email"
+    />
+    <!-- Fullname error message -->
+    @if (signupPersonalForm.email().touched() && signupPersonalForm.email().invalid()) {
+      <ul>
+        @for (error of signupPersonalForm.email().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Password -->
+  <div class="flex flex-col gap-[.5rem]">
+    <app-label variant="auth" for="password">Senha</app-label>
+    <app-input
+      id="password"
+      type="password"
+      placeholder="Digite sua senha"
+      variant="default"
+      sizeH="xl"
+      [formField]="signupPersonalForm.password"
+    />
+
+    <!-- Password error message -->
+    @if (signupPersonalForm.password().touched() && signupPersonalForm.password().invalid()) {
+      <ul>
+        @for (error of signupPersonalForm.password().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Phone Number -->
+  <div class="flex flex-col gap-[.5rem]">
+    <app-label variant="auth" for="phone_number">Telefone</app-label>
+    <app-input
+      id="phone_number"
+      type="text"
+      placeholder="Digite seu telefone"
+      variant="default"
+      sizeH="xl"
+      [mask]="'(00) 00000-0000'"
+      [formField]="signupPersonalForm.phone_number"
+    />
+
+    <!-- Phone error message -->
+    @if (
+      signupPersonalForm.phone_number().touched() && signupPersonalForm.phone_number().invalid()
+    ) {
+      <ul>
+        @for (error of signupPersonalForm.phone_number().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- CPF/CNPJ -->
+  <div class="flex flex-col gap-[.5rem]">
+    <app-label variant="auth" for="cpf_cnpj">CPF/CNPJ</app-label>
+    <app-input
+      id="cpf_cnpj"
+      type="text"
+      placeholder="Digite seu cpf ou cnpj"
+      variant="default"
+      sizeH="xl"
+      [mask]="'CPF_CNPJ'"
+      [formField]="signupPersonalForm.cpf_cnpj"
+    />
+
+    <!-- CPF/CNPJ error message -->
+    @if (signupPersonalForm.cpf_cnpj().touched() && signupPersonalForm.cpf_cnpj().invalid()) {
+      <ul>
+        @for (error of signupPersonalForm.cpf_cnpj().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <!-- Terms and Forgot Password -->
+  <div class="flex gap-[.75rem] justify-between">
+    <label for="" class="flex items-center gap-[.5rem]">
+      <input
+        type="checkbox"
+        class="w-[1rem] h-[1rem]"
+        [checked]="signupPersonalForm.terms_accepted().value()"
+        (change)="toggleTerms($event)"
+      />
+      <p
+        class="font-urbanist font-semibold text-[1.25rem] max-sm:text-[1rem] text-neutral-soft wrap-break-word"
+      >
+        Aceitar os termos de uso
+      </p>
+    </label>
+
+    <!-- Terms error message -->
+    @if (
+      signupPersonalForm.terms_accepted().touched() && signupPersonalForm.terms_accepted().invalid()
+    ) {
+      <ul>
+        @for (error of signupPersonalForm.terms_accepted().errors(); track error) {
+          <li class="text-error">{{ error.message }}</li>
+        }
+      </ul>
+    }
+  </div>
+
+  <app-button type="submit" class="w-full" sizeH="xl">Cadastrar</app-button>
+
+  <!-- Register -->
+  <p class="text-center mt-[3.125rem] font-manrope text-neutral-strong">
+    Já tem uma conta?
+    <a
+      [routerLink]="['/auth/signin']"
+      class="text-black font-semibold hover:text-neutral-strong hover:underline transition-colors duration-300"
+      >Entrar</a
+    >
+  </p>
+</app-auth-form>

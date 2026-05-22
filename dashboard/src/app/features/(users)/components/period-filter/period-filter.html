@@ -1,0 +1,37 @@
+<div class="flex max-sm:flex-col gap-2">
+  <app-button
+    type="button"
+    sizeH="sm"
+    variant="custom"
+    class="flex-1 w-full rounded-[.625rem]"
+    (click)="setPeriod('today')"
+    [class.active]="period() === 'today'"
+    [class.disabled]="period() !== 'today'"
+  >
+    Hoje
+  </app-button>
+
+  <app-button
+    type="button"
+    sizeH="sm"
+    variant="custom"
+    class="flex-1 w-full rounded-[.625rem]"
+    (click)="setPeriod('7d')"
+    [class.active]="period() === '7d'"
+    [class.disabled]="period() !== '7d'"
+  >
+    Últimos 7 dias
+  </app-button>
+
+  <app-button
+    type="button"
+    sizeH="sm"
+    variant="custom"
+    class="flex-1 w-full rounded-[.625rem]"
+    (click)="setPeriod('30d')"
+    [class.active]="period() === '30d'"
+    [class.disabled]="period() !== '30d'"
+  >
+    Últimos 30 dias
+  </app-button>
+</div>

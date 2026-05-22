@@ -1,0 +1,140 @@
+<section>
+  <app-dashboard-title
+    title="Dados de Pagamento"
+    description="Configure sua chave PIX para receber suas comissões"
+  ></app-dashboard-title>
+
+  <!-- Loading State -->
+  @if (isLoadingPixData()) {
+    <div class="flex items-center justify-center py-12">
+      <app-loader></app-loader>
+    </div>
+  }
+
+  <!-- Card de Leitura - Dados PIX Cadastrados -->
+  @if (!isLoadingPixData() && hasPixData()) {
+    <app-surface classes="mb-[2.5rem]">
+      <app-surface-title
+        title="Chave PIX Cadastrada"
+        description="Seus dados de pagamento estão configurados."
+      ></app-surface-title>
+
+      <div class="mt-6 space-y-4">
+        <!-- Tipo de Chave -->
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-medium text-neutral-medium"> Tipo de Chave </span>
+          <span class="text-base font-semibold text-neutral-dark">
+            {{ getPixKeyTypeLabel(pixData()?.pix_key_type || '') }}
+          </span>
+        </div>
+
+        <!-- Chave PIX -->
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-medium text-neutral-medium"> Chave PIX </span>
+          <div class="flex items-center gap-2">
+            <span class="text-base font-semibold text-neutral-dark font-mono">
+              {{ pixData()?.pix_key }}
+            </span>
+            <button
+              type="button"
+              (click)="copyPixKey()"
+              class="text-neutral-medium hover:text-primary transition-colors p-1 rounded hover:bg-neutral-soft"
+              title="Copiar chave PIX"
+            >
+              <ng-icon name="lucideCopy" size="16"></ng-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Nome do Titular -->
+        <div class="flex flex-col gap-1">
+          <span class="text-sm font-medium text-neutral-medium"> Nome do Titular </span>
+          <span class="text-base font-semibold text-neutral-dark">
+            {{ pixData()?.pix_owner_name }}
+          </span>
+        </div>
+      </div>
+    </app-surface>
+  }
+
+  <!-- Formulário de Cadastro -->
+  @if (!isLoadingPixData()) {
+    <app-surface>
+      <app-surface-title
+        title="Chave Pix"
+        description="Informe sua chave PIX para receber os pagamentos."
+      ></app-surface-title>
+
+      <form class="mt-6 space-y-6" (submit)="onSubmit($event)">
+        <!-- Tipo de Chave PIX -->
+        <div>
+          <app-label>Tipo de Chave PIX</app-label>
+          <div class="relative">
+            <select
+              [formField]="paymentForm.pix_key_type"
+              class="w-full px-[1rem] h-[2.375rem] rounded-[.625rem] pr-10 border border-neutral-soft bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+              [class.border-red-500]="
+                paymentForm.pix_key_type().touched() && paymentForm.pix_key_type().invalid()
+              "
+            >
+              @for (type of pixKeyTypes; track type.value) {
+                <option [value]="type.value">{{ type.label }}</option>
+              }
+            </select>
+
+            <!-- Ícone da seta -->
+            <div
+              class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400"
+            >
+              <ng-icon name="lucideChevronDown" size="18"></ng-icon>
+            </div>
+          </div>
+
+          @if (paymentForm.pix_key_type().touched() && paymentForm.pix_key_type().invalid()) {
+            <span class="text-red-500 text-sm mt-1 block">
+              {{ paymentForm.pix_key_type().errors()[0].message }}
+            </span>
+          }
+        </div>
+
+        <!-- Chave PIX -->
+        <div>
+          <app-label>Chave PIX</app-label>
+          <app-input
+            [formField]="paymentForm.pix_key"
+            [type]="inputType()"
+            [mask]="maskValue()"
+            [placeholder]="placeholder()"
+            [disabled]="!hasPixKeyType()"
+          ></app-input>
+
+          @if (paymentForm.pix_key().touched() && paymentForm.pix_key().invalid()) {
+            <span class="text-red-500 text-sm mt-1 block">
+              {{ paymentForm.pix_key().errors()[0].message }}
+            </span>
+          }
+        </div>
+
+        <!-- Nome do Titular -->
+        <div>
+          <app-label>Nome do titular</app-label>
+          <app-input
+            [formField]="paymentForm.pix_owner_name"
+            placeholder="Digite o nome completo do titular da chave PIX"
+            [disabled]="!hasPixKeyType()"
+          ></app-input>
+
+          @if (paymentForm.pix_owner_name().touched() && paymentForm.pix_owner_name().invalid()) {
+            <span class="text-red-500 text-sm mt-1 block">
+              {{ paymentForm.pix_owner_name().errors()[0].message }}
+            </span>
+          }
+        </div>
+
+        <app-button class="w-full" type="submit" [disabled]="paymentForm().invalid()">
+          Salvar dados
+        </app-button>
+      </form>
+    </app-surface>
+  }
+</section>

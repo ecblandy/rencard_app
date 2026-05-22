@@ -1,0 +1,97 @@
+<section>
+  @if (isInitialLoading()) {
+    <div class="flex items-center justify-center min-h-[50vh]">
+      <app-loader></app-loader>
+    </div>
+  } @else {
+    <app-dashboard-title title="Gerenciar Cartão Físico"></app-dashboard-title>
+
+    <h2 class="font-urbanist font-semibold text-[1.25rem] mb-6">Status Atual</h2>
+
+    <div class="bg-[#dfdfdf] rounded-[.625rem] px-6 py-4 space-y-6">
+      <!-- User -->
+      <div class="flex justify-between items-center font-manrope">
+        <span class="text-neutral-strong">Usuário</span>
+        <p class="font-semibold">{{ physicalState().user_name }}</p>
+      </div>
+
+      <!-- Status -->
+      <div class="flex justify-between items-center font-manrope">
+        <span class="text-neutral-strong">Status</span>
+        <p class="font-semibold">{{ getStatusLabel(physicalState().status || 'N/A') }}</p>
+      </div>
+
+      <!-- Código de rastreio -->
+      <div class="flex justify-between items-center font-manrope">
+        <span class="text-neutral-strong">Código de Rastreio</span>
+        <p class="font-semibold">{{ physicalState().shipping_code || 'N/A' }}</p>
+      </div>
+    </div>
+
+    <hr class="mt-6 mb-8 text-neutral-extra-soft" />
+
+    <h2 class="font-urbanist font-semibold text-[1.25rem] mb-6">Atualizar Status</h2>
+
+    <form class="space-y-6" (submit)="onSubmit($event)">
+      <div>
+        <app-label>Novo status</app-label>
+        <div class="relative w-full">
+          <select
+            [formField]="physicalForm.status"
+            class="w-full h-[2.375rem] appearance-none bg-white border border-neutral-soft px-4 py-1 pr-10 rounded-lg text-sm text-neutral-800 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-neutral-medium transition-all cursor-pointer"
+          >
+            <option value="">Todos os status</option>
+            <option value="in_production">Em produção</option>
+            <option value="delivered">Entregue</option>
+            <option value="shipped">Enviado</option>
+          </select>
+
+          <!-- Arrow -->
+          <span
+            class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
+          >
+            <ng-icon name="lucideChevronDown" size="18"></ng-icon>
+          </span>
+        </div>
+      </div>
+
+      <div class="">
+        <app-label>Código de rastreio</app-label>
+        <app-input
+          placeholder="Código"
+          sizeH="sm"
+          [formField]="physicalForm.shipping_code"
+        ></app-input>
+      </div>
+
+      <app-button type="submit" class="w-full">Atualizar dados</app-button>
+    </form>
+
+    <hr class="mt-6 mb-8 text-neutral-extra-soft" />
+
+    <div>
+      <h2 class="font-urbanist font-semibold text-[1.25rem] mb-6">Endereço de Entrega</h2>
+
+      <div>
+        <p class="font-manrope font-semibold">{{ physicalState().shipping_address }}</p>
+      </div>
+    </div>
+
+    <hr class="mt-6 mb-8 text-neutral-extra-soft" />
+
+    <div>
+      <h2 class="font-urbanist font-semibold text-[1.25rem] mb-6">Histórico do Cartão</h2>
+
+      <ul class="space-y-6">
+        @for (history of reversedHistory(); track history) {
+          <li class="flex items-center gap-x-6 font-manrope">
+            <span class="text-neutral-medium">
+              {{ history.created_at | localDate: 'long' }}
+            </span>
+            <p class="font-semibold">{{ history.description }}</p>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>

@@ -1,0 +1,116 @@
+<section class="space-y-6 lg:space-y-8">
+  @if (isInitialLoading()) {
+    <div class="flex items-center justify-center min-h-[50vh]"><app-loader></app-loader></div>
+  } @else {
+    <app-dashboard-title
+      title="Clientes e Assinaturas"
+      description="Gerencie contas e acompanhe usuários"
+    ></app-dashboard-title>
+
+    <!-- Metrics -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5">
+      @for (metric of metrics(); track metric; let i = $index) {
+        <app-surface
+          classes="bg-white border border-neutral-soft hover:border-neutral-medium transition-colors"
+        >
+          <div class="flex items-center gap-4">
+            <!-- Icon -->
+            <div
+              class="flex items-center justify-center rounded-lg h-12 w-12 flex-shrink-0"
+              [ngClass]="{
+                'bg-green-100 text-green-600': i === 0,
+                'bg-blue-100 text-blue-600': i === 1,
+                'bg-amber-100 text-amber-600': i === 2,
+                'bg-red-100 text-red-600': i === 3,
+              }"
+            >
+              <ng-icon [name]="metric.icon" size="20"></ng-icon>
+            </div>
+
+            <!-- Content -->
+            <div class="flex-1 min-w-0">
+              <p class="font-manrope text-sm text-neutral-medium mb-1">
+                {{ metric.label }}
+              </p>
+              <p class="font-urbanist font-bold text-3xl text-neutral-dark">
+                {{ metric.value }}
+              </p>
+            </div>
+          </div>
+        </app-surface>
+      }
+    </div>
+
+    <!-- Filters -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+      <app-input
+        placeholder="Buscar por nome, e-mail ou ID..."
+        sizeH="xl"
+        [formField]="filterForm.q"
+        class="flex-1"
+      ></app-input>
+
+      <!-- Plan Type -->
+      <div class="relative sm:w-56">
+        <select
+          [formField]="filterForm.plan_type"
+          (change)="onFilterChange()"
+          class="w-full h-[3.75rem] appearance-none bg-white border border-neutral-soft px-4 py-3 pr-10 rounded-lg text-sm text-neutral-800 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+        >
+          <option value="">Todos os planos</option>
+          <option value="galera">Da galera</option>
+          <option value="pro">Profissional</option>
+        </select>
+
+        <!-- Arrow -->
+        <span
+          class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400"
+        >
+          <ng-icon name="lucideChevronDown" size="18"></ng-icon>
+        </span>
+      </div>
+
+      <!-- Status -->
+      <div class="relative sm:w-56">
+        <select
+          [formField]="filterForm.status"
+          (change)="onFilterChange()"
+          class="w-full h-[3.75rem] appearance-none bg-white border border-neutral-soft px-4 py-3 pr-10 rounded-lg text-sm text-neutral-800 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+        >
+          <option value="">Todos status</option>
+          <option value="open">Aberto</option>
+          <option value="expiring">Expirado</option>
+          <option value="inactive">Inativos</option>
+          <option value="trial">Teste grátis</option>
+        </select>
+
+        <span
+          class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400"
+        >
+          <ng-icon name="lucideChevronDown" size="18"></ng-icon>
+        </span>
+      </div>
+    </div>
+
+    @if (isLoadingUser()) {
+      <div class="flex items-center justify-center mt-[6.25rem]">
+        <app-loader></app-loader>
+      </div>
+    } @else {
+      <!-- Users List -->
+      <ul class="grid gap-6 lg:gap-8">
+        @for (user of users(); track user.id) {
+          <li app-user-and-subscription-card [user]="user"></li>
+        }
+      </ul>
+
+      <!-- Pagination Controls -->
+      <app-pagination
+        [config]="paginationConfig()"
+        [pageSizeOptions]="pageSizeOptions"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)"
+      />
+    }
+  }
+</section>

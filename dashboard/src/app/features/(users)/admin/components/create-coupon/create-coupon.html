@@ -1,0 +1,264 @@
+<app-modal [isOpen]="isOpen()" (close)="close.emit()">
+  <div class="bg-white rounded-[.625rem] w-[47.125rem] max-h-[90vh] overflow-y-auto">
+    <div class="p-6">
+      <app-surface-title
+        title="Criar um novo cupom"
+        description="Configure um cupom promocional para influenciadores ou parceiros."
+      ></app-surface-title>
+
+      <form class="mt-[2.125rem] space-y-[1.5rem] w-full" (submit)="onSubmit($event)">
+        <!-- Affiliate details -->
+        <div>
+          <app-label>Selecione o afiliado</app-label>
+          <div class="relative">
+            <select
+              [formField]="couponForm.affiliate"
+              class="w-full h-[2.625rem] appearance-none bg-white border border-neutral-soft px-4 py-2 pr-10 rounded-lg text-sm text-neutral-800 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:border-neutral-400"
+            >
+              <option value="" disabled selected class="text-neutral-500">
+                Selecione um afiliado
+              </option>
+              @for (affiliate of affiliatesData(); track affiliate.id) {
+                <option [value]="affiliate.id" class="text-neutral-800">
+                  {{ affiliate.full_name }} • {{ affiliate.email }}
+                </option>
+              }
+            </select>
+
+            <span
+              class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
+            >
+              <ng-icon name="lucideChevronDown" size="18"></ng-icon>
+            </span>
+          </div>
+
+          @if (couponForm.affiliate().touched() && couponForm.affiliate().invalid()) {
+            <ul class="mt-1">
+              @for (error of couponForm.affiliate().errors(); track error) {
+                <li class="text-error text-sm">{{ error.message }}</li>
+              }
+            </ul>
+          }
+        </div>
+
+        <!-- Coupon details -->
+        <div class="flex flex-col gap-[1.25rem] w-full">
+          <!-- code -->
+          <div>
+            <app-label>Código do cupom</app-label>
+            <app-input placeholder="Ex: CUPONCODE10" [formField]="couponForm.code"></app-input>
+
+            @if (couponForm.code().touched() && couponForm.code().invalid()) {
+              <ul class="mt-1">
+                @for (error of couponForm.code().errors(); track error) {
+                  <li class="text-error text-sm">{{ error.message }}</li>
+                }
+              </ul>
+            }
+          </div>
+
+          <!-- Dates -->
+          <div class="grid grid-cols-2 gap-[.75rem]">
+            <!-- Start -->
+            <div>
+              <app-label>Data de início</app-label>
+              <app-input
+                type="date"
+                placeholder="00/00/0000"
+                [formField]="couponForm.starts_at"
+              ></app-input>
+
+              @if (couponForm.starts_at().touched() && couponForm.starts_at().invalid()) {
+                <ul class="mt-1">
+                  @for (error of couponForm.starts_at().errors(); track error) {
+                    <li class="text-error text-sm">{{ error.message }}</li>
+                  }
+                </ul>
+              }
+            </div>
+
+            <!-- End -->
+            <div>
+              <app-label>Data de término</app-label>
+              <app-input
+                type="date"
+                placeholder="00/00/0000"
+                [formField]="couponForm.ends_at"
+              ></app-input>
+
+              @if (couponForm.ends_at().touched() && couponForm.ends_at().invalid()) {
+                <ul class="mt-1">
+                  @for (error of couponForm.ends_at().errors(); track error) {
+                    <li class="text-error text-sm">{{ error.message }}</li>
+                  }
+                </ul>
+              }
+            </div>
+          </div>
+
+          <!-- Discount -->
+          <div class="flex flex-col gap-[1.25rem] w-full">
+            <!-- Type -->
+            <div>
+              <app-label>Tipo de desconto</app-label>
+              <div class="relative">
+                <select
+                  [formField]="couponForm.discount_type"
+                  class="w-full h-[2.625rem] appearance-none bg-white border border-neutral-soft px-4 py-3 pr-10 rounded-lg text-sm text-neutral-800 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:border-neutral-400"
+                >
+                  <option value="" disabled selected>Selecione</option>
+                  <option value="percent">Percentual (%)</option>
+                  <option value="amount">Valor fixo (R$)</option>
+                </select>
+
+                <span
+                  class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
+                >
+                  <ng-icon name="lucideChevronDown" size="18"></ng-icon>
+                </span>
+              </div>
+
+              @if (couponForm.discount_type().touched() && couponForm.discount_type().invalid()) {
+                <ul class="mt-1">
+                  @for (error of couponForm.discount_type().errors(); track error) {
+                    <li class="text-error text-sm">{{ error.message }}</li>
+                  }
+                </ul>
+              }
+            </div>
+
+            <!-- Value -->
+            <div>
+              <app-label>Valor do desconto</app-label>
+              <app-input
+                [placeholder]="discountMaskProps().placeholder"
+                [formField]="couponForm.discount_value"
+                [mask]="discountMaskProps().mask"
+                [prefix]="discountMaskProps().prefix"
+                [suffix]="discountMaskProps().suffix"
+                [thousandSeparator]="discountMaskProps().thousandSeparator"
+                [decimalMarker]="discountMaskProps().decimalMarker"
+                [allowNegativeNumbers]="false"
+                [disabled]="!couponForm.discount_type().value()"
+              ></app-input>
+
+              @if (couponForm.discount_value().touched() && couponForm.discount_value().invalid()) {
+                <ul class="mt-1">
+                  @for (error of couponForm.discount_value().errors(); track error) {
+                    <li class="text-error text-sm">{{ error.message }}</li>
+                  }
+                </ul>
+              }
+
+              <span
+                class="inline-block mt-[.5rem] font-manrope text-sm font-semibold text-neutral-medium"
+                >O desconto será aplicado em cada compra com este cupom.</span
+              >
+            </div>
+          </div>
+
+          <!-- Type product -->
+          <div>
+            <app-label>Aplicável a</app-label>
+            <div class="relative">
+              <select
+                [formField]="couponForm.applicable_to"
+                class="w-full h-[2.625rem] appearance-none bg-white border border-neutral-soft px-4 py-3 pr-10 rounded-lg text-sm text-neutral-800 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:border-neutral-400"
+              >
+                <option value="" disabled selected>Selecione</option>
+                <option value="subscription">Assinatura</option>
+                <option value="physical">Cartão físico</option>
+                <option value="both">Ambos</option>
+              </select>
+
+              <span
+                class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
+              >
+                <ng-icon name="lucideChevronDown" size="18"></ng-icon>
+              </span>
+            </div>
+
+            @if (couponForm.applicable_to().touched() && couponForm.applicable_to().invalid()) {
+              <ul class="mt-1">
+                @for (error of couponForm.applicable_to().errors(); track error) {
+                  <li class="text-error text-sm">{{ error.message }}</li>
+                }
+              </ul>
+            }
+          </div>
+        </div>
+
+        <!-- Commission -->
+        <div class="flex flex-col gap-[1.25rem] w-full">
+          <!-- Type -->
+          <div>
+            <app-label>Tipo de comissão</app-label>
+            <div class="relative">
+              <select
+                [formField]="couponForm.comission_type"
+                class="w-full h-[2.625rem] appearance-none bg-white border border-neutral-soft px-4 py-3 pr-10 rounded-lg text-sm text-neutral-800 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer hover:border-neutral-400"
+              >
+                <option value="" disabled selected>Selecione</option>
+                <option value="percent">Percentual (%)</option>
+                <option value="amount">Valor fixo (R$)</option>
+              </select>
+
+              <span
+                class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
+              >
+                <ng-icon name="lucideChevronDown" size="18"></ng-icon>
+              </span>
+            </div>
+
+            @if (couponForm.comission_type().touched() && couponForm.comission_type().invalid()) {
+              <ul class="mt-1">
+                @for (error of couponForm.comission_type().errors(); track error) {
+                  <li class="text-error text-sm">{{ error.message }}</li>
+                }
+              </ul>
+            }
+          </div>
+
+          <!-- Value -->
+          <div>
+            <app-label>Valor da comissão</app-label>
+            <app-input
+              [placeholder]="commissionMaskProps().placeholder"
+              [formField]="couponForm.commission_value"
+              [mask]="commissionMaskProps().mask"
+              [prefix]="commissionMaskProps().prefix"
+              [suffix]="commissionMaskProps().suffix"
+              [thousandSeparator]="commissionMaskProps().thousandSeparator"
+              [decimalMarker]="commissionMaskProps().decimalMarker"
+              [allowNegativeNumbers]="false"
+              [disabled]="!couponForm.comission_type().value()"
+            ></app-input>
+
+            @if (
+              couponForm.commission_value().touched() && couponForm.commission_value().invalid()
+            ) {
+              <ul class="mt-1">
+                @for (error of couponForm.commission_value().errors(); track error) {
+                  <li class="text-error text-sm">{{ error.message }}</li>
+                }
+              </ul>
+            }
+
+            <span
+              class="inline-block mt-[.5rem] font-manrope text-sm font-semibold text-neutral-medium"
+              >A comissão será calculada sobre cada venda realizada com este cupom.</span
+            >
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex items-center gap-[1rem]">
+          <app-button type="button" variant="outline" class="flex-1 w-full" (click)="close.emit()"
+            >Voltar</app-button
+          >
+          <app-button class="flex-1 w-full" type="submit">Finalizar</app-button>
+        </div>
+      </form>
+    </div>
+  </div>
+</app-modal>

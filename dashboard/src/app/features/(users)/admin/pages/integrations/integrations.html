@@ -1,0 +1,107 @@
+@if (isLoading()) {
+  <div class="flex items-center justify-center min-h-[50vh]">
+    <app-loader></app-loader>
+  </div>
+} @else {
+  <app-surface class="max-w-md mx-auto p-8">
+    <!-- Icon Section -->
+    <div class="flex justify-center mb-6">
+      <div
+        class="w-20 h-20 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow duration-300"
+      >
+        <ng-icon name="bootstrapGraphUp" size="40" color="#7a7a7a"></ng-icon>
+      </div>
+    </div>
+
+    <!-- Header Section -->
+    <div class="text-center mb-8">
+      <h2 class="font-urbanist font-semibold text-2xl text-gray-900 mb-2">Google Analytics 4</h2>
+      <p class="font-urbanist text-sm text-gray-500 leading-relaxed">
+        Métricas completas de toda a plataforma
+      </p>
+    </div>
+
+    <!-- Divider -->
+    <div
+      class="w-full h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mb-8"
+    ></div>
+
+    <!-- Form Section -->
+    <form class="space-y-6" (submit)="onSubmit($event)">
+      <div class="space-y-2">
+        <app-label class="block text-sm font-medium text-gray-700">
+          ID de Medição
+          <span class="text-red-500 ml-1">*</span>
+        </app-label>
+
+        <app-input
+          placeholder="Ex: G-XXXXXXXXXX"
+          mask="0000000000"
+          prefix="G-"
+          class="w-full"
+          [formField]="analyticsForm.google_analytics_id"
+        ></app-input>
+
+        @if (
+          analyticsForm.google_analytics_id().touched() &&
+          analyticsForm.google_analytics_id().invalid()
+        ) {
+          <ul>
+            @for (error of analyticsForm.google_analytics_id().errors(); track error) {
+              <li class="text-error">{{ error.message }}</li>
+            }
+          </ul>
+        }
+
+        <div class="flex items-start gap-2 mt-2">
+          <ng-icon
+            name="lucideTriangleAlert"
+            size="16"
+            class="text-blue-500 mt-0.5 flex-shrink-0"
+          ></ng-icon>
+          <p class="text-xs text-gray-500 leading-relaxed">Digite apenas os números.</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-3 pt-2">
+        <app-button
+          class="w-full shadow-sm hover:shadow-md transition-all duration-200"
+          variant="default"
+          sizeH="sm"
+          type="submit"
+        >
+          <span class="flex items-center justify-center gap-2">
+            <ng-icon name="lucideCheck" size="16"></ng-icon>
+            <span class="font-medium">Salvar Configuração</span>
+          </span>
+        </app-button>
+
+        <a
+          href="https://support.google.com/analytics/answer/9539598?hl=pt-BR"
+          target="_blank"
+          class="w-full flex mt-[.5rem] items-center justify-center gapenp-2 text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-200"
+        >
+          <ng-icon name="lucideFileText" size="16"></ng-icon>
+          <span>Como encontrar meu ID de medição?</span>
+        </a>
+      </div>
+    </form>
+
+    <!-- Footer Info -->
+    <div class="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-100">
+      <div class="flex items-start gap-3">
+        <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+          <ng-icon name="bootstrapGraphUp" size="18" color=" #7a7a7a"></ng-icon>
+        </div>
+        <div>
+          <h4 class="text-sm font-medium text-gray-900 mb-1">Sobre o GA4</h4>
+          <p class="text-xs text-gray-600 leading-relaxed">
+            O Google Analytics 4 oferece análises avançadas com foco em privacidade e insights
+            preditivos baseados em machine learning.
+          </p>
+        </div>
+      </div>
+    </div>
+  </app-surface>
+}

@@ -1,0 +1,20 @@
+<router-outlet></router-outlet>
+<ngx-sonner-toaster
+  position="top-center"
+  duration="4000"
+  [toastOptions]="{
+    unstyled: true,
+    classes: {
+      toast:
+        'flex items-center gap-[1rem] max-w-[31.25rem] w-auto min-h-[5.625rem] rounded-[.625rem] shadow-[0_12px_32px_0_#061C3D14] px-[1rem] py-[1.25rem] whitespace-pre-line ',
+      success: 'text-black bg-[var(--color-success-toast)]',
+      error: 'bg-[var(--color-error-toast)] text-black',
+      info: 'bg-[var(--color-info)] text-white',
+      warning: 'bg-[var(--color-warning)] text-black',
+      loading:
+        'flex items-center gap-[1rem] max-w-[31.25rem] w-auto min-h-[5.625rem] rounded-[.625rem] shadow-[0_12px_32px_0_#061C3D14] px-[1rem] py-[1.25rem] whitespace-pre-line bg-black text-white',
+    },
+  }"
+>
+  >
+</ngx-sonner-toaster>

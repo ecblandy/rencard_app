@@ -1,0 +1,90 @@
+<app-surface classes="max-w-[26.5625rem] w-full ">
+  <app-surface-title
+    title="Dados pessoais"
+    description="Dados principais do seu perfil"
+    class="block mb-[3.5rem]"
+  ></app-surface-title>
+
+  <form class="space-y-[3.5rem]" (submit)="onSubmit($event)">
+    <!-- Profile Photo  -->
+    <div>
+      <app-label>Foto de perfil</app-label>
+
+      <div class="flex items-center gap-x-[1.1875rem]">
+        <img
+          class="w-[2.9375rem] h-[2.9375rem] rounded-[.3125rem] object-cover object-center mt-[.5rem] mb-[1rem]"
+          [src]="profilePreview() || '/images/user-placeholder.svg'"
+          alt="Foto de perfil"
+        />
+
+        <label
+          class="flex items-center h-[2.375rem] gap-[.875rem] font-manrope font-semibold border border-neutral-strong hover:bg-black/80 transition-colors duration-200 ease-in-out hover:text-white text-neutral-medium w-[10rem] rounded-[.625rem] px-[1rem] cursor-pointer"
+        >
+          <ng-icon name="lucideUpload" size="18"></ng-icon>
+          <span>Enviar foto</span>
+          <input type="file" class="hidden" (change)="onFileChange($event)" />
+        </label>
+      </div>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="space-y-[1rem]">
+      <!-- Name -->
+      <div>
+        <app-label for="display_name">Nome</app-label>
+        <app-input
+          type="text"
+          id="display_name"
+          placeholder="João Teste"
+          sizeH="sm"
+          [formField]="personalForm.display_name"
+          (input)="displayNameDirty.set(true)"
+          class="placeholder:text-neutral-medium"
+        ></app-input>
+
+        @if (personalForm.display_name().touched() && personalForm.display_name().invalid()) {
+          <ul>
+            @for (error of personalForm.display_name().errors(); track error) {
+              <li class="text-error">{{ error.message }}</li>
+            }
+          </ul>
+        }
+      </div>
+
+      <!-- Subtitle / Bio -->
+      <div>
+        <app-label>Subtítulo / Bio</app-label>
+        <textarea
+          class="rounded-[.625rem] font-manrope font-medium border border-neutral-soft mt-[.5rem] p-[1rem] resize-none w-full"
+          placeholder="Arquiteto"
+          [formField]="personalForm.subtitle"
+          (input)="subtitleDirty.set(true)"
+        ></textarea>
+
+        @if (personalForm.subtitle().touched() && personalForm.subtitle().invalid()) {
+          <ul>
+            @for (error of personalForm.subtitle().errors(); track error) {
+              <li class="text-error">{{ error.message }}</li>
+            }
+          </ul>
+        }
+
+        <span class="font-manrope text-[.875rem] text-neutral-medium"
+          >Uma breve descrição sobre você ou sua profissão.</span
+        >
+      </div>
+    </div>
+
+    <app-button
+      [disabled]="
+        (displayNameDirty() && personalForm.display_name().invalid()) ||
+        (subtitleDirty() && personalForm.subtitle().invalid()) ||
+        (!displayNameDirty() && !subtitleDirty() && !imageDirty())
+      "
+      sizeH="sm"
+      type="submit"
+      class="w-full"
+      >Salvar alterações</app-button
+    >
+  </form>
+</app-surface>

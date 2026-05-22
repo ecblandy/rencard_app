@@ -1,0 +1,17 @@
+<div class="flex max-sm:flex-col items-center gap-[2.125rem]">
+  @for (metric of metrics(); track metric.label) {
+    <div
+      class="flex-1 flex flex-col items-start px-6 py-4 rounded-[.625rem] border border-neutral-soft bg-white w-full"
+    >
+      <ng-icon [name]="metric.icon" size="25"></ng-icon>
+
+      <strong class="font-urbanist font-bold text-[2.5rem] mt-2">
+        {{ metric.value }}
+      </strong>
+
+      <p class="font-manrope text-neutral-strong mt-1">
+        {{ metric.label }}
+      </p>
+    </div>
+  }
+</div>

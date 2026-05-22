@@ -1,0 +1,10 @@
+@if (isOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+    (click)="close.emit()"
+  >
+    <div class="relative w-full max-w-[47.125rem]" (click)="$event.stopPropagation()">
+      <ng-content />
+    </div>
+  </div>
+}

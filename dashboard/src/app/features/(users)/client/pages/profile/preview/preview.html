@@ -1,0 +1,80 @@
+<span
+  class="block text-center uppercase font-urbanist font-semibold text-[1.25rem] text-neutral-medium mb-[1rem]"
+>
+  Preview ao vivo
+</span>
+
+<app-surface classes="flex flex-col items-center w-full px-[1.125rem]">
+  <!-- Foto do perfil -->
+  <img
+    [src]="profile().profile_image || '/images/user-placeholder.svg'"
+    alt="Profile preview"
+    class="rounded-[.625rem] object-cover w-[6.375rem] h-[6.375rem]"
+  />
+
+  <!-- Nome -->
+  <h2 class="font-urbanist font-bold text-[.9375rem] mt-[1.125rem]">
+    {{ profile().display_name || profile().owner_name || 'Nome não definido' }}
+  </h2>
+
+  <!-- Subtítulo -->
+  <h3 class="font-manrope text-[.75rem] text-neutral-medium w-full text-center break-words">
+    {{ profile().subtitle || 'Sem subtítulo' }}
+  </h3>
+
+  @if (profile().resume?.enabled && profile().resume?.file) {
+    <div
+      class="flex items-center justify-center gap-[.75rem] border border-neutral-medium rounded-[1rem] w-full h-[1.75rem] mt-[1.875rem] cursor-pointer"
+      (click)="downloadResume()"
+    >
+      <ng-icon name="lucideDownload" size="16"></ng-icon>
+      <p class="font-manrope font-semibold">Baixar currículo</p>
+    </div>
+  }
+
+  <iframe
+    data-testid="embed-iframe"
+    style="border-radius: 12px"
+    [src]="spotifyEmbedUrl()"
+    width="100%"
+    height="152"
+    frameBorder="0"
+    allowfullscreen=""
+    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+    loading="lazy"
+    class="my-[1.875rem]"
+    [class.hidden]="!profile().music?.enabled || !profile().music?.value"
+  ></iframe>
+
+  <ul class="flex flex-col w-full space-y-[1.125rem] my-[1.875rem]">
+    @for (socials of profile().social_links; track socials) {
+      @if (socials.enabled) {
+        <li
+          class="flex items-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border border-neutral-extra-soft rounded-[.875rem]"
+        >
+          <ng-icon [name]="socials.icon"></ng-icon>
+          <p class="font-urbanist font-medium">{{ socials.value || socials.type }}</p>
+        </li>
+      }
+    }
+  </ul>
+
+  <ul class="w-full space-y-[1rem]">
+    @for (button of profile().buttons; track button) {
+      @if (button.enabled) {
+        <li
+          class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border bg-black text-white border-neutral-extra-soft rounded-[.875rem] cursor-pointer"
+          (click)="handleButton(button)"
+        >
+          <ng-icon [name]="getButtonIcon(button.type)" size="16"></ng-icon>
+          <p class="font-manrope font-semibold text-[.875rem]">{{ getButtonLabel(button.type) }}</p>
+        </li>
+      }
+    }
+  </ul>
+
+  <p class="font-manrope font-medium text-neutral-medium mt-[1.875rem]">
+    Feito com <span class="font-bold">Rencard</span>
+  </p>
+</app-surface>
+<app-button class="w-full mt-[1.875rem]">Visualizar em tela cheia</app-button>

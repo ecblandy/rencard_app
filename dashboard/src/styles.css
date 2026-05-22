@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+
+@theme inline {
+  /* Fonts */
+  --font-manrope: 'Manrope', ui-sans-serif, system-ui;
+  --font-urbanist: 'Urbanist', ui-sans-serif, system-ui;
+  --font-montserrat: 'Montserrat', ui-sans-serif, system-ui;
+  /* Neutral colors (design tokens) */
+  --color-neutral-extra-soft: #c2c2c2;
+  --color-neutral-soft: #939393;
+  --color-neutral-medium: #7a7a7a;
+  --color-neutral-strong: #454545;
+
+  --color-success: #59b15c;
+  --color-success-toast: #7ced7f;
+  --color-error: #c32222;
+  --color-error-toast: #ffadad;
+  --color-error-soft: #fcf4f4;
+
+  --color-info: #2979ff; /* azul */
+  --color-warning: #ffa000; /* amarelo / laranja */
+}
+
+app-button.active button {
+  background-color: black;
+  color: white;
+  border: none;
+  border-color: black;
+  border-radius: 10px;
+}
+
+app-button.disabled button {
+  color: #454545; /* texto */
+  background-color: white;
+  border: 1px solid #7a7a7a; /* borda visível */
+  border-radius: 10px;
+}
+html {
+  scrollbar-gutter: stable; /* reserva o espaço sem mostrar o scrollbar */
+}

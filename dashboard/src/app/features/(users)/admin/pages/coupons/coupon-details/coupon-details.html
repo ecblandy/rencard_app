@@ -1,0 +1,135 @@
+<section>
+  @if (isLoadingCoupon()) {
+    <!-- Loading -->
+    <div class="flex items-center justify-center min-h-[50vh]">
+      <app-loader></app-loader>
+    </div>
+  } @else {
+    <!-- Go back to Coupon page -->
+    <button
+      (click)="goBack()"
+      class="flex items-center gap-x-2 font-manrope cursor-pointer hover:opacity-80 transition-opacity"
+    >
+      <ng-icon name="bootstrapArrowLeft" size="20"></ng-icon>
+      <p>Voltar para cupons</p>
+    </button>
+
+    <!-- Header -->
+    <div class="flex items-center justify-between my-10.25">
+      <div class="flex items-center gap-x-4">
+        <span class="font-urbanist font-bold text-[2.5rem]">{{ couponState().code }}</span>
+        <p class="font-manrope text-white bg-black py-2 px-4 rounded-[.625rem]">
+          {{ couponState().status_label }}
+        </p>
+      </div>
+
+      <div class="flex items-center gap-x-2">
+        <app-button (click)="open()" variant="outline">Editar</app-button>
+        <app-button variant="outline" (click)="onPauseCoupon()">
+          {{ couponState().status === 'active' ? 'Pausar' : 'Ativar' }}
+        </app-button>
+      </div>
+    </div>
+
+    <!-- Container body -->
+    <div class="grid grid-cols-3 gap-x-[2.375rem] mb-10.25">
+      <!-- Resume coupon 1 -->
+      <app-surface classes=" bg-white space-y-6">
+        <app-surface-title title="Resumo do cupom" class="block mb-6"></app-surface-title>
+
+        <!-- Affiliate name -->
+        <div class="font-manrope">
+          <h2 class="text-neutral-medium">Afiliado</h2>
+          <p class="font-semibold">{{ couponState().affiliate_name }}</p>
+        </div>
+
+        <!-- Affiliate email -->
+        <div class="font-manrope">
+          <h2 class="text-neutral-medium">E-mail</h2>
+          <p class="font-semibold">{{ couponState().affiliate_email }}</p>
+        </div>
+
+        <!-- Discount and Comission -->
+        <div class="flex items-center justify-between">
+          <!-- discount -->
+          <div>
+            <h2 class="text-neutral-medium">Desconto</h2>
+            <p class="font-semibold">{{ formatDiscount(couponState()) }}</p>
+          </div>
+
+          <!-- commission -->
+          <div>
+            <h2 class="text-neutral-medium">Comissão</h2>
+            <p class="font-semibold">{{ formatCommission(couponState()) }}</p>
+          </div>
+        </div>
+
+        <div class="font-manrope">
+          <h2 class="text-neutral-medium">Aplicável á</h2>
+          <p class="font-semibold">{{ couponState().applicable_to }}</p>
+        </div>
+      </app-surface>
+
+      <!-- Resume coupon 2 -->
+      <app-surface classes="bg-white space-y-6">
+        <app-surface-title title="Resumo do cupom" class="block mb-6"></app-surface-title>
+
+        <!-- Total uses -->
+        <div class="flex gap-x-2 bg-[#F5F5F5] px-4 py-2 rounded-[.625rem]">
+          <span class="text-neutral-medium">Total de usos:</span>
+          <p class="font-semibold">{{ couponState().total_uses }}</p>
+        </div>
+
+        <div class="flex gap-x-2 bg-[#F5F5F5] px-4 py-2 rounded-[.625rem]">
+          <span class="text-neutral-medium">Receita total:</span>
+          <p class="font-semibold">{{ formatPrice(couponState().total_uses) }}</p>
+        </div>
+
+        <div class="flex gap-x-2 bg-[#F5F5F5] px-4 py-2 rounded-[.625rem]">
+          <span class="text-neutral-medium">Comissão total:</span>
+          <p class="font-semibold">{{ formatPrice(couponState().total_commission_cents) }}</p>
+        </div>
+      </app-surface>
+
+      <!-- Dates -->
+      <app-surface classes="bg-white space-y-6">
+        <app-surface-title title="Resumo do cupom" class="block mb-6"></app-surface-title>
+
+        <!-- Start Date -->
+        <div class="flex flex-col gap-x-2 bg-[#F5F5F5] px-4 py-2 rounded-[.625rem]">
+          <span class="text-neutral-medium">Data de início</span>
+          <p class="font-semibold">{{ couponState().starts_at | localDate: 'short' }}</p>
+        </div>
+
+        <div class="flex flex-col gap-x-2 bg-[#F5F5F5] px-4 py-2 rounded-[.625rem]">
+          <span class="text-neutral-medium">Data de término</span>
+          <p class="font-semibold">
+            {{ couponState().ends_at | localDate: 'short' }}
+          </p>
+        </div>
+      </app-surface>
+    </div>
+
+    <!-- Footers -->
+    <app-surface classes="flex flex-col gap-y-6 bg-white">
+      <app-surface-title title="Dados para pagamento"></app-surface-title>
+
+      <!-- PIX KEY TYPE -->
+      <div class="flex flex-col gap-x-2">
+        <span class="text-neutral-medium">Tipo de chave PIX</span>
+        <p class="font-semibold uppercase">
+          {{ couponState().affiliate_payment.pix_key_type || 'N/A' }}
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-x-2">
+        <span class="text-neutral-medium">Chave PIX</span>
+        <p class="font-semibold">{{ couponState().affiliate_payment.pix_key || 'N/A' }}</p>
+      </div>
+
+      <app-button class="w-full Copiar" (click)="copyPixKey()">Copiar </app-button>
+    </app-surface>
+  }
+
+  <app-update-coupon [isOpen]="modalOpen()" (close)="close()"></app-update-coupon>
+</section>
