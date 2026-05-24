@@ -25,7 +25,7 @@ const itemVariants: Variants = {
 
 export default function Hero() {
   return (
-    <section className="relative flex items-center min-h-[39.25rem]">
+    <section className="relative flex items-center min-h-[39.25rem] md:min-h-[39.25rem] max-sm:min-h-[37.125rem]">
       <Image
         src="/images/hero-image.png"
         alt="Hero do Rencard"
@@ -34,18 +34,18 @@ export default function Hero() {
         fetchPriority="high"
         placeholder="blur"
         blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAECAIAAAA4WjmaAAAAiElEQVR4AQB8AIP/Al9kZmxxc2ZrbGVqa3F2dnR4eXd8fIGGhnp+f0dJTAIUEhIOCwoTEBARDw8LCAgNCgkFAgDY1NHh39z19PQCDAoKCAYHCQcICwkJBAMEExMTDQwL1d"
-        className="object-cover"
+        className="object-cover object-center"
       />
 
       {/* Conteúdo */}
       <motion.div
-        className="relative z-10 font-urbanist"
+        className="relative z-10 font-urbanist w-full px-6 sm:px-10 md:pl-[5rem] md:pr-0"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         <motion.h1
-          className="pl-[5rem] font-bold text-[4rem] leading-[100%] mb-[1.5rem] max-w-[51.875rem] w-full"
+          className="font-bold text-[2rem] sm:text-[2.75rem] md:text-[4rem] leading-[110%] md:leading-[100%] mb-4 md:mb-[1.5rem] max-w-[51.875rem] w-full"
           variants={itemVariants}
         >
           Olá, eu sou o <strong className="text-white">RENCARD</strong>!
@@ -53,16 +53,16 @@ export default function Hero() {
         </motion.h1>
 
         <motion.div
-          className="pl-[5rem] flex items-center bg-[#FBFBFB80] max-w-[37.75rem] w-full h-[3.5rem] px-[1.875rem] my-[1.5rem] rounded-[.625rem]"
+          className="flex items-center bg-[#FBFBFB80] max-w-[37.75rem] w-full h-[3rem] md:h-[3.5rem] px-5 md:px-[1.875rem] my-4 md:my-[1.5rem] rounded-[.625rem]"
           variants={itemVariants}
         >
-          <p className="text-[2.5rem] text-[#454545] font-montserrat ">
+          <p className="text-[1.5rem] max-sm:text-[1.25rem] md:text-[2.5rem] text-[#454545] font-montserrat">
             <strong>E você já tem seu</strong> REN?
           </p>
         </motion.div>
 
         <motion.p
-          className="pl-[5rem] font-semibold text-[1.5rem] text-white max-w-[46.25rem] w-full"
+          className="font-semibold text-[1rem] sm:text-[1.25rem] md:text-[1.5rem] text-white max-w-[46.25rem] w-full"
           variants={itemVariants}
         >
           Troque informações em segundos. NFC, QR Code e um perfil digital
@@ -70,13 +70,13 @@ export default function Hero() {
         </motion.p>
 
         <motion.div
-          className="flex items-center gap-[1.5rem] mt-[2.5rem] pl-[5rem]"
+          className="flex items-center gap-4 md:gap-[1.5rem] mt-6 md:mt-[2.5rem]"
           variants={itemVariants}
         >
           <Button
             sizeH="sm"
             variant="default"
-            href="/signup"
+            href="/app/auth/signup"
             className="w-[10.75rem] first-letter:uppercase"
           >
             criar meu rencard

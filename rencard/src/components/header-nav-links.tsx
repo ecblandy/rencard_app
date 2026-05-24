@@ -36,7 +36,7 @@ export default function HeaderNavLinks() {
           return (
             <li
               key={link.href}
-              className={`border-b-2 border-transparent hover:border-b-red-600 transition-all duration-200 ease-in-out ${activeClass}`}
+              className={`border-b-2 border-transparent hover:border-b-black transition-all duration-200 ease-in-out ${activeClass}`}
             >
               <a href={link.href} className="font-medium">
                 {link.label}

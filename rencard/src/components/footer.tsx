@@ -13,7 +13,7 @@ const publicLinks = [
 
 export default function Footer() {
   return (
-    <footer className="flex flex-col  bg-[#454545] min-h-[27.4375rem] h-auto px-[3.625rem] py-[2.375rem] ">
+    <footer className="flex flex-col  bg-[#454545] min-h-[27.4375rem] h-auto px-[3.625rem] max-sm:p-[1.25rem] py-[2.375rem] ">
       <div className="flex flex-wrap justify-between gap-[2.5rem]">
         <div className="space-y-[1.5rem]">
           <Image

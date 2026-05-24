@@ -114,16 +114,18 @@ export default function Plans() {
                   ))}
                 </ul>
 
-                <Button
-                  variant="custom"
-                  sizeH="sm"
-                  className={`${style.button} mt-[2.5rem] w-full`}
-                >
-                  {buttonTitle}
-                </Button>
+                <a href="/app/auth/signup">
+                  <Button
+                    variant="custom"
+                    sizeH="sm"
+                    className={`${style.button} mt-[2.5rem] w-full`}
+                  >
+                    {buttonTitle}
+                  </Button>
+                </a>
               </motion.div>
             );
-          }
+          },
         )}
       </div>
     </section>

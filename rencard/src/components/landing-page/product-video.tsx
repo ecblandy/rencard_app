@@ -10,7 +10,7 @@ export default function ProductVideo() {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
-      className="flex justify-center py-[3.75rem] px-[1.25rem] bg-[linear-gradient(180deg,#F5F5F5_14.9%,#C2C2C2_94.23%)] h-[51.8125rem]"
+      className="flex justify-center py-[3.75rem] max-sm:py-[2.5rem] px-[1.25rem] bg-[linear-gradient(180deg,#F5F5F5_14.9%,#C2C2C2_94.23%)] h-[51.8125rem]"
     >
       {/* container */}
       <div className="max-w-[56.1875rem] w-full">
@@ -23,7 +23,7 @@ export default function ProductVideo() {
           loading="lazy"
           width="560"
           height="315"
-          src="https://www.youtube.com/embed/218ELDhIiGY?si=Ml41eTdBwWvLRe8Pcontrols=1&rel=0&modestbranding=1"
+          src="https://www.youtube.com/embed/hfxc41zCxJs?si=aTLUyWoUf2OIcOWi"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           title="YouTube video player"

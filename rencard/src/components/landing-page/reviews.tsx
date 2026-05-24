@@ -38,7 +38,7 @@ export default function Reviews() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.2 }}
             transition={{ delay: index * 0.2, duration: 0.6, ease: "easeOut" }}
-            className="max-w-[19.9375rem] w-full h-auto space-y-[1rem] font-manrope py-[1rem] px-6 border border-[#7A7A7A] rounded-[1.25rem]"
+            className="max-w-[19.9375rem] max-sm:max-w-full w-full h-auto space-y-[1rem] font-manrope py-[1rem] px-6 border border-[#7A7A7A] rounded-[1.25rem]"
           >
             <div className="flex gap-1">
               {[...Array(5)].map((_, i) => (

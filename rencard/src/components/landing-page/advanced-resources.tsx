@@ -83,7 +83,7 @@ export default function AdvancedResources() {
                 duration: 0.6,
                 ease: "easeOut",
               }}
-              className="max-w-[14.1875rem] w-full rounded-[1.25rem] py-[1rem] px-6 bg-white shadow-[0_1px_3px_1px_#00000026,_0_1px_2px_0px_#0000004D] flex flex-col items-center"
+              className="max-w-[14.1875rem] max-sm:max-w-full w-full rounded-[1.25rem] py-[1rem] px-6 bg-white shadow-[0_1px_3px_1px_#00000026,_0_1px_2px_0px_#0000004D] flex flex-col items-center"
             >
               <Icon size={30} className="text-[#454545]" />
               <h3 className="mt-[1rem] mb-[.5rem] font-urbanist text-[1.25rem] whitespace-nowrap font-semibold text-center">
@@ -93,7 +93,7 @@ export default function AdvancedResources() {
                 {description}
               </p>
             </motion.li>
-          )
+          ),
         )}
       </ul>
     </section>

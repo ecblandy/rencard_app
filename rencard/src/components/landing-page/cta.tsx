@@ -12,14 +12,14 @@ export default function Cta() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <strong className="text-[4rem] font-bold text-end">
+        <strong className="text-[4rem] max-sm:text-[2rem] font-bold text-end">
           O cartão de visita
           <br /> que evoluiu
         </strong>
         <p className="text-[1.5rem] font-semibold text-[#939393]">
           Pronto para o futuro?
         </p>
-        <p className="font-semibold text-[1.5rem] text-[#939393] text-end">
+        <p className="font-semibold text-[1.5rem]  text-[#939393] text-end">
           Junte-se a milhares de pessoas que já <br />
           transformaram sua forma de fazer networking.
         </p>
@@ -30,13 +30,15 @@ export default function Cta() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
       >
-        <Button
-          sizeH="xl"
-          variant="default"
-          className="mt-[2.5rem] w-[17.125rem] text-[1.5625rem] hover:scale-105 transition-transform duration-300"
-        >
-          Criar meu Rencard
-        </Button>
+        <a href="/app/auth/signup">
+          <Button
+            sizeH="xl"
+            variant="default"
+            className="mt-[2.5rem] w-[17.125rem] text-[1.5625rem] hover:scale-105 transition-transform duration-300"
+          >
+            Criar meu Rencard
+          </Button>
+        </a>
       </motion.div>
     </section>
   );
