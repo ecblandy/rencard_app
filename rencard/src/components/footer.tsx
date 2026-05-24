@@ -2,13 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 
 const publicLinks = [
-  { name: "Política de Privacidade", href: "#" },
-  { name: "Política de devolução", href: "#" },
-  { name: "LGPD", href: "#" },
-  { name: "Política comercial", href: "#" },
-  { name: "Política de assinatura", href: "#" },
-  { name: "Termos de serviço", href: "#" },
-  { name: "Seja um(a) afiliado(a) Rencard", href: "#" },
+  { name: "Política de Privacidade", href: "/privacy-policy" },
+  { name: "Termos de Uso", href: "/terms-of-use" },
+  { name: "Termos de Serviço", href: "/terms-of-service" },
+  { name: "Política de Troca e Devolução", href: "/return-policy" },
 ];
 
 export default function Footer() {
