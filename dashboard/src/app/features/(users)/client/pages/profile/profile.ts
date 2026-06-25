@@ -6,6 +6,7 @@ import { EDITOR_TABS } from './editor-tabs.config';
 import { NgIcon } from '@ng-icons/core';
 import { Preview } from './preview/preview';
 import { DashboardTitle } from '../../../components/dashboard-title/dashboard-title';
+import { AuthState } from '../../../../auth/services/state/auth/auth-state';
 
 @Component({
   selector: 'app-profile',
@@ -16,8 +17,12 @@ import { DashboardTitle } from '../../../components/dashboard-title/dashboard-ti
 export class Profile {
   private readonly profileService = inject(ProfileService);
   private readonly profileStore = inject(ProfileStore);
+  private readonly authState = inject(AuthState);
 
   readonly tabs = signal(EDITOR_TABS);
+  readonly isPro = computed(
+    () => this.authState.user()?.active_access_grant?.permissions?.can_use_pro_features ?? false,
+  );
 
   activeTabKey = signal(this.tabs()[0].key);
 
@@ -25,26 +30,20 @@ export class Profile {
     () => this.tabs().find((tab) => tab.key === this.activeTabKey())?.component ?? null,
   );
 
-  activeTabInputs = computed(() => ({
-    profile: this.profileStore.profile(), // passa o signal do store
-  }));
+  isLoaded = signal(false);
 
   selectTab(key: string) {
+    const tab = this.tabs().find((t) => t.key === key);
+    if (tab?.requiresPro && !this.isPro()) return; // bloqueia navegação
     this.activeTabKey.set(key);
   }
-
-  isLoaded = signal(false);
 
   ngOnInit() {
     this.profileService.fetchProfile().subscribe({
       next: (profile) => {
         this.profileStore.setProfileFromAPI(profile);
-        this.isLoaded.set(true); // só renderiza após API responder
+        this.isLoaded.set(true);
       },
     });
-  }
-
-  constructor() {
-    console.log('Profile store instance:', this.profileStore);
   }
 }

@@ -4,7 +4,10 @@
   Preview ao vivo
 </span>
 
-<app-surface classes="flex flex-col items-center w-full px-[1.125rem]">
+<app-surface
+  classes="flex flex-col items-center w-full px-[1.125rem]"
+  [bgColor]="appearance.settings().background_color"
+>
   <!-- Foto do perfil -->
   <img
     [src]="profile().profile_image || '/images/user-placeholder.svg'"
@@ -13,18 +16,25 @@
   />
 
   <!-- Nome -->
-  <h2 class="font-urbanist font-bold text-[.9375rem] mt-[1.125rem]">
+  <h2
+    class="font-urbanist font-bold text-[.9375rem] mt-[1.125rem]"
+    [style.color]="appearance.settings().text_primary"
+  >
     {{ profile().display_name || profile().owner_name || 'Nome não definido' }}
   </h2>
 
   <!-- Subtítulo -->
-  <h3 class="font-manrope text-[.75rem] text-neutral-medium w-full text-center break-words">
+  <h3
+    class="font-manrope text-[.75rem] w-full text-center break-words"
+    [style.color]="appearance.settings().text_secondary"
+  >
     {{ profile().subtitle || 'Sem subtítulo' }}
   </h3>
 
   @if (profile().resume?.enabled && profile().resume?.file) {
     <div
       class="flex items-center justify-center gap-[.75rem] border border-neutral-medium rounded-[1rem] w-full h-[1.75rem] mt-[1.875rem] cursor-pointer"
+      [style.color]="appearance.settings().text_primary"
       (click)="downloadResume()"
     >
       <ng-icon name="lucideDownload" size="16"></ng-icon>
@@ -46,11 +56,14 @@
     [class.hidden]="!profile().music?.enabled || !profile().music?.value"
   ></iframe>
 
+  <!-- Redes sociais -->
   <ul class="flex flex-col w-full space-y-[1.125rem] my-[1.875rem]">
     @for (socials of profile().social_links; track socials) {
       @if (socials.enabled) {
         <li
           class="flex items-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border border-neutral-extra-soft rounded-[.875rem]"
+          [style.background-color]="appearance.settings().button_bg_secondary"
+          [style.color]="appearance.settings().button_text_secondary"
         >
           <ng-icon [name]="socials.icon"></ng-icon>
           <p class="font-urbanist font-medium">{{ socials.value || socials.type }}</p>
@@ -59,11 +72,14 @@
     }
   </ul>
 
+  <!-- Botões -->
   <ul class="w-full space-y-[1rem]">
     @for (button of profile().buttons; track button) {
       @if (button.enabled) {
         <li
-          class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border bg-black text-white border-neutral-extra-soft rounded-[.875rem] cursor-pointer"
+          class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border border-neutral-extra-soft rounded-[.875rem] cursor-pointer"
+          [style.background-color]="appearance.settings().button_bg_primary"
+          [style.color]="appearance.settings().button_text_primary"
           (click)="handleButton(button)"
         >
           <ng-icon [name]="getButtonIcon(button.type)" size="16"></ng-icon>
@@ -73,8 +89,13 @@
     }
   </ul>
 
-  <p class="font-manrope font-medium text-neutral-medium mt-[1.875rem]">
-    Feito com <span class="font-bold">Rencard</span>
+  <p
+    class="font-manrope font-medium mt-[1.875rem]"
+    [style.color]="appearance.settings().text_secondary"
+  >
+    Feito com
+    <span class="font-bold" [style.color]="appearance.settings().text_primary">Rencard</span>
   </p>
 </app-surface>
+
 <app-button class="w-full mt-[1.875rem]">Visualizar em tela cheia</app-button>

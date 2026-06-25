@@ -12,7 +12,7 @@
       ></app-dashboard-title>
 
       <!-- Add partner -->
-      <app-button class="flex items-center gap-[.5rem]">
+      <app-button class="flex items-center gap-[.5rem]" (click)="open()">
         <ng-icon name="lucidePlus" size="20"></ng-icon>
         <p>Cadastrar parceiro</p>
       </app-button>
@@ -50,5 +50,7 @@
       (pageChange)="onPageChange($event)"
       (pageSizeChange)="onPageSizeChange($event)"
     />
+
+    <app-create-partner [isOpen]="modalOpen()" (close)="close()"></app-create-partner>
   </section>
 }

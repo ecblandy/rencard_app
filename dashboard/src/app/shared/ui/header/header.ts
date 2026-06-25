@@ -1,5 +1,10 @@
-import { Component } from '@angular/core';
-import { NgIcon } from "@ng-icons/core";
+import { Component, input, signal } from '@angular/core';
+import { NgIcon } from '@ng-icons/core';
+
+export interface MenuLink {
+  label: string;
+  href: string;
+}
 
 @Component({
   selector: 'app-header',
@@ -7,4 +12,12 @@ import { NgIcon } from "@ng-icons/core";
   templateUrl: './header.html',
   styleUrl: './header.css',
 })
-export class UiHeader {}
+export class UiHeader {
+  links = input<MenuLink[]>([]);
+
+  isOpen = signal(false);
+
+  toggle() {
+    this.isOpen.update((v) => !v);
+  }
+}

@@ -9,16 +9,18 @@ import { UserRegistration } from '../../../../../shared/types/user.model';
 import { AuthState } from '../../../../auth/services/state/auth/auth-state';
 import { NgIcon } from '@ng-icons/core';
 import { ActivatedRoute, Router, RouterOutlet } from '@angular/router';
+import { Loader } from "../../../../../shared/components/loader/loader";
+import { LocalDatePipe } from "../../../../../shared/pipes/local-date.pipe.ts-pipe";
 
 @Component({
   selector: 'app-billing',
-  imports: [DashboardTitle, Surface, UiButton, NgIcon, RouterOutlet],
+  imports: [DashboardTitle, Surface, UiButton, NgIcon, RouterOutlet, Loader, LocalDatePipe],
   templateUrl: './billing.html',
   styleUrl: './billing.css',
 })
 export class Billing {
-  private readonly clientService = inject(ClientService);
   private readonly authState = inject(AuthState);
+
   private readonly router = inject(Router);
   readonly user = this.authState.user; // signal<UserRegistration | null>
   signalTeste = signal({
@@ -28,9 +30,7 @@ export class Billing {
   signalForm = form(this.signalTeste);
 
   ngOnInit() {
-    this.clientService.getClientPlan().subscribe((response) => {
-      console.log('Client Plan Data:', response);
-    });
+    console.log('user', this.user());
   }
 
   goToChangePlan() {

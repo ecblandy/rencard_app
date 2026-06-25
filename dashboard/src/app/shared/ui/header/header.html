@@ -8,7 +8,37 @@
     <img src="/images/rencard-logo.svg" alt="logo rencard" width="145" height="36" />
 
     <div class="flex items-center justify-center sm:hidden">
-      <ng-icon name="lucideMenu" size="32"></ng-icon>
+      <button (click)="toggle()" [attr.aria-label]="isOpen() ? 'Fechar menu' : 'Abrir menu'">
+        <ng-icon [name]="isOpen() ? 'lucideX' : 'lucideMenu'" size="24" />
+      </button>
     </div>
+
+    @if (isOpen()) {
+      <div class="fixed inset-0 z-50 flex flex-col bg-white sm:hidden">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+          <img src="/images/rencard-logo.svg" alt="logo rencard" width="145" height="36" />
+          <button
+            (click)="toggle()"
+            aria-label="Fechar menu"
+            class="p-1 rounded-md text-neutral-800 hover:bg-neutral-100 transition-colors"
+          >
+            <ng-icon name="lucideX" size="22" />
+          </button>
+        </div>
+
+        <nav class="flex flex-col">
+          @for (link of links(); track link.href) {
+            <a
+              [href]="link.href"
+              (click)="toggle()"
+              class="flex items-center justify-between px-5 py-[0.875rem] text-[15px] font-medium text-neutral-900 hover:bg-neutral-100 transition-colors border-b border-neutral-100"
+            >
+              {{ link.label }}
+              <ng-icon name="lucideArrowRight" size="16" class="text-neutral-400" />
+            </a>
+          }
+        </nav>
+      </div>
+    }
   </div>
 </header>

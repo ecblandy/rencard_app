@@ -49,6 +49,9 @@ import {
   lucideVideo,
   lucideYoutube,
   lucideDownload,
+  lucideX,
+  lucideArrowRight,
+  lucideLock,
 } from '@ng-icons/lucide';
 
 import { svglTiktok } from '@ng-icons/svgl';
@@ -157,6 +160,9 @@ export const appConfig: ApplicationConfig = {
       lucideYoutube,
       lucideDownload,
       bootstrapCheckCircleFill,
+      lucideX,
+      lucideArrowRight,
+      lucideLock,
     }),
 
     provideEnvironmentNgxMask(),

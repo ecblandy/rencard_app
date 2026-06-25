@@ -14,69 +14,29 @@ interface EditorTab {
   label: string;
   component: Type<unknown>;
   icon: string;
+  requiresPro?: boolean;
 }
 
 export const EDITOR_TABS: EditorTab[] = [
-  {
-    key: 'appearence',
-    label: 'Aparência',
-    component: Appearance,
-    icon: 'lucidePalette',
-  },
-
-  {
-    key: 'personal-info',
-    label: 'Dados pessoais',
-    component: PersonalInfoTab,
-    icon: 'lucideUser',
-  },
-
-  {
-    key: 'socials',
-    label: 'Rede sociais',
-    component: Socials,
-    icon: 'lucideShare2',
-  },
-
-  {
-    key: 'buttons',
-    label: 'Botões',
-    component: Buttons,
-    icon: 'lucideMousePointerClick',
-  },
-
+  { key: 'appearence', label: 'Aparência', component: Appearance, icon: 'lucidePalette' },
+  { key: 'personal-info', label: 'Dados pessoais', component: PersonalInfoTab, icon: 'lucideUser' },
+  { key: 'socials', label: 'Rede sociais', component: Socials, icon: 'lucideShare2' },
+  { key: 'buttons', label: 'Botões', component: Buttons, icon: 'lucideMousePointerClick' },
   {
     key: 'portfolio',
     label: 'Portfólio',
     component: Portfolio,
     icon: 'lucideImages',
+    requiresPro: true,
   },
-
-  {
-    key: 'music',
-    label: 'Música',
-    component: Music,
-    icon: 'bootstrapMusicNoteBeamed',
-  },
-
-  {
-    key: 'form',
-    label: 'Formúlario',
-    component: Form,
-    icon: 'lucideFileText',
-  },
-
+  { key: 'music', label: 'Música', component: Music, icon: 'bootstrapMusicNoteBeamed' },
+  { key: 'form', label: 'Formulário', component: Form, icon: 'lucideFileText', requiresPro: true },
   {
     key: 'curriculum',
     label: 'Currículo',
     component: Curriculum,
     icon: 'lucideFileUser',
+    requiresPro: true,
   },
-
-  {
-    key: 'settings',
-    label: 'Configurações',
-    component: Settings,
-    icon: 'lucideSettings',
-  },
+  { key: 'settings', label: 'Configurações', component: Settings, icon: 'lucideSettings' },
 ];

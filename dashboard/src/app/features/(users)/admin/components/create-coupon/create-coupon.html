@@ -1,6 +1,8 @@
 <app-modal [isOpen]="isOpen()" (close)="close.emit()">
-  <div class="bg-white rounded-[.625rem] w-[47.125rem] max-h-[90vh] overflow-y-auto">
-    <div class="p-6">
+  <div
+    class="bg-white rounded-[.625rem] w-[47.125rem] max-w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto"
+  >
+    <div class="p-6 max-sm:p-4">
       <app-surface-title
         title="Criar um novo cupom"
         description="Configure um cupom promocional para influenciadores ou parceiros."
@@ -24,14 +26,12 @@
                 </option>
               }
             </select>
-
             <span
               class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
             >
               <ng-icon name="lucideChevronDown" size="18"></ng-icon>
             </span>
           </div>
-
           @if (couponForm.affiliate().touched() && couponForm.affiliate().invalid()) {
             <ul class="mt-1">
               @for (error of couponForm.affiliate().errors(); track error) {
@@ -47,7 +47,6 @@
           <div>
             <app-label>Código do cupom</app-label>
             <app-input placeholder="Ex: CUPONCODE10" [formField]="couponForm.code"></app-input>
-
             @if (couponForm.code().touched() && couponForm.code().invalid()) {
               <ul class="mt-1">
                 @for (error of couponForm.code().errors(); track error) {
@@ -58,8 +57,7 @@
           </div>
 
           <!-- Dates -->
-          <div class="grid grid-cols-2 gap-[.75rem]">
-            <!-- Start -->
+          <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-[.75rem]">
             <div>
               <app-label>Data de início</app-label>
               <app-input
@@ -67,7 +65,6 @@
                 placeholder="00/00/0000"
                 [formField]="couponForm.starts_at"
               ></app-input>
-
               @if (couponForm.starts_at().touched() && couponForm.starts_at().invalid()) {
                 <ul class="mt-1">
                   @for (error of couponForm.starts_at().errors(); track error) {
@@ -76,8 +73,6 @@
                 </ul>
               }
             </div>
-
-            <!-- End -->
             <div>
               <app-label>Data de término</app-label>
               <app-input
@@ -85,7 +80,6 @@
                 placeholder="00/00/0000"
                 [formField]="couponForm.ends_at"
               ></app-input>
-
               @if (couponForm.ends_at().touched() && couponForm.ends_at().invalid()) {
                 <ul class="mt-1">
                   @for (error of couponForm.ends_at().errors(); track error) {
@@ -98,7 +92,6 @@
 
           <!-- Discount -->
           <div class="flex flex-col gap-[1.25rem] w-full">
-            <!-- Type -->
             <div>
               <app-label>Tipo de desconto</app-label>
               <div class="relative">
@@ -110,14 +103,12 @@
                   <option value="percent">Percentual (%)</option>
                   <option value="amount">Valor fixo (R$)</option>
                 </select>
-
                 <span
                   class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
                 >
                   <ng-icon name="lucideChevronDown" size="18"></ng-icon>
                 </span>
               </div>
-
               @if (couponForm.discount_type().touched() && couponForm.discount_type().invalid()) {
                 <ul class="mt-1">
                   @for (error of couponForm.discount_type().errors(); track error) {
@@ -127,7 +118,6 @@
               }
             </div>
 
-            <!-- Value -->
             <div>
               <app-label>Valor do desconto</app-label>
               <app-input
@@ -141,7 +131,6 @@
                 [allowNegativeNumbers]="false"
                 [disabled]="!couponForm.discount_type().value()"
               ></app-input>
-
               @if (couponForm.discount_value().touched() && couponForm.discount_value().invalid()) {
                 <ul class="mt-1">
                   @for (error of couponForm.discount_value().errors(); track error) {
@@ -149,15 +138,15 @@
                   }
                 </ul>
               }
-
               <span
                 class="inline-block mt-[.5rem] font-manrope text-sm font-semibold text-neutral-medium"
-                >O desconto será aplicado em cada compra com este cupom.</span
               >
+                O desconto será aplicado em cada compra com este cupom.
+              </span>
             </div>
           </div>
 
-          <!-- Type product -->
+          <!-- Applicable to -->
           <div>
             <app-label>Aplicável a</app-label>
             <div class="relative">
@@ -170,14 +159,12 @@
                 <option value="physical">Cartão físico</option>
                 <option value="both">Ambos</option>
               </select>
-
               <span
                 class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
               >
                 <ng-icon name="lucideChevronDown" size="18"></ng-icon>
               </span>
             </div>
-
             @if (couponForm.applicable_to().touched() && couponForm.applicable_to().invalid()) {
               <ul class="mt-1">
                 @for (error of couponForm.applicable_to().errors(); track error) {
@@ -190,7 +177,6 @@
 
         <!-- Commission -->
         <div class="flex flex-col gap-[1.25rem] w-full">
-          <!-- Type -->
           <div>
             <app-label>Tipo de comissão</app-label>
             <div class="relative">
@@ -202,14 +188,12 @@
                 <option value="percent">Percentual (%)</option>
                 <option value="amount">Valor fixo (R$)</option>
               </select>
-
               <span
                 class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
               >
                 <ng-icon name="lucideChevronDown" size="18"></ng-icon>
               </span>
             </div>
-
             @if (couponForm.comission_type().touched() && couponForm.comission_type().invalid()) {
               <ul class="mt-1">
                 @for (error of couponForm.comission_type().errors(); track error) {
@@ -219,7 +203,6 @@
             }
           </div>
 
-          <!-- Value -->
           <div>
             <app-label>Valor da comissão</app-label>
             <app-input
@@ -233,7 +216,6 @@
               [allowNegativeNumbers]="false"
               [disabled]="!couponForm.comission_type().value()"
             ></app-input>
-
             @if (
               couponForm.commission_value().touched() && couponForm.commission_value().invalid()
             ) {
@@ -243,19 +225,19 @@
                 }
               </ul>
             }
-
             <span
               class="inline-block mt-[.5rem] font-manrope text-sm font-semibold text-neutral-medium"
-              >A comissão será calculada sobre cada venda realizada com este cupom.</span
             >
+              A comissão será calculada sobre cada venda realizada com este cupom.
+            </span>
           </div>
         </div>
 
         <!-- Buttons -->
-        <div class="flex items-center gap-[1rem]">
-          <app-button type="button" variant="outline" class="flex-1 w-full" (click)="close.emit()"
-            >Voltar</app-button
-          >
+        <div class="flex items-center gap-[1rem] max-sm:flex-col">
+          <app-button type="button" variant="outline" class="flex-1 w-full" (click)="close.emit()">
+            Voltar
+          </app-button>
           <app-button class="flex-1 w-full" type="submit">Finalizar</app-button>
         </div>
       </form>

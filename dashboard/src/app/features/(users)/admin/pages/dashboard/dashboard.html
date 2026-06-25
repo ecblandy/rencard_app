@@ -9,7 +9,7 @@
     <app-period-filter [(period)]="period"></app-period-filter>
 
     <!-- Metrics -->
-    <div class="grid grid-cols-2 gap-[1.3125rem]">
+    <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-[1.3125rem]">
       @for (metric of metricsSignal(); track metric) {
         <app-surface classes="flex bg-white flex-col gap-[.5rem] border border-neutral-soft">
           <div
@@ -45,20 +45,23 @@
 
     <!-- Coupons & Influencers -->
     <app-surface classes="bg-white flex flex-col gap-[2.0625rem] border border-neutral-soft">
-      <div class="flex justify-between items-center">
+      <div class="flex max-sm:flex-col justify-between items-center">
         <app-surface-title
           title="Cupons & Influenciadores"
           description="Gerencie cupons promocionais e parcerias"
         ></app-surface-title>
 
-        <app-button class="flex items-center gap-x-2" [routerLink]="['/admin/coupons']">
+        <app-button
+          class="flex items-center gap-x-2 max-sm:hidden"
+          [routerLink]="['/admin/coupons']"
+        >
           <ng-icon name="lucidePlus"></ng-icon>
           Criar cupom
         </app-button>
       </div>
 
       <!-- Metric Cards -->
-      <div class="grid grid-cols-2 gap-[1.3125rem]">
+      <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-[1.3125rem]">
         @for (metric of couponsMetric(); track metric) {
           <app-surface classes="flex flex-col gap-[.5rem] border border-neutral-soft">
             <div

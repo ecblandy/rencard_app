@@ -5,6 +5,7 @@ import { NgIcon } from '@ng-icons/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { UiButton } from '../../../../../../shared/ui/button/button';
 import { toast } from 'ngx-sonner';
+import { AppearanceStore } from '../tabs/appearance/appearence-store';
 
 @Component({
   selector: 'app-preview',
@@ -14,6 +15,7 @@ import { toast } from 'ngx-sonner';
 })
 export class Preview {
   private readonly store = inject(ProfileStore);
+  readonly appearance = inject(AppearanceStore);
 
   readonly profile = this.store.profile;
   private readonly sanitizer = inject(DomSanitizer);
@@ -28,7 +30,6 @@ export class Preview {
       if (!value) return;
 
       const clean = value.replace(/\/intl-[a-z]{2}\//, '/').split('?')[0];
-
       const embedUrl = clean.replace('open.spotify.com/', 'open.spotify.com/embed/');
       this.spotifyEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl));
     });
@@ -52,9 +53,7 @@ export class Preview {
 
   downloadResume() {
     const file = this.profile().resume?.file;
-    if (file) {
-      window.open(file, '_blank');
-    }
+    if (file) window.open(file, '_blank');
   }
 
   handleButton(button: { type: string; value: string }) {
@@ -66,9 +65,7 @@ export class Preview {
 
     if (button.type === 'pix') {
       navigator.clipboard.writeText(button.value).then(() => {
-        toast.success('Chave Pix copiada!', {
-          description: button.value,
-        });
+        toast.success('Chave Pix copiada!', { description: button.value });
       });
       return;
     }

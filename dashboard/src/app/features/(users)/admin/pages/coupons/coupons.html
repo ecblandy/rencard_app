@@ -5,20 +5,22 @@
     </div>
   } @else {
     <!-- Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between gap-4 flex-wrap mb-4">
       <app-dashboard-title
         title="Cupons"
-        description="Gerencie cupons promocionais "
+        description="Gerencie cupons promocionais"
       ></app-dashboard-title>
 
-      <app-button (click)="open()" class="flex items-center gap-[.5rem]">
-        <ng-icon name="lucidePlus" size="20"></ng-icon>
-        <p>Criar cupon</p></app-button
+      <app-button
+        (click)="open()"
+        class="flex items-center gap-[.5rem] max-sm:w-full justify-center"
       >
+        <ng-icon name="lucidePlus" size="20"></ng-icon>
+        <p>Criar cupom</p>
+      </app-button>
     </div>
 
     <!-- Filters -->
-
     <div class="mb-[2.5625rem]">
       <app-input
         placeholder="Buscar por código ou influenciador..."
@@ -28,23 +30,23 @@
     </div>
 
     @if (isLoadingCupons()) {
-      <!-- Loading -->
       <div class="flex items-center justify-center mt-[6.25rem]">
         <app-loader></app-loader>
       </div>
     } @else {
       @if (coupons().results.length > 0) {
         <!-- Coupon List -->
-        <div class="flex flex-wrap gap-x-[.5rem] gap-y-[3rem] w-full">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] gap-x-2 gap-y-12 w-full">
           @for (coupon of coupons().results; track coupon) {
-            <app-surface classes="w-[21.75rem] bg-white">
+            <app-surface classes="bg-white">
               <!-- Header -->
               <div class="flex items-center justify-between mb-[1.5rem]">
                 <span class="font-urbanist font-bold text-[1.25rem]">{{ coupon.code }}</span>
                 <span
-                  class="bg-black text-white rounded-[.625rem] px-[1rem] py-[.5rem] capitalize font-manrope"
-                  >{{ coupon.status_label }}</span
+                  class="bg-black text-white rounded-[.625rem] px-[1rem] py-[.5rem] capitalize font-manrope text-sm"
                 >
+                  {{ coupon.status_label }}
+                </span>
               </div>
 
               <!-- Body -->
@@ -69,15 +71,15 @@
                   </div>
                 </div>
 
-                <app-button variant="outline" class="w-full" (click)="viewCouponDetails(coupon.id)"
-                  >Ver detalhes</app-button
-                >
+                <app-button variant="outline" class="w-full" (click)="viewCouponDetails(coupon.id)">
+                  Ver detalhes
+                </app-button>
               </div>
             </app-surface>
           }
         </div>
 
-        <!-- Pagination - only show when there are results -->
+        <!-- Pagination -->
         <app-pagination
           [config]="paginationConfig()"
           [pageSizeOptions]="pageSizeOptions"

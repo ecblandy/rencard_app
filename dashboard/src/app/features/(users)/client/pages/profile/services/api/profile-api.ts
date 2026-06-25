@@ -7,6 +7,7 @@ import {
   ProfileModel,
   Resume,
 } from '../../../../../../../shared/types/profile-model';
+import { AppearanceSettings } from '../../tabs/appearance/appearence-store';
 
 @Injectable({
   providedIn: 'root',
@@ -32,6 +33,10 @@ export class ProfileApi {
 
   updateButtons(payload: { type: string; value: string; enabled: boolean }[]) {
     return this.http.post(`${this.baseUrl}/profiles/me/buttons/`, payload);
+  }
+
+  updateAppearance(payload: AppearanceSettings) {
+    return this.http.patch<ProfileModel>(`${this.baseUrl}/profiles/me/`, payload);
   }
 
   updatePortfolioImages(payload: FormData) {

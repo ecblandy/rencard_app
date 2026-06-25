@@ -8,5 +8,6 @@ import { Component, input } from '@angular/core';
   styleUrl: './surface.css',
 })
 export class Surface {
-  classes = input<string | string[]>();
+  classes = input<string>('');
+  bgColor = input<string>('');
 }

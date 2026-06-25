@@ -1,4 +1,4 @@
-import { effect, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import {
   Button,
   PortfolioImage,
@@ -6,6 +6,7 @@ import {
   ProfileModel,
   SocialLink,
 } from '../../../../../../../shared/types/profile-model';
+import { AppearanceStore } from '../../tabs/appearance/appearence-store';
 
 const EMPTY_PROFILE: ProfileModel = {
   id: 0,
@@ -42,14 +43,17 @@ const EMPTY_PROFILE: ProfileModel = {
 export class ProfileStore {
   readonly profile = signal<ProfileModel>(EMPTY_PROFILE);
 
+  private readonly appearanceStore = inject(AppearanceStore);
+
   setProfileFromAPI(data: ProfileModel) {
-    console.log('Setting profile from API data:', data);
     this.profile.set(data);
+    this.appearanceStore.setFromProfile(data);
   }
 
   updateProfile(data: Partial<ProfileModel>) {
     this.profile.update((state) => ({ ...state, ...data }));
   }
+
   updateSocial(id: number, data: Partial<SocialLink>) {
     this.profile.update((state) => ({
       ...state,

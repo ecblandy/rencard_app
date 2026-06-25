@@ -13,6 +13,7 @@ import {
 import { Router } from '@angular/router';
 import { Affiliate } from '../../types/affiliate-model';
 import { Loader } from '../../../../../shared/components/loader/loader';
+import { CreatePartner } from "../../components/create-partner/create-partner";
 
 interface FilterAffiliate {
   q: string;
@@ -20,7 +21,7 @@ interface FilterAffiliate {
 
 @Component({
   selector: 'app-partners',
-  imports: [DashboardTitle, UiButton, NgIcon, UiInput, Surface, FormField, Pagination, Loader],
+  imports: [DashboardTitle, UiButton, NgIcon, UiInput, Surface, FormField, Pagination, Loader, CreatePartner],
   templateUrl: './partners.html',
   styleUrl: './partners.css',
 })
@@ -127,5 +128,15 @@ export class Partners {
 
   viewPhysicalDetails(physicalId: number | string) {
     this.router.navigate(['/admin/partners', physicalId]);
+  }
+
+  modalOpen = signal(false);
+
+  open() {
+    this.modalOpen.set(true);
+  }
+
+  close() {
+    this.modalOpen.set(false);
   }
 }

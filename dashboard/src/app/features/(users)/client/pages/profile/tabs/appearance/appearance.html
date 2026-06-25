@@ -1,0 +1,37 @@
+<app-surface>
+  <app-surface-title title="Aparência" description="Personalize o visual do seu cartão digital" />
+
+  <div class="flex flex-col gap-3 mt-6 font-manrope">
+    @for (field of colorFields; track field.key) {
+      <div class="bg-[#F7F7F7] rounded-xl px-5 py-4 flex items-center justify-between gap-4">
+        <div>
+          <p class="font-semibold text-sm text-black">{{ field.label }}</p>
+          <p class="text-xs text-neutral-400 mt-0.5">{{ field.description }}</p>
+        </div>
+
+        <label class="relative cursor-pointer shrink-0 flex flex-col items-center">
+          <div
+            class="w-9 h-9 rounded-lg border border-neutral-200 shadow-sm transition-transform hover:scale-105"
+            [style.background-color]="store.settings()[field.key]"
+          ></div>
+          <span class="text-[0.6rem] text-neutral-400 mt-1 font-mono">
+            {{ store.settings()[field.key] }}
+          </span>
+          <input
+            type="color"
+            class="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
+            [value]="store.settings()[field.key]"
+            (input)="updateColor(field.key, $any($event.target).value)"
+          />
+        </label>
+      </div>
+    }
+
+    <button
+      (click)="save()"
+      class="mt-3 w-full bg-black text-white font-semibold text-sm py-3 rounded-xl hover:bg-neutral-800 transition-colors font-manrope"
+    >
+      Salvar alterações
+    </button>
+  </div>
+</app-surface>

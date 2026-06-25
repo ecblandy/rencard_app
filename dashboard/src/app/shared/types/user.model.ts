@@ -4,6 +4,13 @@ export interface Plan {
   id: number;
   name: string;
   type: string;
+  description?: string;
+  features?: string[];
+}
+
+export interface Permissions {
+  can_manage_profile: boolean;
+  can_use_pro_features: boolean;
 }
 
 export interface ActiveGrant {
@@ -12,6 +19,8 @@ export interface ActiveGrant {
   source: string;
   start_at: string;
   end_at: string;
+  permissions: Permissions;
+  plan_type: string;
 }
 
 export interface PhysicalCard {

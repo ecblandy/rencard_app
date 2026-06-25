@@ -11,6 +11,9 @@ interface PlanStyle {
   card: string;
   button: string;
   icon: string;
+  priceBadge: string;
+  priceLabel: string;
+  divider: string;
 }
 
 interface PlanDetail {
@@ -20,6 +23,7 @@ interface PlanDetail {
   description: string;
   features: string[];
   buttonTitle: string;
+  price: string;
 }
 
 const plansDetails: PlanDetail[] = [
@@ -36,6 +40,7 @@ const plansDetails: PlanDetail[] = [
       "Música - Sua vibe, em um toque.",
     ],
     buttonTitle: "Escolher Da Galera",
+    price: "19,90",
   },
   {
     id: 1,
@@ -57,6 +62,7 @@ const plansDetails: PlanDetail[] = [
       "Música - Conecte e converta",
     ],
     buttonTitle: "Escolher Pro",
+    price: "39,90",
   },
 ];
 
@@ -65,11 +71,17 @@ const plansStyle: Record<PlanType, PlanStyle> = {
     card: "bg-[#FBFBFB] text-neutral-strong",
     button: "bg-black text-white hover:bg-[#333333]",
     icon: "text-black",
+    priceBadge: "bg-black text-white",
+    priceLabel: "text-neutral-500",
+    divider: "border-neutral-200",
   },
   pro: {
     card: "bg-black text-white",
     button: "bg-white text-black hover:bg-[#E5E5E5]",
     icon: "text-white",
+    priceBadge: "bg-white text-black",
+    priceLabel: "text-neutral-400",
+    divider: "border-neutral-700",
   },
 };
 
@@ -85,7 +97,10 @@ export default function Plans() {
       />
       <div className="flex justify-center flex-wrap w-full gap-[6rem] items-start">
         {plansDetails.map(
-          ({ id, title, description, features, type, buttonTitle }, index) => {
+          (
+            { id, title, description, features, type, buttonTitle, price },
+            index,
+          ) => {
             const style = plansStyle[type];
             return (
               <motion.div
@@ -100,10 +115,36 @@ export default function Plans() {
                 }}
                 className={`font-urbanist max-w-[28.75rem] w-full h-auto p-6 rounded-[.625rem] ${style.card}`}
               >
-                <div className="max-w-[21.25rem] w-full mb-[2.375rem]">
-                  <h3 className="font-bold text-[2rem]">{title}</h3>
-                  <p className="font-semibold text-[1.25rem]">{description}</p>
+                {/* Cabeçalho com título e preço lado a lado */}
+                <div className="flex items-start justify-between gap-4 mb-[2.375rem]">
+                  <div className="max-w-[21.25rem] w-full">
+                    <h3 className="font-bold text-[2rem]">{title}</h3>
+                    <p className="font-semibold text-[1.25rem]">
+                      {description}
+                    </p>
+                  </div>
+
+                  {/* Badge de preço */}
+                  <div
+                    className={`flex flex-col items-center justify-center rounded-xl px-4 py-3 min-w-[7rem] text-center shrink-0 ${style.priceBadge}`}
+                  >
+                    <span
+                      className={`text-[0.65rem] font-semibold uppercase tracking-widest mb-0.5 ${style.priceLabel}`}
+                    >
+                      por mês
+                    </span>
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="text-[0.85rem] font-bold leading-none">
+                        R$
+                      </span>
+                      <span className="text-[1.6rem] font-extrabold leading-none">
+                        {price}
+                      </span>
+                    </div>
+                  </div>
                 </div>
+
+                <hr className={`border-t mb-[2rem] ${style.divider}`} />
 
                 <ul className="space-y-[2rem]">
                   {features.map((feature, idx) => (
