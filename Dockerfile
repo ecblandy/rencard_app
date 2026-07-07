@@ -1,7 +1,5 @@
-# syntax=docker/dockerfile:1
-
 # =========================
-# NEXT.JS BUILD
+# NEXT BUILD
 # =========================
 FROM node:20-alpine AS next-build
 
@@ -13,6 +11,24 @@ COPY rencard/public ./public
 COPY rencard/src ./src
 
 RUN npm ci && npm run build
+
+
+# =========================
+# NEXT RUNTIME
+# =========================
+FROM node:20-alpine AS next-runtime
+
+WORKDIR /app
+
+COPY --from=next-build /workspace/package.json ./
+COPY --from=next-build /workspace/node_modules ./node_modules
+COPY --from=next-build /workspace/.next ./.next
+COPY --from=next-build /workspace/public ./public
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
+
 
 # =========================
 # ANGULAR BUILD
@@ -29,17 +45,14 @@ COPY dashboard .
 
 RUN npm run build
 
+
 # =========================
-# FINAL NGINX
+# NGINX
 # =========================
-FROM nginx:stable-alpine AS final
+FROM nginx:stable-alpine AS nginx
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Landing page Next
-COPY --from=next-build /workspace/out /usr/share/nginx/html
-
-# Dashboard Angular
 COPY --from=angular-build /dashboard/dist/rencard_dashboard_and_auth/browser /usr/share/nginx/html/app
 
 EXPOSE 80

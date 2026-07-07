@@ -1,9 +1,18 @@
 services:
+  rencard-next:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: next-runtime
+    restart: unless-stopped
+
   rencard-frontend:
     build:
       context: .
       dockerfile: Dockerfile
-    image: rencard-frontend:latest
+      target: nginx
     ports:
       - "3000:80"
+    depends_on:
+      - rencard-next
     restart: unless-stopped

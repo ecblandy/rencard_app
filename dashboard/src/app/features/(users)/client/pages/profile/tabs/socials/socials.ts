@@ -5,7 +5,7 @@ import { SOCIALS_CARD, SocialsFormModel, SocialsModel } from './socials.config';
 import { NgIcon } from '@ng-icons/core';
 import { SwitchButton } from '../../../../../../../shared/components/switch-button/switch-button';
 import { UiInput } from '../../../../../../../shared/ui/input/input';
-import { form, pattern, required, submit } from '@angular/forms/signals';
+import { form } from '@angular/forms/signals';
 import { UiButton } from '../../../../../../../shared/ui/button/button';
 import { ProfileStore } from '../../services/store/profile.store';
 import { ClientService } from '../../../../services/facade/client.service';
@@ -37,7 +37,51 @@ export class Socials {
 
   socialsForm = form(this.socialsModel, (schema) => {});
 
+  private initialized = false;
+
   constructor() {
+    // 1. Hidrata UMA VEZ quando o profile chega do backend
+    effect(() => {
+      const profile = this.profileStore.profile();
+      if (this.initialized || !profile?.social_links?.length) return;
+
+      this.initialized = true;
+
+      const keyMap: Record<string, keyof SocialsFormModel> = {
+        linkedin: 'linkedIn',
+      };
+
+      const model: SocialsFormModel = {
+        instagram: '',
+        tiktok: '',
+        linkedIn: '',
+        facebook: '',
+        youtube: '',
+        telegram: '',
+        email: '',
+        x: '',
+        website: '',
+        spotify: '',
+      };
+
+      profile.social_links.forEach((link) => {
+        const key = keyMap[link.type] ?? (link.type as keyof SocialsFormModel);
+        if (key in model) model[key] = link.value;
+      });
+
+      this.socialsModel.set(model);
+
+      this.socials.update((list) =>
+        list.map((social) => {
+          const fromBackend = profile.social_links.find(
+            (l) => (keyMap[l.type] ?? l.type) === social.key,
+          );
+          return fromBackend ? { ...social, enabled: fromBackend.enabled } : social;
+        }),
+      );
+    });
+
+    // 2. Sincroniza formulário → store para preview (sem ler profile, sem loop)
     effect(() => {
       const socialsArray = this.socials();
 
@@ -59,7 +103,6 @@ export class Socials {
       this.profileStore.updateProfile({ social_links: socials_list });
     });
   }
-
   // 1) Atualiza `socials` imutavelmente quando trocar o switch
   toggleEnabled(index: number, value: boolean) {
     this.socials.update((list) =>

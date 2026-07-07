@@ -7,7 +7,7 @@ import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-change-password-modal',
-  imports: [UiInput, UiLabel, UiButton, Modal, NgIcon],
+  imports: [UiInput, UiLabel, UiButton, Modal],
   templateUrl: './change-password-modal.html',
   styleUrl: './change-password-modal.css',
 })

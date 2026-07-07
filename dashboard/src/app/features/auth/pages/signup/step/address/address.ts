@@ -25,7 +25,7 @@ interface SignupAddressForm {
 
 @Component({
   selector: 'app-address',
-  imports: [AuthForm, UiLabel, UiInput, UiButton, NgxMaskDirective, FormField],
+  imports: [AuthForm, UiLabel, UiInput, UiButton, FormField],
   templateUrl: './address.html',
   styleUrl: './address.css',
 })
