@@ -14,23 +14,6 @@ RUN npm ci && npm run build
 
 
 # =========================
-# NEXT RUNTIME
-# =========================
-FROM node:20-alpine AS next-runtime
-
-WORKDIR /app
-
-COPY --from=next-build /workspace/package.json ./
-COPY --from=next-build /workspace/node_modules ./node_modules
-COPY --from=next-build /workspace/.next ./.next
-COPY --from=next-build /workspace/public ./public
-
-EXPOSE 3000
-
-CMD ["npm", "start"]
-
-
-# =========================
 # ANGULAR BUILD
 # =========================
 FROM node:20-alpine AS angular-build
@@ -47,14 +30,45 @@ RUN npm run build
 
 
 # =========================
-# NGINX
+# FINAL
 # =========================
-FROM nginx:stable-alpine AS nginx
+FROM node:20-alpine AS final
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
+
+# Instala nginx e supervisor
+RUN apk add --no-cache nginx supervisor
+
+
+# -------------------------
+# Next
+# -------------------------
+COPY --from=next-build /workspace/package.json ./
+COPY --from=next-build /workspace/node_modules ./node_modules
+COPY --from=next-build /workspace/.next ./.next
+COPY --from=next-build /workspace/public ./public
+
+
+# -------------------------
+# Angular
+# -------------------------
 COPY --from=angular-build /dashboard/dist/rencard_dashboard_and_auth/browser /usr/share/nginx/html/app
+
+
+# -------------------------
+# Nginx
+# -------------------------
+COPY nginx.conf /etc/nginx/http.d/default.conf
+
+
+# -------------------------
+# Supervisor
+# -------------------------
+COPY supervisord.conf /etc/supervisord.conf
+
 
 EXPOSE 80
 
-CMD ["nginx", "-g", "daemon off;"]
+
+CMD ["supervisord", "-c", "/etc/supervisord.conf"]
