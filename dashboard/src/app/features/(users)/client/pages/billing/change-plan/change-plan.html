@@ -1,1 +1,80 @@
-<p>change-plan works!</p>
+<div class="mx-auto px-[1.25rem] mb-[3.75rem] max-w-[79.875rem] w-full h-full">
+  <app-onboarding-title
+    title="Trocar plano de assinatura"
+    description="Selecione o novo plano ideal para a sua conta e aproveite os recursos disponíveis."
+  ></app-onboarding-title>
+
+  @if (isInitialLoading()) {
+    <!-- Loading -->
+    <div class="flex flex-col items-center justify-center mt-[6.25rem]">
+      <app-loader></app-loader>
+      <p class="mt-4 text-gray-600">Carregando seus planos, aguarde...</p>
+    </div>
+  } @else {
+    <div class="flex gap-[1.5rem]">
+      <!-- Plans -->
+      <ul class="flex gap-[1.5rem] items-start">
+        @for (plan of plans(); track plan) {
+          <li
+            class="p-6 border max-w-[28.125rem] w-full rounded-[1.25rem] h-auto transition-all relative"
+            [class.pro]="plan.type === 'pro'"
+            [class.border-neutral-medium]="plan.type !== 'pro'"
+            [class.ring-2]="currentPlan()?.id === plan.id"
+            [class.ring-purple-500]="currentPlan()?.id === plan.id"
+          >
+            <!-- Badge de plano atual -->
+            @if (currentPlan()?.id === plan.id) {
+              <span
+                class="absolute top-4 right-4 text-xs font-bold font-manrope px-3 py-1 rounded-full bg-purple-100 text-purple-700"
+              >
+                Plano atual
+              </span>
+            }
+
+            <!-- Titles -->
+            <div class="space-y-[1rem] font-urbanist mb-[2.375rem]">
+              <h2 class="text-[2.5rem] font-bold text-[2rem]">{{ plan.name }}</h2>
+              <p
+                class="font-semibold text-[1.25rem]"
+                [class.text-neutral-medium]="plan.type !== 'pro'"
+              >
+                {{ plan.description }}
+              </p>
+            </div>
+
+            <!-- Features -->
+            <ul class="space-y-[2rem]">
+              @for (feature of plan.features; track feature) {
+                <li class="flex items-center gap-[.75rem]">
+                  <ng-icon
+                    name="lucideCheck"
+                    size="22"
+                    [class.text-neutral-strong]="plan.type !== 'pro'"
+                  ></ng-icon>
+                  <p
+                    class="font-semibold font-manrope"
+                    [class.text-neutral-strong]="plan.type !== 'pro'"
+                  >
+                    {{ feature }}
+                  </p>
+                </li>
+              }
+            </ul>
+
+            <app-button
+              variant="custom"
+              sizeH="xl"
+              class="w-full py-[.5625rem] rounded-[.625rem] mt-[2.375rem]"
+              [class.proButton]="plan.type === 'pro'"
+              [class.galeraButton]="plan.type !== 'pro'"
+              [disabled]="currentPlan()?.id === plan.id"
+              (click)="choosePlan(plan)"
+            >
+              {{ currentPlan()?.id === plan.id ? 'Plano atual' : 'Trocar para ' + plan.name }}
+            </app-button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>

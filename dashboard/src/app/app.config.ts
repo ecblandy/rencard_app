@@ -62,6 +62,7 @@ import {
   bootstrapCurrencyDollar,
   bootstrapFileEarmarkWordFill,
   bootstrapGraphUp,
+  bootstrapHeadset,
   bootstrapLink,
   bootstrapLinkedin,
   bootstrapLockFill,
@@ -163,6 +164,7 @@ export const appConfig: ApplicationConfig = {
       lucideX,
       lucideArrowRight,
       lucideLock,
+      bootstrapHeadset,
     }),
 
     provideEnvironmentNgxMask(),

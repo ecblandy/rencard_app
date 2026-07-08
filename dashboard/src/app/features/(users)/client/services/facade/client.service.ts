@@ -58,4 +58,12 @@ export class ClientService {
       }),
     );
   }
+
+  downloadQrCodeImage() {
+    return this.api.downloadQrCodeImage().pipe(
+      tap((response) => {
+        console.log('Download QR Code Image Response:', response);
+      }),
+    );
+  }
 }

@@ -10,17 +10,26 @@ export const clientRoutes: Routes = [
   },
   {
     path: 'billing',
-    loadComponent: () => import('../pages/billing/billing').then((m) => m.Billing),
-    title: 'Assinatura – Rencard',
     children: [
+      {
+        path: '',
+        redirectTo: 'preview',
+        pathMatch: 'full',
+      },
+      {
+        path: 'preview',
+        loadComponent: () => import('../pages/billing/preview/preview').then((m) => m.Preview),
+        title: 'Prévia da Assinatura – Rencard',
+      },
       {
         path: 'change-plan',
         loadComponent: () =>
           import('../pages/billing/change-plan/change-plan').then((m) => m.ChangePlan),
-        title: 'Alterar Plano – Rencard',
+        title: 'Escolher Plano – Rencard',
       },
     ],
   },
+
   {
     path: 'profile',
     canActivate: [],
@@ -38,6 +47,13 @@ export const clientRoutes: Routes = [
     canActivate: [],
     loadComponent: () => import('../pages/settings/settings').then((m) => m.Settings),
     title: 'Configurações – Rencard',
+  },
+
+  {
+    path: 'support',
+    canActivate: [],
+    loadComponent: () => import('../pages/support/support').then((m) => m.Support),
+    title: 'Suporte – Rencard',
   },
   { path: '**', redirectTo: 'dashboard' },
 ];

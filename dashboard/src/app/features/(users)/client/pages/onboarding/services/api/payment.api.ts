@@ -53,4 +53,8 @@ export class PaymentApi {
       ordersData,
     );
   }
+
+  renewPlan() {
+    return this.http.post(`${this.baseUrl}/payments/subscriptions/renew/`, {});
+  }
 }

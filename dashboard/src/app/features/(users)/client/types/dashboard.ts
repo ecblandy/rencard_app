@@ -34,7 +34,11 @@ export interface DashboardProfile {
   custom_url: string;
   public_url: string;
   tracked_url: string;
-  profile_image: string;
+  profile_image: string | null;
+  qr_code: {
+    download_url: string;
+    image_url: string;
+  };
 }
 
 export interface DashboardQuickAccess {

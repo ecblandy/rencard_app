@@ -38,4 +38,8 @@ export class PaymentService {
       .previewOrder(orderData)
       .pipe(tap((response) => console.log('Order preview response:', response)));
   }
+
+  renewPlan() {
+    return this.api.renewPlan().pipe(tap(() => console.log('Plan renewed')));
+  }
 }

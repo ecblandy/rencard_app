@@ -45,4 +45,8 @@ export class ClientApi {
 
     return this.http.patch<ProfileModel>(`${this.baseUrl}/profiles/me/`, formData);
   }
+
+  downloadQrCodeImage() {
+    return this.http.get(`${this.baseUrl}/users/client/dashboard/qr-code/`);
+  }
 }

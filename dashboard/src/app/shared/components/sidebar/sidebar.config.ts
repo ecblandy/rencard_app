@@ -25,9 +25,10 @@ export const SIDEBAR_LINKS: Record<UserRole, SidebarLink[]> = {
   ],
   client: [
     { label: 'Dashboard', path: '/client/dashboard', icon: 'lucideLayoutDashboard' },
-    { label: 'Assinatura', path: '/client/billing', icon: 'lucideCrown' },
+    { label: 'Assinatura', path: '/client/billing/preview', icon: 'lucideCrown' },
     { label: 'Perfil', path: '/client/profile', icon: 'lucideUser' },
     { label: 'Códigos & Apps', path: '/client/apps', icon: 'lucideQrCode' },
     { label: 'Configurações', path: '/client/settings', icon: 'lucideSettings' },
+    { label: 'Suporte', path: '/client/support', icon: 'bootstrapHeadset' },
   ],
 };

@@ -1,0 +1,24 @@
+.pro {
+  background-color: black;
+  color: white;
+}
+
+.proButton {
+  background-color: white;
+  color: black;
+}
+
+.proButton:hover {
+  background-color: rgba(255, 255, 255, 0.87);
+  color: rgb(0, 17, 255);
+}
+
+.galeraButton {
+  background-color: black;
+  color: white;
+}
+
+.galeraButton:hover {
+  background-color: rgba(0, 0, 0, 0.932);
+  color: greenyellow;
+}
