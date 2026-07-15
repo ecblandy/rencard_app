@@ -55,7 +55,13 @@
       <!-- Accept terms -->
       <app-surface classes="my-[2.5rem] max-w-[58.375rem] w-full">
         <label for="terms" class="flex items-center gap-x-[1rem] font-manrope font-semibold">
-          <input type="checkbox" id="terms" class="h-[1.25rem] w-[1.25rem] rounded-[.625rem]" />
+          <input
+            type="checkbox"
+            id="terms"
+            class="h-[1.25rem] w-[1.25rem] rounded-[.625rem]"
+            [checked]="acceptedTerms()"
+            (change)="acceptedTerms.set($any($event.target).checked)"
+          />
           Li e entendi como funciona o uso do Rencard e do perfil digital.
         </label>
       </app-surface>
@@ -63,7 +69,9 @@
       <!-- Actions Buttons -->
       <div class="flex gap-x-[1rem]">
         <app-button variant="outline" class="w-full">Voltar</app-button>
-        <app-button class="w-full" (click)="onCreateOrder()">Pagar</app-button>
+        <app-button class="w-full" [disabled]="!acceptedTerms()" (click)="goToSignup()">
+          Continuar cadastro
+        </app-button>
       </div>
 
       <span class="block text-neutral-soft font-manrope text-center mt-[.5rem]"

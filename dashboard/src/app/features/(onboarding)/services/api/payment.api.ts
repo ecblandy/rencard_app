@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../../../../../environments/environments';
-import { Plan, PlansResponse } from '../../../../../../../shared/types/plan-model';
-import { ProductResponse } from '../../../../../../../shared/types/product-model';
+import { environment } from '../../../../../environments/environments';
+import { Plan, PlansResponse } from '../../../../shared/types/plan-model';
+import { ProductResponse } from '../../../../shared/types/product-model';
 import {
   CouponValidateResponse,
   Shipping,
   ShippingCalculationResponse,
   ShippingItem,
   ShippingOrder,
-} from '../../../../../../../shared/types/shipping';
-import { Order } from '../../../../../../../shared/types/order';
+  TemporaryCartResponse,
+} from '../../../../shared/types/shipping';
+import { Order } from '../../../../shared/types/order';
 
 @Injectable({
   providedIn: 'root',
@@ -33,10 +34,21 @@ export class PaymentApi {
 
   shipping(items: Shipping) {
     return this.http.post<ShippingCalculationResponse>(
-      `${this.baseUrl}/payments/orders/preview/`,
+      `${this.baseUrl}/payments/orders/shipping/`,
       items,
     );
   }
+
+  tempCart(order: ShippingOrder) {
+    return this.http.post<TemporaryCartResponse>(`${this.baseUrl}/payments/temporary-carts/`, {
+      ...order,
+    });
+  }
+
+  tempCartId(id: string) {
+    return this.http.get<TemporaryCartResponse>(`${this.baseUrl}/payments/temporary-carts/${id}/`);
+  }
+
   isValidCoupon(coupon_code: string, items: ShippingItem[]) {
     return this.http.post<CouponValidateResponse>(
       `${this.baseUrl}/payments/orders/coupon/validate/`,

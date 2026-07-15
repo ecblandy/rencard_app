@@ -8,12 +8,8 @@ import { AuthApi } from '../../features/auth/services/api/auth-api';
 // 🌍 APIs públicas externas
 const PUBLIC_EXTERNAL_DOMAINS = ['viacep.com.br'];
 
-// 🔓 Auth
-const AUTH_BASE = '/auth/';
-const AUTH_CONFIRM_EMAIL = '/auth/email/confirm';
-
-// 🔓 Outras rotas públicas
-const PUBLIC_ROUTES = ['/users/register_client/'];
+// 🔓 Endpoints públicos da API
+const PUBLIC_API_ENDPOINTS = ['/auth/email/confirm'];
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authState = inject(AuthState);
@@ -22,6 +18,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   /* -------------------------------------------------------------------------- */
   /* 🧩 Helpers                                                                  */
   /* -------------------------------------------------------------------------- */
+
   const cloneWithToken = (token: string) =>
     req.clone({
       setHeaders: {
@@ -31,16 +28,30 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       withCredentials: true,
     });
 
-  const sendWithoutToken = () => next(req.clone({ withCredentials: true }));
+  /**
+   * Requisição sem autenticação
+   * Só envia cookies se existir sessão ativa.
+   */
+  const sendWithoutToken = () => {
+    const hasSession = authState.isAuthenticated();
+
+    return next(
+      req.clone({
+        withCredentials: hasSession,
+      }),
+    );
+  };
 
   const tryRefreshAndRetry = () =>
     authApi.refreshAccessToken().pipe(
       switchMap(({ access }) => {
         authState.setAccessToken(access);
+
         return next(cloneWithToken(access));
       }),
       catchError((err) => {
         authState.clear();
+
         return throwError(() => err);
       }),
     );
@@ -48,51 +59,49 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   /* -------------------------------------------------------------------------- */
   /* 🌍 APIs públicas externas                                                    */
   /* -------------------------------------------------------------------------- */
-  if (PUBLIC_EXTERNAL_DOMAINS.some((d) => req.url.includes(d))) {
+
+  if (PUBLIC_EXTERNAL_DOMAINS.some((domain) => req.url.includes(domain))) {
     return next(req);
   }
 
-  const isAuthRoute = req.url.includes(AUTH_BASE);
-  const isConfirmEmail = req.url.includes(AUTH_CONFIRM_EMAIL);
-  const isPublicRoute = PUBLIC_ROUTES.some((r) => req.url.includes(r));
+  /* -------------------------------------------------------------------------- */
+  /* 🔓 Endpoints públicos                                                       */
+  /* -------------------------------------------------------------------------- */
 
-  /* -------------------------------------------------------------------------- */
-  /* 🔓 Públicas + /auth/* (exceto confirm-email)                                */
-  /* -------------------------------------------------------------------------- */
-  if ((isAuthRoute && !isConfirmEmail) || isPublicRoute) {
+  const isPublicApiEndpoint = PUBLIC_API_ENDPOINTS.some((endpoint) => req.url.includes(endpoint));
+
+  if (isPublicApiEndpoint) {
     return sendWithoutToken();
-  }
-
-  /* -------------------------------------------------------------------------- */
-  /* 🟡 /auth/email/confirm                                                      */
-  /* -------------------------------------------------------------------------- */
-  if (isConfirmEmail) {
-    const token = authState.accessToken();
-
-    if (token) {
-      return next(cloneWithToken(token));
-    }
-
-    // tenta refresh, se falhar segue sem token
-    return authApi.refreshAccessToken().pipe(
-      switchMap(({ access }) => {
-        authState.setAccessToken(access);
-        return next(cloneWithToken(access));
-      }),
-      catchError(() => sendWithoutToken()),
-    );
   }
 
   /* -------------------------------------------------------------------------- */
   /* 🔒 Rotas privadas                                                           */
   /* -------------------------------------------------------------------------- */
+
   const token = authState.accessToken();
   const isExpired = authState.isAccessTokenExpired();
 
-  if (!token || isExpired) {
+  /**
+   * Usuário nunca autenticou:
+   * não manda token
+   * não tenta refresh
+   */
+  if (!token) {
+    return sendWithoutToken();
+  }
+
+  /**
+   * Usuário tem sessão mas access expirou:
+   * tenta renovar
+   */
+  if (isExpired) {
     return tryRefreshAndRetry();
   }
 
+  /**
+   * Usuário autenticado normalmente:
+   * manda access token + refresh cookie
+   */
   return next(cloneWithToken(token)).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status !== 401) {

@@ -4,7 +4,7 @@
   (submitForm)="onSubmit($event)"
 >
   <!-- Code -->
-  <div class="flex flex-col gap-[.5rem]">
+  <div class="flex flex-col gap-2">
     <app-label variant="auth" for="code">Código de verificação</app-label>
     <app-input
       variant="default"
@@ -16,7 +16,6 @@
       sizeH="xl"
       [formField]="confirmEmailForm.code"
     />
-    <!-- Email error message -->
     @if (confirmEmailForm.code().touched() && confirmEmailForm.code().invalid()) {
       <ul>
         @for (error of confirmEmailForm.code().errors(); track error) {
@@ -26,5 +25,61 @@
     }
   </div>
 
+  <button
+    type="button"
+    class="text-sm text-muted-foreground underline w-fit"
+    (click)="openChangeEmailModal()"
+  >
+    Errou o e-mail? Alterar
+  </button>
+
   <app-button type="submit" class="w-full" sizeH="xl">Confirmar código</app-button>
 </app-auth-form>
+
+@if (isChangeEmailOpen()) {
+  <app-modal [isOpen]="isChangeEmailOpen()" (close)="closeChangeEmailModal()">
+    <form
+      class="mx-auto flex w-full max-w-[26rem] flex-col gap-6 rounded-[.75rem] bg-white p-6"
+      (submit)="onChangeEmailSubmit($event)"
+    >
+      <div class="flex flex-col gap-1">
+        <h2 class="text-lg font-semibold text-foreground">Alterar e-mail</h2>
+        <p class="text-sm text-muted-foreground">
+          Informe o e-mail correto. Enviaremos um novo código de confirmação para ele.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <app-label variant="auth" for="new-email">Novo e-mail</app-label>
+        <app-input
+          variant="default"
+          id="new-email"
+          type="email"
+          placeholder="Digite o novo e-mail."
+          sizeH="xl"
+          [formField]="changeEmailForm.email"
+        />
+        @if (changeEmailForm.email().touched() && changeEmailForm.email().invalid()) {
+          <ul>
+            @for (error of changeEmailForm.email().errors(); track error) {
+              <li class="text-error">{{ error.message }}</li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="flex gap-3">
+        <app-button
+          type="button"
+          variant="destructive"
+          class="w-full"
+          sizeH="xl"
+          (click)="closeChangeEmailModal()"
+        >
+          Cancelar
+        </app-button>
+        <app-button type="submit" class="w-full" sizeH="xl">Salvar</app-button>
+      </div>
+    </form>
+  </app-modal>
+}

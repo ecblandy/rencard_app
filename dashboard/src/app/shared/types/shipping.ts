@@ -51,3 +51,19 @@ export interface CouponValidateResponse {
   discounted_total_cents: number;
   coupon_discount: CouponDiscount;
 }
+
+export interface TemporaryCartResponse {
+  id: string;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+  items: TemporaryCartItem[];
+  coupon_code: string;
+  postal_code: string;
+  shipping_service_code: string;
+}
+
+export interface TemporaryCartItem {
+  product: number;
+  quantity: number;
+}

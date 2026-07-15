@@ -8,7 +8,7 @@ import { NgIcon } from '@ng-icons/core';
 import { UiButton } from '../../../../../../shared/ui/button/button';
 import { DashboardTitle } from '../../../../components/dashboard-title/dashboard-title';
 import { LocalDatePipe } from '../../../../../../shared/pipes/local-date.pipe.ts-pipe';
-import { PaymentService } from '../../onboarding/services/facade/payment.service';
+import { PaymentService } from '../../../../../(onboarding)/services/facade/payment.service';
 import { toast } from 'ngx-sonner';
 
 @Component({

@@ -1,0 +1,22 @@
+<div
+  class="mx-auto px-[1.25rem] mb-[3.75rem] max-w-[79.875rem] w-full h-full flex items-center justify-center min-h-[70vh]"
+>
+  <app-surface classes="bg-[#F5F5F5] max-w-[32rem] w-full">
+    <div class="flex flex-col items-center text-center gap-[1.5rem] py-[1rem]">
+      <div class="flex items-center justify-center w-[4rem] h-[4rem] rounded-full bg-green-100">
+        <ng-icon name="heroCheckCircle" class="text-green-500 text-[2.5rem]"></ng-icon>
+      </div>
+
+      <div class="flex flex-col gap-[.5rem]">
+        <h2 class="font-urbanist font-semibold text-[1.5rem]">Pagamento confirmado!</h2>
+        <p class="font-manrope text-neutral-medium">
+          Seu pagamento foi processado com sucesso. Agora você já pode acessar o seu painel.
+        </p>
+      </div>
+
+      <app-button variant="default" sizeH="xl" class="w-full" (click)="goToDashboard()">
+        Ir para o painel
+      </app-button>
+    </div>
+  </app-surface>
+</div>

@@ -84,7 +84,12 @@ const plansStyle: Record<PlanType, PlanStyle> = {
     divider: "border-neutral-700",
   },
 };
+function setPlanStyle(planType: string) {
+  const dashboardUrl =
+    process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "/app/onboarding/products";
 
+  window.location.href = `${dashboardUrl}/onboarding/products?plan=${planType}`;
+}
 export default function Plans() {
   return (
     <section
@@ -155,15 +160,14 @@ export default function Plans() {
                   ))}
                 </ul>
 
-                <a href="/app/auth/signup">
-                  <Button
-                    variant="custom"
-                    sizeH="sm"
-                    className={`${style.button} mt-[2.5rem] w-full`}
-                  >
-                    {buttonTitle}
-                  </Button>
-                </a>
+                <Button
+                  variant="custom"
+                  sizeH="sm"
+                  onClick={() => setPlanStyle(type)}
+                  className={`${style.button} mt-[2.5rem] w-full`}
+                >
+                  {buttonTitle}
+                </Button>
               </motion.div>
             );
           },

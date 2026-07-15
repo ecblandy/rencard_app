@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { postAuthGuard } from '../guard/post-auth-guard';
 
 export const authRoutes: Routes = [
   { path: '', redirectTo: 'signin', pathMatch: 'full' },
@@ -29,18 +28,6 @@ export const authRoutes: Routes = [
         path: 'address',
         loadComponent: () => import('../pages/signup/step/address/address').then((m) => m.Address),
         title: 'Endereço – Rencard',
-      },
-
-      {
-        path: 'plan',
-        loadComponent: () => import('../pages/signup/step/plan/plan').then((m) => m.Plan),
-        title: 'Planos – Rencard',
-      },
-
-      {
-        path: 'product',
-        loadComponent: () => import('../pages/signup/step/product/product').then((m) => m.Product),
-        title: 'Produto – Rencard',
       },
 
       {

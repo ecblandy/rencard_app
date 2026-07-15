@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { tap } from 'rxjs';
 import { PaymentApi } from '../api/payment.api';
-import { Shipping, ShippingItem, ShippingOrder } from '../../../../../../../shared/types/shipping';
+import { Shipping, ShippingItem, ShippingOrder } from '../../../../shared/types/shipping';
 
 @Injectable({
   providedIn: 'root',
@@ -31,6 +31,18 @@ export class PaymentService {
     return this.api
       .createOrder(orderData)
       .pipe(tap(() => console.log('Order created with data:', orderData)));
+  }
+
+  createTemporaryCart(order: ShippingOrder) {
+    return this.api
+      .tempCart(order)
+      .pipe(tap((response) => console.log('Temporary cart created:', response)));
+  }
+
+  getTemporaryCartById(id: string) {
+    return this.api
+      .tempCartId(id)
+      .pipe(tap((response) => console.log('Temporary cart fetched by ID:', response)));
   }
 
   previewOrder(orderData: ShippingOrder) {

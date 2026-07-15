@@ -4,7 +4,7 @@ import { Surface } from '../../../../../shared/components/surface/surface';
 import { UiButton } from '../../../../../shared/ui/button/button';
 import { AuthState } from '../../../../auth/services/state/auth/auth-state';
 import { DashboardTitle } from '../../../components/dashboard-title/dashboard-title';
-import { OnboardingTitle } from "../../components/onboarding-title/onboarding-title";
+import { OnboardingTitle } from '../../components/onboarding-title/onboarding-title';
 
 interface SupportForm {
   email: string;
@@ -32,7 +32,7 @@ const DESCRIPTION_MAX_LENGTH = 500;
 
 @Component({
   selector: 'app-support',
-  imports: [NgIcon, UiButton, DashboardTitle, Surface, OnboardingTitle],
+  imports: [NgIcon, UiButton, OnboardingTitle],
   templateUrl: './support.html',
   styleUrl: './support.css',
 })

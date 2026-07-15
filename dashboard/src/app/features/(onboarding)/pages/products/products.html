@@ -1,0 +1,432 @@
+<div class="mx-auto px-[1.25rem] mb-[3.75rem] max-w-[79.875rem] w-full h-full">
+  <app-onboarding-step [currentStep]="currentStep()"></app-onboarding-step>
+  <app-onboarding-title
+    title="Agora escolha como você quer compartilhar seu Rencard"
+    description="Você pode optar por um produto físico conectado ao seu perfil ou usar apenas a versão digital."
+  ></app-onboarding-title>
+
+  @if (isInitialLoading()) {
+    <div class="flex flex-col items-center justify-center mt-[6.25rem]">
+      <app-loader></app-loader>
+      <p class="mt-4 text-gray-600">Carregando produtos, aguarde...</p>
+    </div>
+  } @else {
+    <div>
+      <!-- Seleção de modo: físico ou digital -->
+      <div class="flex gap-[1.5rem] mb-[2.5rem]">
+        <button
+          type="button"
+          class="flex-1 text-left rounded-xl border-2 p-[1.5rem] transition-all"
+          [class.border-blue-500]="selectionMode() === 'fisico'"
+          [class.bg-blue-50]="selectionMode() === 'fisico'"
+          [class.border-neutral-medium]="selectionMode() !== 'fisico'"
+          (click)="selectMode('fisico')"
+        >
+          <h3 class="font-urbanist font-semibold text-[1.25rem]">Cartão e Tag</h3>
+          <p class="font-manrope text-neutral-medium text-sm">
+            Produto físico conectado ao seu perfil.
+          </p>
+        </button>
+
+        <button
+          type="button"
+          class="flex-1 text-left rounded-xl border-2 p-[1.5rem] transition-all"
+          [class.border-blue-500]="selectionMode() === 'digital'"
+          [class.bg-blue-50]="selectionMode() === 'digital'"
+          [class.border-neutral-medium]="selectionMode() !== 'digital'"
+          (click)="selectMode('digital')"
+        >
+          <h3 class="font-urbanist font-semibold text-[1.25rem]">Apenas Digital</h3>
+          <p class="font-manrope text-neutral-medium text-sm">
+            Sem produto físico, acesso 100% digital ao seu perfil.
+          </p>
+        </button>
+      </div>
+
+      @if (selectionMode() === null) {
+        <p class="text-center text-neutral-medium font-manrope mb-[2.5rem]">
+          Selecione uma das opções acima para continuar.
+        </p>
+      }
+
+      @if (selectionMode() === 'fisico') {
+        <h2
+          class="uppercase mb-[1.5rem] font-urbanist font-semibold text-[1.5rem] text-neutral-soft"
+        >
+          Produtos físicos
+        </h2>
+
+        <section class="flex flex-col gap-y-[1.5rem]">
+          <div class="flex gap-[1.625rem] items-start">
+            <!-- Coluna esquerda: produtos + logo (não é afetada pelo frete/cupom) -->
+            <div class="flex flex-col gap-y-[1.5rem] max-w-[58.4375rem] w-full">
+              <ul class="flex justify-between w-full">
+                @for (product of products(); track product) {
+                  <li
+                    class="rounded-xl transition-all self-start"
+                    [class.ring-2]="isSelected(product.id.toString())"
+                    [class.ring-blue-500]="isSelected(product.id.toString())"
+                  >
+                    <app-surface classes="bg-[#F5F5F5]">
+                      <img
+                        src="{{ product.image }}"
+                        alt="{{ product.name }}"
+                        class="w-full max-w-[22.5rem] h-[13.75rem]"
+                      />
+
+                      <div class="my-[2.5rem] space-y-[1rem]">
+                        <span
+                          class="block font-manrope font-medium text-[.875rem] text-neutral-medium"
+                          >{{ product.subtitle }}</span
+                        >
+                        <h3 class="font-urbanist font-semibold text-[1.5rem]">
+                          {{ product.name }}
+                        </h3>
+                        <p class="font-manrope text-neutral-medium">{{ product.description }}</p>
+                        <p class="font-manrope text-neutral-medium">
+                          {{ formatPrice(product.price_cents) }}
+                        </p>
+                      </div>
+
+                      <app-button
+                        variant="default"
+                        sizeH="sm"
+                        class="w-full"
+                        (click)="
+                          selectItem({ id: product.id.toString(), price: product.price_cents })
+                        "
+                      >
+                        {{ isSelected(product.id.toString()) ? 'Selecionado' : 'Selecionar' }}
+                      </app-button>
+                    </app-surface>
+                  </li>
+                }
+              </ul>
+
+              @if (showAdditionalProducts()) {
+                @for (additional of aditionalProducts(); track additional.id) {
+                  <app-surface classes="flex flex-col gap-y-[1rem] w-full bg-[#F5F5F5] p-[1.5rem]">
+                    <div class="flex items-center gap-x-[1rem]">
+                      <input
+                        type="checkbox"
+                        class="h-[34px] w-[2.125rem]"
+                        [checked]="isSelected(additional.id.toString())"
+                        (change)="
+                          selectItem({
+                            id: additional.id.toString(),
+                            price: additional.price_cents,
+                          })
+                        "
+                      />
+                      <div class="font-manrope space-y-[.5rem]">
+                        <h3 class="font-semibold">Adicionar personalização com logo</h3>
+                        <p class="text-neutral-medium">{{ formatPrice(additional.price_cents) }}</p>
+                      </div>
+                    </div>
+
+                    @if (isSelected(additional.id.toString())) {
+                      <div class="pl-[3rem] space-y-[.5rem]">
+                        @if (logoPreviewFor(additional.id.toString()); as previewUrl) {
+                          <div class="flex items-center gap-x-[1rem]">
+                            <img
+                              [src]="previewUrl"
+                              alt="Preview da logo"
+                              class="h-[4rem] w-[4rem] object-contain rounded border border-neutral-medium bg-white"
+                            />
+                            <div class="flex flex-col gap-y-[.25rem]">
+                              <label
+                                [for]="'logo-input-' + additional.id"
+                                class="text-sm font-manrope font-medium text-blue-600 cursor-pointer underline"
+                              >
+                                Trocar imagem
+                              </label>
+                              <button
+                                type="button"
+                                class="text-sm font-manrope text-red-500 text-left"
+                                (click)="removeLogo(additional.id.toString())"
+                              >
+                                Remover
+                              </button>
+                            </div>
+                          </div>
+                        } @else {
+                          <label
+                            [for]="'logo-input-' + additional.id"
+                            class="flex flex-col items-center justify-center gap-y-[.5rem] w-full max-w-[16rem] h-[6rem] border-2 border-dashed border-neutral-medium rounded-lg cursor-pointer hover:border-blue-500 transition-colors"
+                          >
+                            <span class="text-sm font-manrope text-neutral-medium">
+                              Clique para enviar sua logo
+                            </span>
+                            <span class="text-xs font-manrope text-neutral-medium">
+                              PNG, JPG, SVG ou WEBP · até 5MB
+                            </span>
+                          </label>
+                        }
+
+                        <input
+                          [id]="'logo-input-' + additional.id"
+                          type="file"
+                          accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                          class="hidden"
+                          (change)="onLogoSelected(additional.id.toString(), $event)"
+                        />
+
+                        @if (logoErrorFor(additional.id.toString()); as error) {
+                          <p class="text-sm font-manrope text-red-500">{{ error }}</p>
+                        }
+
+                        @if (isLogoMissing(additional.id.toString())) {
+                          <p class="text-sm font-manrope text-amber-600">
+                            Envie uma imagem para concluir a personalização.
+                          </p>
+                        }
+                      </div>
+                    }
+                  </app-surface>
+                }
+              }
+            </div>
+
+            <!-- Coluna direita: carrinho + cupom + frete -->
+            <div>
+              <app-onboarding-cart class="flex-1" [items]="cartItems()"></app-onboarding-cart>
+
+              @if (selectedItems().length > 0) {
+                <!-- Campo de cupom -->
+                <div class="mt-[1rem]">
+                  <p class="text-sm font-medium text-neutral-medium mb-[0.5rem]">
+                    Cupom de desconto
+                  </p>
+
+                  <div class="flex gap-2">
+                    <div class="relative flex-1">
+                      <input
+                        type="text"
+                        placeholder="Digite seu cupom"
+                        class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors"
+                        [class.border-neutral-medium]="
+                          couponStatus() === 'idle' || couponStatus() === 'loading'
+                        "
+                        [class.border-green-500]="couponStatus() === 'valid'"
+                        [class.border-red-500]="couponStatus() === 'invalid'"
+                        [value]="couponCode()"
+                        (input)="
+                          couponCode.set($any($event.target).value); couponStatus.set('idle')
+                        "
+                      />
+
+                      @if (couponStatus() === 'valid') {
+                        <span
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-sm"
+                          >✓</span
+                        >
+                      } @else if (couponStatus() === 'invalid') {
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-sm"
+                          >✕</span
+                        >
+                      }
+                    </div>
+
+                    <app-button
+                      variant="outline"
+                      sizeH="sm"
+                      [disabled]="!couponCode().trim() || couponStatus() === 'loading'"
+                      (click)="applyCoupon()"
+                    >
+                      {{ couponStatus() === 'loading' ? 'Validando...' : 'Aplicar' }}
+                    </app-button>
+                  </div>
+
+                  @if (couponStatus() === 'valid') {
+                    <p class="text-xs text-green-600 mt-1">Cupom aplicado!</p>
+                  } @else if (couponStatus() === 'invalid') {
+                    <p class="text-xs text-red-500 mt-1">Cupom inválido ou expirado.</p>
+                  }
+                </div>
+              }
+
+              @if (hasPhysicalProductSelected()) {
+                <div class="mt-[1.5rem] space-y-[.5rem]">
+                  <label
+                    for="cep-input"
+                    class="block font-manrope font-medium text-sm text-neutral-medium"
+                  >
+                    CEP para cálculo de frete
+                  </label>
+                  <input
+                    id="cep-input"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="00000-000"
+                    maxlength="9"
+                    class="w-full rounded-lg border border-neutral-medium px-[1rem] py-[.75rem] font-manrope"
+                    (input)="onCepInput($event)"
+                  />
+
+                  @if (cepDigits().length > 0 && cepDigits().length < 8) {
+                    <p class="text-sm font-manrope text-neutral-medium">
+                      Digite os 8 dígitos do CEP.
+                    </p>
+                  }
+
+                  @if (isCalculatingShipping()) {
+                    <p class="text-sm font-manrope text-neutral-medium">Calculando frete...</p>
+                  }
+
+                  @if (shippingOptions().length > 0) {
+                    <div class="mt-[1rem] space-y-[0.5rem]">
+                      <p class="text-sm font-medium text-neutral-medium">Escolha o frete:</p>
+
+                      @for (option of shippingOptions(); track option.service_code) {
+                        <div
+                          class="flex items-center justify-between rounded-lg border p-3 cursor-pointer transition-colors"
+                          [class.border-blue-500]="
+                            selectedShipping()?.service_code === option.service_code
+                          "
+                          [class.border-neutral-medium]="
+                            selectedShipping()?.service_code !== option.service_code
+                          "
+                          (click)="selectShipping(option)"
+                        >
+                          <div class="flex items-center gap-2">
+                            <div
+                              class="h-4 w-4 rounded-full border-2 flex items-center justify-center"
+                              [class.border-blue-500]="
+                                selectedShipping()?.service_code === option.service_code
+                              "
+                              [class.border-neutral-medium]="
+                                selectedShipping()?.service_code !== option.service_code
+                              "
+                            >
+                              @if (selectedShipping()?.service_code === option.service_code) {
+                                <div class="h-2 w-2 rounded-full bg-blue-500"></div>
+                              }
+                            </div>
+
+                            <div>
+                              <p class="text-sm font-medium font-manrope">
+                                {{ option.service_name }}
+                              </p>
+                              <p class="text-xs font-manrope text-neutral-medium">
+                                {{ option.deadline_days }} dias úteis
+                              </p>
+                            </div>
+                          </div>
+
+                          <p class="text-sm font-semibold font-manrope">
+                            {{ formatPrice(option.price_cents) }}
+                          </p>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+          <span
+            class="block text-center text-neutral-soft text-[1.25rem] font-semibold font-urbanist"
+          >
+            Todos os produtos físicos incluem acesso inicial para configuração do perfil
+          </span>
+        </section>
+      }
+
+      @if (selectionMode() === 'digital') {
+        @for (digital of digitalProducts(); track digital.id) {
+          <div>
+            <h2
+              class="uppercase mb-[1.5rem] font-urbanist font-semibold text-[1.5rem] text-neutral-soft"
+            >
+              Somente digital
+            </h2>
+
+            <app-surface
+              classes="max-w-[58.4375rem] w-full bg-[#F5F5F5] ring-2 ring-blue-500 border-transparent"
+            >
+              <div class="mb-[2.5rem] space-y-[1rem]">
+                <h4 class="font-urbanist font-semibold text-[1.5rem]">{{ digital.name }}</h4>
+                <p class="font-manrope text-neutral-medium">{{ digital.description }}</p>
+                <p class="font-manrope text-neutral-medium">
+                  {{ formatPrice(digital.price_cents) }}
+                </p>
+              </div>
+
+              <app-onboarding-cart class="flex-1" [items]="cartItems()"></app-onboarding-cart>
+
+              @if (selectedItems().length > 0) {
+                <!-- Campo de cupom -->
+                <div class="mt-[1rem]">
+                  <p class="text-sm font-medium text-neutral-medium mb-[0.5rem]">
+                    Cupom de desconto
+                  </p>
+
+                  <div class="flex gap-2">
+                    <div class="relative flex-1">
+                      <input
+                        type="text"
+                        placeholder="Digite seu cupom"
+                        class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors"
+                        [class.border-neutral-medium]="
+                          couponStatus() === 'idle' || couponStatus() === 'loading'
+                        "
+                        [class.border-green-500]="couponStatus() === 'valid'"
+                        [class.border-red-500]="couponStatus() === 'invalid'"
+                        [value]="couponCode()"
+                        (input)="
+                          couponCode.set($any($event.target).value); couponStatus.set('idle')
+                        "
+                      />
+
+                      @if (couponStatus() === 'valid') {
+                        <span
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-sm"
+                          >✓</span
+                        >
+                      } @else if (couponStatus() === 'invalid') {
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-sm"
+                          >✕</span
+                        >
+                      }
+                    </div>
+
+                    <app-button
+                      variant="outline"
+                      sizeH="sm"
+                      [disabled]="!couponCode().trim() || couponStatus() === 'loading'"
+                      (click)="applyCoupon()"
+                    >
+                      {{ couponStatus() === 'loading' ? 'Validando...' : 'Aplicar' }}
+                    </app-button>
+                  </div>
+
+                  @if (couponStatus() === 'valid') {
+                    <p class="text-xs text-green-600 mt-1">Cupom aplicado!</p>
+                  } @else if (couponStatus() === 'invalid') {
+                    <p class="text-xs text-red-500 mt-1">Cupom inválido ou expirado.</p>
+                  }
+                </div>
+              }
+            </app-surface>
+          </div>
+        }
+      }
+
+      <div class="mt-[2.5rem]">
+        <div class="flex gap-x-[1rem]">
+          <app-button variant="outline" sizeH="sm" class="w-full">Voltar</app-button>
+          <app-button
+            variant="default"
+            sizeH="sm"
+            class="w-full"
+            [disabled]="!canContinue() || isSubmitting()"
+            (click)="continueToNextStep()"
+          >
+            Continuar
+          </app-button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

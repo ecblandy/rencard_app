@@ -41,14 +41,20 @@ export class Auth {
     );
   }
 
-  confirmEmail(code: string) {
+  confirmEmail(code: string, email?: string) {
     console.log('code facade', code);
-    return this.api.confirmEmail(code).pipe(
+    return this.api.confirmEmail(code, email).pipe(
       tap((teste) => {
         console.log(teste);
         console.log('[Auth] email confirmado com sucesso');
       }),
     );
+  }
+
+  changeEmail(newEmail: string) {
+    return this.api
+      .changeEmail(newEmail)
+      .pipe(tap(() => console.log('[Auth] email alterado com sucesso')));
   }
 
   refreshAccessToken() {

@@ -33,11 +33,16 @@ export class AuthApi {
     return this.http.patch<User>(`${this.baseUrl}/users/me/`, payload);
   }
 
-  confirmEmail(code: string) {
+  confirmEmail(code: string, email?: string) {
     console.log('code no auth api:', code);
     return this.http.post<{ code: string }>(`${this.baseUrl}/auth/email/confirm/`, {
       code: code,
+      email: email,
     });
+  }
+
+  changeEmail(newEmail: string) {
+    return this.http.post(`${this.baseUrl}/auth/email/change/`, { new_email: newEmail });
   }
 
   registerClient(credentials: User) {

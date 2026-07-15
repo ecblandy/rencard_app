@@ -23,6 +23,7 @@ import { UserRegistration } from '../../../../../../shared/types/user.model';
 import { Auth } from '../../../../services/facade/auth';
 import { toast } from 'ngx-sonner';
 import { formatErrorList } from '../../../../../../shared/utils/format-error';
+import { PaymentService } from '../../../../../(onboarding)/services/facade/payment.service';
 
 interface SignupPersonalForm {
   full_name: string;
@@ -44,6 +45,9 @@ export class PersonalData {
   private auth = inject(Auth);
   private signupState = inject(SignupState);
   private readonly persisted = this.signupState.data();
+  private readonly PaymentService = inject(PaymentService);
+
+  temporaryCart = signal<any | null>(null);
 
   signupPersonalModel = signal<SignupPersonalForm>({
     full_name: this.persisted.full_name ?? '',
@@ -54,29 +58,23 @@ export class PersonalData {
     cpf_cnpj: this.persisted.cpf_cnpj ?? '',
   });
   signupPersonalForm = form(this.signupPersonalModel, (schemaPath) => {
-    // Full Name Validation
     required(schemaPath.full_name, { message: 'O campo de nome é obrigatório.' });
 
-    // Email Validation
     required(schemaPath.email, { message: 'O e-mail é obrigatório.' });
     email(schemaPath.email, { message: 'Insira um endereço de e-mail válido.' });
 
-    // Password Validation
     required(schemaPath.password, { message: 'Senha é obrigatória.' });
     minLength(schemaPath.password, 8, { message: 'A senha deve ter pelo menos 8 caracteres.' });
 
-    // Terms Accepted (boolean)
     validate(schemaPath.terms_accepted, ({ value }) => {
       return value() ? null : { kind: 'required', message: 'Você deve aceitar os termos.' };
     });
 
-    // Phone number Validation
     required(schemaPath.phone_number, { message: 'O telefone é obrigatório.' });
     pattern(schemaPath.phone_number, /^\d{10,11}$/, {
       message: 'Insira um número de telefone válido (somente números).',
     });
 
-    // CPF/CNPJ Validation
     required(schemaPath.cpf_cnpj, { message: 'CPF ou CNPJ é obrigatório.' });
     pattern(schemaPath.cpf_cnpj, /^\d{11}$|^\d{14}$/, {
       message: 'Insira um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.',
@@ -88,29 +86,54 @@ export class PersonalData {
     this.signupPersonalModel.update((v) => ({ ...v, terms_accepted: checked }));
   }
 
+  // só valida que o carrinho ainda existe antes de permitir o cadastro
+  loadTempCart() {
+    const temporaryCart = JSON.parse(localStorage.getItem('temporaryCart') ?? 'null');
+
+    if (!temporaryCart?.id) {
+      toast.error('Carrinho temporário não encontrado. Por favor, refaça o processo de compra.');
+      this.router.navigate(['/onboarding/products']);
+      return;
+    }
+
+    this.PaymentService.getTemporaryCartById(temporaryCart.id).subscribe({
+      next: (response) => this.temporaryCart.set(response),
+      error: () => {
+        toast.error('Carrinho temporário inválido ou expirado. Por favor, refaça a compra.');
+        this.router.navigate(['/onboarding/products']);
+      },
+    });
+  }
+
+  constructor() {
+    this.loadTempCart();
+  }
+
   onSubmit(event: Event) {
     event.preventDefault();
 
     submit(this.signupPersonalForm, async () => {
       const personalData = this.signupPersonalModel();
-
-      // ✅ Junta dados pessoais com endereço do step anterior
       this.signupState.setStepData(personalData);
-
-      // ✅ Prepara payload completo
       const payload = this.signupState.data() as UserRegistration;
 
-      console.log('Payload final:', payload);
+      const cart = this.temporaryCart();
+      if (!cart) {
+        toast.error('Carrinho temporário não encontrado.');
+        return;
+      }
+
       const loadingToast = toast.loading('Enviando cadastro...');
+
       try {
-        // ✅ Envia para backend
+        // Cria usuário — carrinho continua salvo no localStorage,
+        // será usado pelo confirm-email pra criar a ordem depois
         await firstValueFrom(this.auth.register(payload));
 
-        // ✅ Limpa estado temporário
         this.signupState.clear();
 
         toast.success('Cadastro realizado!', {
-          description: 'Bem-vindo(a)! Você foi cadastrado com sucesso.',
+          description: 'Confirme seu e-mail para concluir o pedido.',
           id: loadingToast,
         });
 
