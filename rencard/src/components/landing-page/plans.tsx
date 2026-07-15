@@ -85,10 +85,7 @@ const plansStyle: Record<PlanType, PlanStyle> = {
   },
 };
 function setPlanStyle(planType: string) {
-  const dashboardUrl =
-    process.env.NEXT_PUBLIC_DASHBOARD_URL ?? "/app/onboarding/products";
-
-  window.location.href = `${dashboardUrl}/onboarding/products?plan=${planType}`;
+  window.location.href = `https://rencard.com.br/app/onboarding/products?plan=${planType}`;
 }
 export default function Plans() {
   return (
