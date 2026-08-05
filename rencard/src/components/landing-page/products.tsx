@@ -10,14 +10,12 @@ const productsDetails = [
     info: "O clássico premium",
     title: "Cartão Digital",
     description: "Cartão físico com NFC + QR Code integrado",
-    price: "79,90",
   },
   {
     imageUrl: "/images/tag-renc.svg",
     info: "Leve e versátil",
     title: "Tag Renc",
     description: "Tag NFC circular que você pode colar no seu celular",
-    price: "69,90",
   },
 ];
 
@@ -32,7 +30,7 @@ export default function Products() {
 
       <ul className="flex flex-wrap justify-center w-full gap-[7.8125rem] mt-[2.5rem]">
         {productsDetails.map(
-          ({ imageUrl, info, title, description, price }, index) => (
+          ({ imageUrl, info, title, description }, index) => (
             <motion.li
               key={index}
               initial={{ opacity: 0, y: 30 }}
@@ -65,21 +63,6 @@ export default function Products() {
                   <p className="text-neutral-strong max-w-[18.75rem] w-full">
                     {description}
                   </p>
-                </div>
-
-                {/* Badge de preço */}
-                <div className="flex flex-col items-center justify-center bg-black text-white rounded-lg px-3 py-2 min-w-[5rem] text-center shrink-0">
-                  <span className="text-[0.6rem] font-semibold uppercase tracking-widest text-neutral-400 mb-0.5">
-                    por
-                  </span>
-                  <div className="flex items-baseline gap-0.5">
-                    <span className="text-[0.7rem] font-bold leading-none">
-                      R$
-                    </span>
-                    <span className="text-[1.1rem] font-extrabold leading-none">
-                      {price}
-                    </span>
-                  </div>
                 </div>
               </div>
             </motion.li>

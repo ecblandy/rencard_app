@@ -29,6 +29,16 @@ export const onboardingRoutes: Routes = [
         title: 'Checkout – Rencard',
         data: { step: 3 },
       },
+      {
+        path: 'checkout/success',
+        loadComponent: () => import('./pages/checkout/success/success').then((m) => m.Success),
+        title: 'Pagamento aprovado – Rencard',
+      },
+      {
+        path: 'checkout/erro',
+        loadComponent: () => import('./pages/checkout/erro/erro').then((m) => m.Erro),
+        title: 'Erro no pagamento – Rencard',
+      },
     ],
   },
 ];

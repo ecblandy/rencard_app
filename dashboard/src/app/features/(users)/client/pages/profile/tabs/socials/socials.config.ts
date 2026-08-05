@@ -1,7 +1,7 @@
 type SocialKey =
   | 'instagram'
   | 'tiktok'
-  | 'linkedIn'
+  | 'linkedin'
   | 'facebook'
   | 'youtube'
   | 'telegram'
@@ -36,7 +36,7 @@ export const SOCIALS_CARD: SocialsModel[] = [
     enabled: false,
   },
   {
-    key: 'linkedIn',
+    key: 'linkedin',
     label: 'LinkedIn',
     value: '',
     icon: 'bootstrapLinkedin',

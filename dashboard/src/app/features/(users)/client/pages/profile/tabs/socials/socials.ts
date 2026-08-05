@@ -25,7 +25,7 @@ export class Socials {
   socialsModel = signal<SocialsFormModel>({
     instagram: '',
     tiktok: '',
-    linkedIn: '',
+    linkedin: '',
     facebook: '',
     youtube: '',
     telegram: '',
@@ -48,13 +48,13 @@ export class Socials {
       this.initialized = true;
 
       const keyMap: Record<string, keyof SocialsFormModel> = {
-        linkedin: 'linkedIn',
+        linkedin: 'linkedin',
       };
 
       const model: SocialsFormModel = {
         instagram: '',
         tiktok: '',
-        linkedIn: '',
+        linkedin: '',
         facebook: '',
         youtube: '',
         telegram: '',

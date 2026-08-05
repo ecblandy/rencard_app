@@ -70,4 +70,18 @@ export class Preview {
       return;
     }
   }
+
+  getSocialUsername(url: string): string {
+    try {
+      const { pathname } = new URL(url);
+
+      return pathname.split('/').filter(Boolean).pop()?.replace(/^@/, '') ?? url;
+    } catch {
+      return url;
+    }
+  }
+
+  openSocial(url: string) {
+    window.open(url, '_blank');
+  }
 }

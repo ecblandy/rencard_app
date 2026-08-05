@@ -11,8 +11,6 @@ interface PlanStyle {
   card: string;
   button: string;
   icon: string;
-  priceBadge: string;
-  priceLabel: string;
   divider: string;
 }
 
@@ -71,16 +69,12 @@ const plansStyle: Record<PlanType, PlanStyle> = {
     card: "bg-[#FBFBFB] text-neutral-strong",
     button: "bg-black text-white hover:bg-[#333333]",
     icon: "text-black",
-    priceBadge: "bg-black text-white",
-    priceLabel: "text-neutral-500",
     divider: "border-neutral-200",
   },
   pro: {
     card: "bg-black text-white",
     button: "bg-white text-black hover:bg-[#E5E5E5]",
     icon: "text-white",
-    priceBadge: "bg-white text-black",
-    priceLabel: "text-neutral-400",
     divider: "border-neutral-700",
   },
 };
@@ -99,10 +93,7 @@ export default function Plans() {
       />
       <div className="flex justify-center flex-wrap w-full gap-[6rem] items-start">
         {plansDetails.map(
-          (
-            { id, title, description, features, type, buttonTitle, price },
-            index,
-          ) => {
+          ({ id, title, description, features, type, buttonTitle }, index) => {
             const style = plansStyle[type];
             return (
               <motion.div
@@ -124,25 +115,6 @@ export default function Plans() {
                     <p className="font-semibold text-[1.25rem]">
                       {description}
                     </p>
-                  </div>
-
-                  {/* Badge de preço */}
-                  <div
-                    className={`flex flex-col items-center justify-center rounded-xl px-4 py-3 min-w-[7rem] text-center shrink-0 ${style.priceBadge}`}
-                  >
-                    <span
-                      className={`text-[0.65rem] font-semibold uppercase tracking-widest mb-0.5 ${style.priceLabel}`}
-                    >
-                      por mês
-                    </span>
-                    <div className="flex items-baseline gap-0.5">
-                      <span className="text-[0.85rem] font-bold leading-none">
-                        R$
-                      </span>
-                      <span className="text-[1.6rem] font-extrabold leading-none">
-                        {price}
-                      </span>
-                    </div>
                   </div>
                 </div>
 

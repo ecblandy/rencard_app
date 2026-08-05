@@ -8,8 +8,14 @@ import { AuthApi } from '../../features/auth/services/api/auth-api';
 // 🌍 APIs públicas externas
 const PUBLIC_EXTERNAL_DOMAINS = ['viacep.com.br'];
 
-// 🔓 Endpoints públicos da API
+// 🔓 Endpoints públicos da API (não exigem token, nem cookie)
 const PUBLIC_API_ENDPOINTS = ['/auth/email/confirm'];
+
+// 🍪 Endpoints que SEMPRE precisam mandar/receber o cookie de refresh,
+// mesmo sem access token em memória.
+// '/auth/token/' cobre login (/auth/token/), refresh (/auth/token/refresh/)
+// e logout (/auth/token/logout/), já que usamos .includes()
+const ALWAYS_CREDENTIALS_ENDPOINTS = ['/auth/token/'];
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authState = inject(AuthState);
@@ -29,15 +35,20 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     });
 
   /**
-   * Requisição sem autenticação
-   * Só envia cookies se existir sessão ativa.
+   * Requisição sem access token.
+   * Manda cookie (withCredentials) se:
+   *  - já existe sessão ativa em memória, OU
+   *  - é um endpoint que precisa do cookie mesmo sem sessão (login/refresh/logout)
    */
   const sendWithoutToken = () => {
+    const alwaysCredentials = ALWAYS_CREDENTIALS_ENDPOINTS.some((endpoint) =>
+      req.url.includes(endpoint),
+    );
     const hasSession = authState.isAuthenticated();
 
     return next(
       req.clone({
-        withCredentials: hasSession,
+        withCredentials: alwaysCredentials || hasSession,
       }),
     );
   };
@@ -82,9 +93,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const isExpired = authState.isAccessTokenExpired();
 
   /**
-   * Usuário nunca autenticou:
-   * não manda token
-   * não tenta refresh
+   * Usuário nunca autenticou (ou fez logout):
+   * não manda Authorization, mas ainda pode precisar mandar cookie
+   * (ex.: chamada de /auth/token/ ou /auth/token/refresh/)
    */
   if (!token) {
     return sendWithoutToken();

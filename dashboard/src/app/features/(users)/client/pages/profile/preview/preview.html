@@ -61,12 +61,16 @@
     @for (socials of profile().social_links; track socials) {
       @if (socials.enabled) {
         <li
-          class="flex items-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border border-neutral-extra-soft rounded-[.875rem]"
+          class="flex items-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border border-neutral-extra-soft rounded-[.875rem] cursor-pointer"
           [style.background-color]="appearance.settings().button_bg_secondary"
           [style.color]="appearance.settings().button_text_secondary"
+          (click)="openSocial(socials.value)"
         >
           <ng-icon [name]="socials.icon"></ng-icon>
-          <p class="font-urbanist font-medium">{{ socials.value || socials.type }}</p>
+
+          <p class="font-urbanist font-medium">
+            {{ getSocialUsername(socials.value) }}
+          </p>
         </li>
       }
     }

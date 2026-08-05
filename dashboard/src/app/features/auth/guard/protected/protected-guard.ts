@@ -82,7 +82,7 @@ export const protectedGuard: CanActivateFn = (route, state) => {
 function redirectBasedOnRole(role: string, router: Router) {
   const roleRoutes: Record<string, string> = {
     admin: '/admin/dashboard',
-    manager: '/manager/dashboard',
+    affiliate: '/affiliate/dashboard',
     client: '/client/dashboard',
   };
 
