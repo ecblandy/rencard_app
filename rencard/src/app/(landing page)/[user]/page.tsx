@@ -105,7 +105,7 @@ function getSocialLabel(url: string) {
 export default async function UserProfilePage({ params }: Props) {
   const { user: username } = await params;
   const url = new URL(
-    `profiles/public/${encodeURIComponent(username)}`,
+    `profiles/public/${encodeURIComponent(username)}/`,
     process.env.BACKEND_URL,
   );
 
