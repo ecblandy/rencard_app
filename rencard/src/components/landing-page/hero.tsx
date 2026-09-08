@@ -19,13 +19,22 @@ const containerVariants: Variants = {
 };
 
 const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 30, scale: 0.95 },
-  visible: { opacity: 1, y: 0, scale: 1, transition },
+  hidden: {
+    opacity: 0,
+    y: 30,
+    scale: 0.95,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition,
+  },
 };
 
 export default function Hero() {
   return (
-    <section className="relative flex items-center min-h-[39.25rem] md:min-h-[39.25rem] max-sm:min-h-[37.125rem]">
+    <section className="relative flex items-center min-h-[39.25rem] md:min-h-[39.25rem] max-sm:min-h-[37.125rem] overflow-hidden">
       <Image
         src="/images/hero-image.png"
         alt="Hero do Rencard"
@@ -37,40 +46,123 @@ export default function Hero() {
         className="object-cover object-center"
       />
 
-      {/* Conteúdo */}
+      {/* Overlay para melhorar a leitura do conteúdo */}
+      <div
+        className="
+          absolute inset-0 z-[1]
+          bg-white/50
+          md:bg-white/35
+        "
+      />
+
       <motion.div
-        className="relative z-10 font-urbanist w-full px-6 sm:px-10 md:pl-[5rem] md:pr-0"
+        className="
+          relative z-10
+          font-urbanist
+          w-full
+          px-6
+          sm:px-10
+          md:pl-[5rem]
+          md:pr-0
+        "
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
+        {/* Título */}
         <motion.h1
-          className="font-bold text-[2rem] sm:text-[2.75rem] md:text-[4rem] leading-[110%] md:leading-[100%] mb-4 md:mb-[1.5rem] max-w-[51.875rem] w-full"
+          className="
+            font-bold
+            text-[#454545]
+            text-[2rem]
+            sm:text-[2.75rem]
+            md:text-[4rem]
+            leading-[110%]
+            md:leading-[100%]
+            mb-4
+            md:mb-[1.5rem]
+            max-w-[51.875rem]
+            w-full
+          "
           variants={itemVariants}
         >
-          Olá, eu sou o <strong className="text-white">RENCARD</strong>!
-          <br /> A melhor forma de fazer networking!
+          Olá, eu sou o{" "}
+          <strong
+            className="
+              font-montserrat
+              font-extrabold
+              text-white
+              tracking-[-0.04em]
+            "
+          >
+            RENCARD
+          </strong>
+          !
+          <br />A melhor forma de fazer networking!
         </motion.h1>
 
+        {/* REN */}
         <motion.div
-          className="flex items-center bg-[#FBFBFB80] max-w-[37.75rem] w-full h-[3rem] md:h-[3.5rem] px-5 md:px-[1.875rem] my-4 md:my-[1.5rem] rounded-[.625rem]"
+          className="
+            flex
+            items-center
+            bg-[#FBFBFB]/85
+            max-w-[37.75rem]
+            w-full
+            h-[3rem]
+            md:h-[3.5rem]
+            px-5
+            md:px-[1.875rem]
+            my-4
+            md:my-[1.5rem]
+            rounded-[.625rem]
+            border
+            border-[#454545]/10
+          "
           variants={itemVariants}
         >
-          <p className="text-[1.5rem] max-sm:text-[1.25rem] md:text-[2.5rem] text-[#454545] font-montserrat">
-            <strong>E você já tem seu</strong> REN?
+          <p
+            className="
+              text-[1.5rem]
+              max-sm:text-[1.25rem]
+              md:text-[2.5rem]
+              text-[#454545]
+              font-montserrat
+              leading-none
+            "
+          >
+            <strong className="font-extrabold">E você já tem seu</strong>{" "}
+            <span className="font-bold">REN?</span>
           </p>
         </motion.div>
 
+        {/* Descrição */}
         <motion.p
-          className="font-semibold text-[1rem] sm:text-[1.25rem] md:text-[1.5rem] text-white max-w-[46.25rem] w-full"
+          className="
+            font-semibold
+            text-[1rem]
+            sm:text-[1.25rem]
+            md:text-[1.5rem]
+            text-[#454545]
+            max-w-[46.25rem]
+            w-full
+          "
           variants={itemVariants}
         >
           Troque informações em segundos. NFC, QR Code e um perfil digital
           completo — tudo em um só produto.
         </motion.p>
 
+        {/* Botões */}
         <motion.div
-          className="flex items-center gap-4 md:gap-[1.5rem] mt-6 md:mt-[2.5rem]"
+          className="
+            flex
+            items-center
+            gap-4
+            md:gap-[1.5rem]
+            mt-6
+            md:mt-[2.5rem]
+          "
           variants={itemVariants}
         >
           <Button
@@ -81,6 +173,7 @@ export default function Hero() {
           >
             criar meu rencard
           </Button>
+
           <Button
             sizeH="sm"
             variant="outline"
