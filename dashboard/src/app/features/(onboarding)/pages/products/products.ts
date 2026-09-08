@@ -495,4 +495,8 @@ export class Products {
       },
     });
   }
+
+  goBack() {
+    window.history.back();
+  }
 }

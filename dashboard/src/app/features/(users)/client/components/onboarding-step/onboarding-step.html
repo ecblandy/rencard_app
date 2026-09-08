@@ -1,9 +1,11 @@
-<div class="flex items-center justify-center gap-3 mt-[5rem]">
+<div
+  class="flex items-center justify-center gap-1 sm:gap-2 md:gap-3 mt-8 sm:mt-10 md:mt-[5rem] overflow-x-auto pb-2 sm:pb-0"
+>
   @for (step of steps(); track step) {
-    <div class="flex items-center gap-[1rem]">
+    <div class="flex items-center gap-1 sm:gap-2 md:gap-[1rem] flex-shrink-0">
       <!-- número -->
       <span
-        class="flex items-center justify-center rounded-[.5rem] h-[3.6875rem] w-[3.6875rem] text-[1.5rem] font-bold text-white transition"
+        class="flex items-center justify-center rounded-[.25rem] sm:rounded-[.375rem] md:rounded-[.5rem] h-8 sm:h-10 md:h-[3.6875rem] w-8 sm:w-10 md:w-[3.6875rem] text-xs sm:text-sm md:text-[1.5rem] font-bold text-white transition flex-shrink-0"
         [class.bg-black]="step <= currentStep()"
         [class.bg-neutral-400]="step > currentStep()"
       >
@@ -13,7 +15,7 @@
       <!-- barra (somente se NÃO for o último) -->
       @if (step < totalSteps()) {
         <div
-          class="h-[.125rem] w-10 rounded transition"
+          class="h-px sm:h-[0.09375rem] md:h-[.125rem] w-4 sm:w-6 md:w-10 rounded transition flex-shrink-0"
           [class.bg-black]="step < currentStep()"
           [class.bg-neutral-300]="step >= currentStep()"
         ></div>

@@ -1,24 +1,229 @@
-.pro {
-  background-color: black;
+:host {
+  display: block;
+}
+
+/* ========================================================= */
+/* ANIMAÇÕES */
+/* ========================================================= */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes planCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes iconIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.35s ease-out both;
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.45s ease-out both;
+}
+
+.animation-delay-100 {
+  animation-delay: 100ms;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+/* ========================================================= */
+/* PLAN CARD */
+/* ========================================================= */
+
+.plan-card {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: white;
+
+  border: 1px solid rgb(229 229 229);
+  border-radius: 1rem;
+
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+
+  animation: planCardIn 0.5s ease-out both;
+
+  transition:
+    transform 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-3px);
+
+  border-color: rgb(163 163 163);
+
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.plan-card-current {
+  border-color: rgb(23 23 23);
+}
+
+.plan-card-current:hover {
+  transform: none;
+
+  border-color: rgb(23 23 23);
+}
+
+/* ========================================================= */
+/* ÍCONE */
+/* ========================================================= */
+
+.plan-icon {
+  width: 3rem;
+  height: 3rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border-radius: 0.75rem;
+
+  background: rgb(245 245 245);
+
+  border: 1px solid rgb(229 229 229);
+
+  color: rgb(64 64 64);
+
+  animation: iconIn 0.4s ease-out both;
+
+  transition:
+    transform 180ms ease,
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+.plan-card:hover .plan-icon {
+  transform: scale(1.04);
+}
+
+.plan-icon-pro {
+  background: rgb(23 23 23);
+
+  border-color: rgb(23 23 23);
+
   color: white;
 }
 
-.proButton {
-  background-color: white;
-  color: black;
+.plan-icon-current {
+  background: white;
+
+  border-color: rgba(255, 255, 255, 0.15);
+
+  color: rgb(23 23 23);
 }
 
-.proButton:hover {
-  background-color: rgba(255, 255, 255, 0.87);
-  color: rgb(0, 17, 255);
+/* ========================================================= */
+/* BOTÃO PLANO ATUAL */
+/* ========================================================= */
+
+.current-plan-button {
+  width: 100%;
+
+  min-height: 3rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+
+  padding: 0.75rem 1rem;
+
+  border-radius: 0.65rem;
+
+  border: 1px solid rgb(229 229 229);
+
+  background: rgb(245 245 245);
+
+  color: rgb(115 115 115);
+
+  font-family: Manrope, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+
+  cursor: not-allowed;
 }
 
-.galeraButton {
-  background-color: black;
-  color: white;
+/* ========================================================= */
+/* RESPONSIVIDADE */
+/* ========================================================= */
+
+@media (max-width: 768px) {
+  .plan-card:hover {
+    transform: translateY(-1px);
+  }
 }
 
-.galeraButton:hover {
-  background-color: rgba(0, 0, 0, 0.932);
-  color: greenyellow;
+@media (max-width: 640px) {
+  .plan-card:hover {
+    transform: none;
+  }
+}
+
+/* ========================================================= */
+/* REDUÇÃO DE MOVIMENTO */
+/* ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-fade-up,
+  .plan-card,
+  .plan-icon {
+    animation: none;
+  }
+
+  .plan-card,
+  .plan-icon {
+    transition: none;
+  }
 }

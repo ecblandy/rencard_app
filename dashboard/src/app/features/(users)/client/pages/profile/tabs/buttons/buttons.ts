@@ -10,7 +10,7 @@ import { UiButton } from '../../../../../../../shared/ui/button/button';
 import { ProfileStore } from '../../services/store/profile.store';
 import { toast } from 'ngx-sonner';
 import { ProfileService } from '../../services/facade/profile.service';
-import { Button } from '../../../../../../../shared/types/profile-model'; // ← adicionado
+import { Button } from '../../../../../../../shared/types/profile-model';
 
 @Component({
   selector: 'app-buttons',
@@ -31,24 +31,29 @@ export class Buttons {
   buttonsForm = form(this.buttonsModel, (schema) => {});
 
   constructor() {
+    // HIDRATA COM DADOS DA API
     effect(() => {
-      const buttonsArray = this.buttons();
+      const apiButtons = this.profileStore.profile().buttons;
 
-      const buttons_list: Button[] = buttonsArray.map((button) => {
-        const fieldFn = this.buttonsForm[
-          button.key as keyof ButtonsFormModel
-        ] as unknown as () => any;
-        const value = typeof fieldFn === 'function' ? (fieldFn()?.value?.() ?? '') : '';
+      if (apiButtons && apiButtons.length > 0) {
+        // Atualiza o signal buttons com dados reais da API
+        this.buttons.update((current) =>
+          current.map((btn) => {
+            const apiBtn = apiButtons.find((b) => b.type === btn.key);
+            return {
+              ...btn,
+              value: apiBtn?.value ?? '',
+              enabled: apiBtn?.enabled ?? false,
+            };
+          }),
+        );
 
-        return {
-          id: 0,
-          type: button.key,
-          value,
-          enabled: button.enabled,
-        };
-      });
-
-      this.profileStore.setButtons(buttons_list);
+        // Atualiza o model do form
+        this.buttonsModel.set({
+          whatsapp: apiButtons.find((b) => b.type === 'whatsapp')?.value ?? '',
+          pix: apiButtons.find((b) => b.type === 'pix')?.value ?? '',
+        });
+      }
     });
   }
 
@@ -99,9 +104,7 @@ export class Buttons {
     const loadingToast = toast.loading('Aguarde, tentando atualizar...', { description: '' });
 
     this.profileServices.updateButtons(payload).subscribe({
-      // ← corrigido
       next: () => {
-        this.profileStore.setButtons(payload);
         toast.success('Pronto! Tudo atualizado.', {
           description: 'Botões atualizados com sucesso!',
           id: loadingToast,
@@ -115,5 +118,12 @@ export class Buttons {
         });
       },
     });
+  }
+
+  getMask(key: string): string {
+    if (key === 'whatsapp') {
+      return '(00) 00000-0000';
+    }
+    return ''; // Sem máscara para PIX
   }
 }

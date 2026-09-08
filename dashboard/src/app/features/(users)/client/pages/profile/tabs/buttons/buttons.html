@@ -28,10 +28,9 @@
               sizeH="sm"
               class="block mt-[1.1875rem]"
               type="text"
-              placeholder="Digite seu telefone"
               variant="default"
               sizeH="sm"
-              [mask]="'(00) 00000-0000'"
+              [mask]="button.key === 'whatsapp' ? '(00) 00000-0000' : ''"
               [formField]="buttonsForm[button.key]"
             ></app-input>
 

@@ -1,38 +1,71 @@
-<app-dashboard-title
-  title="Personalizar Perfil"
-  description="Configure cada detalhe do seu cartão digital."
-/>
+@if (subscriptionAccess.canAccess()) {
+  <app-dashboard-title
+    title="Personalizar Perfil"
+    description="Configure cada detalhe do seu cartão digital."
+  />
 
-<div class="flex gap-x-[3.375rem]">
-  <nav class="tabs flex flex-col gap-y-[1rem]">
-    @for (tab of tabs(); track tab.key) {
-      <button
-        type="button"
-        (click)="selectTab(tab.key)"
-        [class.active-tab]="tab.key === activeTabKey()"
-        [class.opacity-50]="tab.requiresPro && !isPro()"
-        [class.cursor-not-allowed]="tab.requiresPro && !isPro()"
-        class="relative flex items-center gap-x-[.5rem] font-manrope font-medium whitespace-nowrap w-[13.5625rem] h-[3.125rem] rounded-[.5rem] px-[1.25rem] border border-neutral-soft"
-      >
-        <ng-icon [name]="tab.icon" size="18"></ng-icon>
-        {{ tab.label }}
-
-        @if (tab.requiresPro && !isPro()) {
-          <ng-icon name="lucideLock" size="14" class="ml-auto text-neutral-400"></ng-icon>
-        }
-      </button>
-    }
-  </nav>
-
-  <section class="flex-1">
-    @if (isLoaded()) {
-      @for (tab of tabs(); track tab.key) {
-        <div [class.hidden]="tab.key !== activeTabKey()">
-          <ng-container *ngComponentOutlet="tab.component"></ng-container>
-        </div>
+  <div
+    class="flex flex-col xl:flex-row gap-y-[1.5rem] xl:gap-x-[3.375rem]"
+    style="
+      @media (max-width: 1319px) {
+        flex-direction: column;
       }
-    }
-  </section>
+      @media (min-width: 1320px) {
+        flex-direction: row;
+      }
+    "
+  >
+    <!-- Navegação de abas -->
+    <nav class="tabs flex flex-col gap-y-[1rem] overflow-x-auto xl:w-[13.5625rem] xl:flex-shrink-0">
+      @for (tab of tabs(); track tab.key) {
+        <button
+          type="button"
+          (click)="selectTab(tab.key)"
+          [class.active-tab]="tab.key === activeTabKey()"
+          [class.opacity-50]="tab.requiresPro && !isPro()"
+          [class.cursor-not-allowed]="tab.requiresPro && !isPro()"
+          class="relative flex items-center gap-x-[.5rem] font-manrope font-medium whitespace-nowrap flex-shrink-0 h-[3.125rem] rounded-[.5rem] px-[1.25rem] border border-neutral-soft hover:bg-neutral-50 transition-colors duration-200 xl:w-full"
+        >
+          <ng-icon [name]="tab.icon" size="18" class="flex-shrink-0"></ng-icon>
+          <span>{{ tab.label }}</span>
 
-  <app-preview class="flex-1 max-w-77.25 w-full"></app-preview>
-</div>
+          @if (tab.requiresPro && !isPro()) {
+            <ng-icon
+              name="lucideLock"
+              size="14"
+              class="ml-auto text-neutral-400 flex-shrink-0"
+            ></ng-icon>
+          }
+        </button>
+      }
+    </nav>
+
+    <!-- Conteúdo principal -->
+    <section class="flex-1 min-w-0 w-full xl:w-auto">
+      @if (isLoaded()) {
+        @for (tab of tabs(); track tab.key) {
+          <div [class.hidden]="tab.key !== activeTabKey()" class="w-full">
+            <ng-container *ngComponentOutlet="tab.component"></ng-container>
+          </div>
+        }
+      }
+    </section>
+
+    <!-- Preview Desktop -->
+    <aside
+      class="hidden xl:block xl:flex-1 xl:flex-shrink-0 xl:max-w-77.25"
+      style="@media (max-width: 1319px) {display: none} @media (min-width: 1320px) {display: block}"
+    >
+      <app-preview class="w-full"></app-preview>
+    </aside>
+  </div>
+
+  <!-- Preview Mobile/Tablet -->
+  <div class="xl:hidden mt-[2rem] w-full" style="@media (min-width: 1320px) {display: none}">
+    <app-preview class="w-full"></app-preview>
+  </div>
+} @else {
+  <app-subscription-blocked
+    [status]="subscriptionAccess.blockedStatus()"
+  ></app-subscription-blocked>
+}

@@ -5,7 +5,9 @@
     class="flex items-center justify-between p-[30px] max-[26.875rem]:px-0 max-[26.875rem]:py-[.75rem] max-[26.875rem]:mx-[1rem] bg-[#FBFBFB66] border-b border-neutral-extra-soft max-[26.875rem]:w-[23.75rem] w-full"
   >
     <!-- Logo -->
-    <img src="/images/rencard-logo.svg" alt="logo rencard" width="145" height="36" />
+    <a href="/">
+      <img src="/images/rencard-logo.svg" alt="logo rencard" width="145" height="36" />
+    </a>
 
     <div class="flex items-center justify-center sm:hidden">
       <button (click)="toggle()" [attr.aria-label]="isOpen() ? 'Fechar menu' : 'Abrir menu'">

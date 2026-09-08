@@ -44,7 +44,7 @@ export class PersonalInfoTab {
       const profile = this.profileStore.profile();
 
       this.personalModel.set({
-        profile_image: profile.profile_image,
+        profile_image: profile.profile_image || '',
         display_name: profile.display_name,
         subtitle: profile.subtitle,
       });

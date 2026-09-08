@@ -30,15 +30,18 @@ export default function Cta() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4, duration: 0.6, ease: "easeOut" }}
       >
-        <a href="/app/auth/signup">
-          <Button
-            sizeH="xl"
-            variant="default"
-            className="mt-[2.5rem] w-[17.125rem] text-[1.5625rem] hover:scale-105 transition-transform duration-300"
-          >
-            Criar meu Rencard
-          </Button>
-        </a>
+        <Button
+          sizeH="xl"
+          variant="default"
+          className="mt-[2.5rem] w-[17.125rem] text-[1.5625rem] hover:scale-105 transition-transform duration-300"
+          onClick={() => {
+            document
+              .getElementById("plans")
+              ?.scrollIntoView({ behavior: "smooth" });
+          }}
+        >
+          Criar meu Rencard
+        </Button>
       </motion.div>
     </section>
   );

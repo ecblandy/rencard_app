@@ -1,8 +1,12 @@
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../../../../environments/environments';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { ProfileModel, SocialLink } from '../../../../../shared/types/profile-model';
 import { Observable } from 'rxjs';
+
+import { environment } from '../../../../../../environments/environments';
+
+import { ProfileModel, SocialLink } from '../../../../../shared/types/profile-model';
+
+import { CreateSubscriptionRequest, PendingSubscription } from '../../types/pending-subscription';
 
 @Injectable({
   providedIn: 'root',
@@ -11,32 +15,56 @@ export class ClientApi {
   private readonly baseUrl = environment.apiUrl;
   private readonly http = inject(HttpClient);
 
+  // =========================================================
+  // PLANO
+  // =========================================================
+
   clientPlan() {
     return this.http.get(`${this.baseUrl}/payments/subscriptions/`);
   }
 
+  // =========================================================
+  // REDES SOCIAIS
+  // =========================================================
+
   enableSocials(socials: SocialLink[]) {
-    return this.http.post(`${this.baseUrl}/profiles/me/socials/`, { socials });
+    return this.http.post(`${this.baseUrl}/profiles/me/socials/`, {
+      socials,
+    });
   }
+
+  // =========================================================
+  // DASHBOARD
+  // =========================================================
 
   dashboardDetails(period: 'today' | '7d' | '30d') {
     const params = new HttpParams().set('period', period);
-    return this.http.get(`${this.baseUrl}/users/client/dashboard/`, { params });
+
+    return this.http.get(`${this.baseUrl}/users/client/dashboard/`, {
+      params,
+    });
   }
+
+  // =========================================================
+  // PERFIL
+  // =========================================================
 
   updateProfileField(field: string, value: string): Observable<ProfileModel> {
-    return this.http.patch<ProfileModel>(`${this.baseUrl}/profiles/me/`, { [field]: value });
+    return this.http.patch<ProfileModel>(`${this.baseUrl}/profiles/me/`, {
+      [field]: value,
+    });
   }
 
-  updateMusic(payload: { value: string; enabled: boolean }): Observable<ProfileModel> {
+  updateMusic(payload: { value: string; enabled: boolean }) {
     return this.http.patch<ProfileModel>(`${this.baseUrl}/profiles/me/music/`, {
       value: payload.value,
       enabled: payload.enabled,
     });
   }
 
-  updateResume(payload: { file: File | null; enabled: boolean }): Observable<ProfileModel> {
+  updateResume(payload: { file: File | null; enabled: boolean }) {
     const formData = new FormData();
+
     formData.append('resume_enabled', String(payload.enabled));
 
     if (payload.file) {
@@ -46,7 +74,37 @@ export class ClientApi {
     return this.http.patch<ProfileModel>(`${this.baseUrl}/profiles/me/`, formData);
   }
 
-  downloadQrCodeImage() {
-    return this.http.get(`${this.baseUrl}/users/client/dashboard/qr-code/`);
+  // =========================================================
+  // PLANOS DISPONÍVEIS
+  // =========================================================
+
+  fetchPlans() {
+    return this.http.get(`${this.baseUrl}/payments/plans/`);
+  }
+
+  // =========================================================
+  // ASSINATURA
+  // =========================================================
+
+  createSubscription(data: CreateSubscriptionRequest) {
+    return this.http.post(`${this.baseUrl}/payments/subscriptions/`, data);
+  }
+
+  // =========================================================
+  // PAGAMENTO PENDENTE
+  // =========================================================
+
+  checkPendingSubscription(): Observable<PendingSubscription | null> {
+    return this.http.get<PendingSubscription | null>(
+      `${this.baseUrl}/payments/subscriptions/pending/`,
+    );
+  }
+
+  // =========================================================
+  // CANCELAR ASSINATURA / PAGAMENTO
+  // =========================================================
+
+  cancelSubscriptionOrPaymentLink() {
+    return this.http.post(`${this.baseUrl}/payments/subscriptions/cancel/`, {});
   }
 }

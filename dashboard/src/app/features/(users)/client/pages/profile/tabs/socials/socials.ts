@@ -147,11 +147,20 @@ export class Socials {
       return;
     }
 
-    const social_links_filtered = enabledSocials.map((s) => ({
-      type: s.key,
-      value: this.getFieldValue(s.key as keyof SocialsFormModel),
-      enabled: true,
-    }));
+    const social_links_filtered = enabledSocials.map((s) => {
+      let value = this.getFieldValue(s.key);
+
+      if (s.key === 'email' && !value.startsWith('mailto:')) {
+        value = `mailto:${value}`;
+      }
+
+      return {
+        id: 0,
+        type: s.key,
+        value,
+        enabled: true,
+      };
+    });
 
     const loadingToast = toast.loading('Aguarde, tentando atualizar...', { description: '' });
 

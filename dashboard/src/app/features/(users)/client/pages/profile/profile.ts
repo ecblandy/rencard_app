@@ -7,10 +7,12 @@ import { NgIcon } from '@ng-icons/core';
 import { Preview } from './preview/preview';
 import { DashboardTitle } from '../../../components/dashboard-title/dashboard-title';
 import { AuthState } from '../../../../auth/services/state/auth/auth-state';
+import { SubscriptionAccessService } from '../../../../../shared/services/subscription-access';
+import { SubscriptionBlocked } from "../billing/subscription-blocked/subscription-blocked";
 
 @Component({
   selector: 'app-profile',
-  imports: [NgComponentOutlet, NgIcon, Preview, DashboardTitle],
+  imports: [NgComponentOutlet, NgIcon, Preview, DashboardTitle, SubscriptionBlocked],
   templateUrl: './profile.html',
   styleUrl: './profile.css',
 })
@@ -18,7 +20,7 @@ export class Profile {
   private readonly profileService = inject(ProfileService);
   private readonly profileStore = inject(ProfileStore);
   private readonly authState = inject(AuthState);
-
+  protected readonly subscriptionAccess = inject(SubscriptionAccessService);
   readonly tabs = signal(EDITOR_TABS);
   readonly isPro = computed(
     () => this.authState.user()?.active_access_grant?.permissions?.can_use_pro_features ?? false,

@@ -1,0 +1,638 @@
+<div class="mb-12 animate-fade-in-up">
+  <!-- ========================================================= -->
+  <!-- CABEÇALHO -->
+  <!-- ========================================================= -->
+
+  <div class="mb-6">
+    <h2 class="font-manrope text-2xl font-bold text-neutral-900">Plano atual</h2>
+
+    <p class="font-manrope text-sm text-neutral-500 mt-1">
+      Gerencie sua assinatura e acompanhe os detalhes do seu plano.
+    </p>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- CARD PRINCIPAL -->
+  <!-- ========================================================= -->
+
+  <app-surface class="block animate-scale-in">
+    <div class="p-6 md:p-8">
+      <!-- ===================================================== -->
+      <!-- CABEÇALHO DO PLANO -->
+      <!-- ===================================================== -->
+
+      <div class="animate-slide-in">
+        <div class="flex-1 min-w-0">
+          <div class="flex flex-wrap items-center gap-3">
+            <h3 class="font-manrope text-2xl md:text-3xl font-bold text-neutral-900">
+              {{ data().name }}
+            </h3>
+
+            <span
+              class="font-manrope inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+              [class]="data().statusBadgeClass"
+            >
+              {{ data().statusLabel || data().status }}
+            </span>
+          </div>
+
+          @if (data().description) {
+            <p class="font-manrope text-sm text-neutral-500 mt-3 max-w-2xl leading-relaxed">
+              {{ data().description }}
+            </p>
+          }
+
+          <!-- TAGS -->
+
+          <div class="flex flex-wrap items-center gap-2 mt-4">
+            @if (data().type) {
+              <span
+                class="font-manrope inline-flex items-center gap-1.5 rounded-lg bg-neutral-100 border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-600"
+              >
+                <ng-icon name="lucideTag" size="14" />
+                {{ data().type }}
+              </span>
+            }
+
+            @if (data().hasActivePlan) {
+              <span
+                class="font-manrope inline-flex items-center gap-1.5 rounded-lg bg-neutral-100 border border-neutral-200 px-3 py-1.5 text-xs font-medium text-neutral-600"
+              >
+                <ng-icon name="lucideCheckCircle" size="14" />
+                Acesso premium
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- STATUS -->
+      <!-- ===================================================== -->
+
+      @if (data().statusMessage) {
+        <div
+          class="mt-7 rounded-xl border border-neutral-200 bg-neutral-50 p-4 animate-slide-in-delay"
+        >
+          <div class="flex items-start gap-3">
+            <div
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white border border-neutral-200"
+            >
+              <ng-icon name="lucideInfo" size="18" />
+            </div>
+
+            <div>
+              <p class="font-manrope text-sm font-semibold text-neutral-800">
+                Status da assinatura
+              </p>
+
+              <p class="font-manrope text-sm text-neutral-500 mt-1 leading-relaxed">
+                {{ data().statusMessage }}
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ===================================================== -->
+      <!-- DETALHES -->
+      <!-- ===================================================== -->
+
+      <div class="mt-8 animate-slide-up">
+        <div class="mb-4">
+          <h4 class="font-manrope text-base font-semibold text-neutral-900">
+            Detalhes da assinatura
+          </h4>
+
+          <p class="font-manrope text-xs text-neutral-500 mt-1">
+            Informações importantes sobre seu plano atual.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- PLANO -->
+
+          <div class="detail-card rounded-xl border border-neutral-200 bg-white p-5">
+            <div class="flex items-center gap-3">
+              <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-neutral-100"
+              >
+                <ng-icon name="lucideCrown" size="18" />
+              </div>
+
+              <div class="min-w-0">
+                <span class="font-manrope block text-xs text-neutral-400"> Plano </span>
+
+                <span
+                  class="font-manrope block text-sm font-semibold text-neutral-900 mt-1 truncate"
+                >
+                  {{ data().name }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- TIPO -->
+
+          <div class="detail-card rounded-xl border border-neutral-200 bg-white p-5">
+            <div class="flex items-center gap-3">
+              <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-neutral-100"
+              >
+                <ng-icon name="lucideTag" size="18" />
+              </div>
+
+              <div>
+                <span class="font-manrope block text-xs text-neutral-400"> Tipo de plano </span>
+
+                <span
+                  class="font-manrope block text-sm font-semibold text-neutral-900 mt-1 capitalize"
+                >
+                  {{ data().type || '—' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- EXPIRAÇÃO -->
+
+          <div class="detail-card rounded-xl border border-neutral-200 bg-white p-5">
+            <div class="flex items-center gap-3">
+              <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-neutral-100"
+              >
+                <ng-icon name="lucideCalendar" size="18" />
+              </div>
+
+              <div>
+                <span class="font-manrope block text-xs text-neutral-400"> Expiração </span>
+
+                @if (expirationDate()) {
+                  <span class="font-manrope block text-sm font-semibold text-neutral-900 mt-1">
+                    {{ expirationDate() | localDate }}
+                  </span>
+                } @else {
+                  <span class="font-manrope block text-sm font-semibold text-neutral-900 mt-1">
+                    —
+                  </span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- PROGRESSO -->
+      <!-- ===================================================== -->
+
+      @if (data().isActive || data().isExpired || data().isFreeTrial) {
+        <div class="mt-8 rounded-xl border border-neutral-200 bg-neutral-50 p-5 animate-slide-up">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
+            <div>
+              <span class="font-manrope block text-sm font-semibold text-neutral-800">
+                Período da assinatura
+              </span>
+
+              <span class="font-manrope block text-xs text-neutral-500 mt-1">
+                Acompanhe o período atual do seu plano.
+              </span>
+            </div>
+
+            @if (data().daysRemaining > 0) {
+              <span class="font-manrope shrink-0 text-xs font-medium text-neutral-500">
+                {{ data().daysRemaining }} dias restantes
+              </span>
+            } @else {
+              <span class="font-manrope shrink-0 text-xs font-medium text-neutral-500">
+                Período encerrado
+              </span>
+            }
+          </div>
+
+          <!-- BARRA -->
+
+          <div class="w-full h-2.5 bg-neutral-200 rounded-full overflow-hidden">
+            <div
+              class="progress-bar h-full rounded-full transition-all duration-700"
+              [class]="data().progressColor"
+              [style.width.%]="data().progressPercentage"
+            ></div>
+          </div>
+
+          <!-- DATAS -->
+
+          <div class="flex justify-between mt-2">
+            @if (data().startDate) {
+              <span class="font-manrope text-[11px] text-neutral-400">
+                {{ data().startDate | localDate }}
+              </span>
+            } @else {
+              <span class="font-manrope text-[11px] text-neutral-400"> Início </span>
+            }
+
+            @if (expirationDate()) {
+              <span class="font-manrope text-[11px] text-neutral-400">
+                {{ expirationDate() | localDate }}
+              </span>
+            } @else {
+              <span class="font-manrope text-[11px] text-neutral-400"> Expiração </span>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ===================================================== -->
+      <!-- PAGAMENTO -->
+      <!-- ===================================================== -->
+
+      <div class="mt-8 animate-slide-up">
+        <div class="mb-4">
+          <h4 class="font-manrope text-base font-semibold text-neutral-900">Forma de pagamento</h4>
+
+          <p class="font-manrope text-xs text-neutral-500 mt-1">
+            Informações sobre o pagamento associado à assinatura.
+          </p>
+        </div>
+
+        @if (
+          data().payment_method &&
+          (data().payment_method.card_last4 ||
+            (data().payment_method.billing_type &&
+              data().payment_method.billing_type !== 'UNDEFINED'))
+        ) {
+          <div class="payment-card rounded-xl border border-neutral-200 bg-white p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
+              <!-- MÉTODO -->
+
+              <div class="flex items-center gap-4">
+                <div
+                  class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-neutral-100 border border-neutral-200"
+                >
+                  <ng-icon name="lucideCreditCard" size="20" />
+                </div>
+
+                <div>
+                  <p class="font-manrope text-sm font-semibold text-neutral-900">
+                    @if (
+                      data().payment_method.card_brand &&
+                      data().payment_method.card_brand !== 'UNKNOWN'
+                    ) {
+                      {{ data().payment_method.card_brand }}
+                    } @else {
+                      Cartão de crédito
+                    }
+                  </p>
+
+                  @if (data().payment_method.card_last4) {
+                    <p class="font-manrope text-xs text-neutral-500 mt-1">
+                      Cartão terminado em
+
+                      <strong class="font-semibold text-neutral-700">
+                        {{ data().payment_method.card_last4 }}
+                      </strong>
+                    </p>
+                  }
+                </div>
+              </div>
+
+              <!-- TIPO -->
+
+              @if (
+                data().payment_method.billing_type &&
+                data().payment_method.billing_type !== 'UNDEFINED'
+              ) {
+                <div class="sm:text-right">
+                  <span class="font-manrope block text-xs text-neutral-400">
+                    Tipo de cobrança
+                  </span>
+
+                  <span class="font-manrope block text-sm font-medium text-neutral-700 mt-1">
+                    {{ data().payment_method.billing_type }}
+                  </span>
+                </div>
+              }
+            </div>
+
+            <!-- SEGURANÇA -->
+
+            <div class="mt-5 pt-4 border-t border-neutral-100 flex items-center gap-2">
+              <ng-icon name="lucideLockKeyhole" size="14" class="text-neutral-400" />
+
+              <span class="font-manrope text-xs text-neutral-400">
+                Os dados completos do cartão não são armazenados nesta aplicação.
+              </span>
+            </div>
+          </div>
+        } @else {
+          <div
+            class="payment-card rounded-xl border border-dashed border-neutral-200 bg-neutral-50 p-5"
+          >
+            <div class="flex items-center gap-4">
+              <div
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white border border-neutral-200"
+              >
+                <ng-icon name="lucideCreditCard" size="20" class="text-neutral-400" />
+              </div>
+
+              <div>
+                <p class="font-manrope text-sm font-semibold text-neutral-800">
+                  Nenhuma forma de pagamento disponível
+                </p>
+
+                <p class="font-manrope text-xs text-neutral-500 mt-1 leading-relaxed">
+                  As informações de pagamento aparecerão aqui quando estiverem disponíveis.
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- ===================================================== -->
+      <!-- BENEFÍCIOS -->
+      <!-- ===================================================== -->
+
+      @if (data().features?.length) {
+        <div class="mt-8 animate-slide-up">
+          <div class="mb-4">
+            <h4 class="font-manrope text-base font-semibold text-neutral-900">
+              Benefícios do plano
+            </h4>
+
+            <p class="font-manrope text-xs text-neutral-500 mt-1">
+              Recursos disponíveis na sua assinatura.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            @for (feature of data().features; track feature; let i = $index) {
+              <div
+                class="feature-item flex items-center gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-3"
+                [style.--feature-delay]="i * 60 + 'ms'"
+              >
+                <div
+                  class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-neutral-100"
+                >
+                  <ng-icon name="lucideCheck" size="14" />
+                </div>
+
+                <span class="font-manrope text-sm text-neutral-700">
+                  {{ feature }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- ===================================================== -->
+      <!-- AÇÕES -->
+      <!-- ===================================================== -->
+
+      @if (data().isActive) {
+        <div class="mt-8 pt-6 border-t border-neutral-100 animate-slide-up">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+            <div>
+              <p class="font-manrope text-sm font-semibold text-neutral-800">
+                Gerencie sua assinatura
+              </p>
+
+              <p class="font-manrope text-xs text-neutral-500 mt-1">
+                Altere seu plano, renove ou cancele sua assinatura.
+              </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <app-button variant="outline" (click)="changePlan.emit()"> Alterar plano </app-button>
+
+              <button
+                type="button"
+                (click)="renew.emit()"
+                class="font-manrope inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition cursor-pointer"
+              >
+                <ng-icon name="lucideRefreshCcw" size="15" />
+
+                Renovar
+              </button>
+
+              <button
+                type="button"
+                (click)="openCancellationModal()"
+                class="font-manrope inline-flex items-center justify-center px-4 py-2.5 rounded-xl text-sm font-medium text-neutral-500 hover:bg-red-50 hover:text-red-600 transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      } @else {
+        @if (data().hasNoPlan || data().isFreeTrial) {
+          <div class="mt-8 pt-6 border-t border-neutral-100 flex justify-end animate-slide-up">
+            <app-button variant="default" (click)="selectPlan.emit()"> Assinar agora </app-button>
+          </div>
+        } @else if (data().isExpired) {
+          <div class="mt-8 pt-6 border-t border-neutral-100 flex justify-end animate-slide-up">
+            <app-button variant="default" (click)="renew.emit()">
+              <span class="inline-flex items-center gap-2">
+                <ng-icon name="lucideRefreshCcw" size="16" />
+
+                Renovar agora
+              </span>
+            </app-button>
+          </div>
+        } @else if (data().isCancelled) {
+          <div class="mt-8 pt-6 border-t border-neutral-100 flex justify-end animate-slide-up">
+            <app-button variant="default" (click)="selectPlan.emit()">
+              Contratar novo plano
+            </app-button>
+          </div>
+        } @else if (data().isFailed) {
+          <div class="mt-8 pt-6 border-t border-neutral-100 flex justify-end animate-slide-up">
+            <app-button variant="default" (click)="renew.emit()"> Resolver problema </app-button>
+          </div>
+        }
+      }
+    </div>
+  </app-surface>
+</div>
+
+<!-- =========================================================== -->
+<!-- MODAL DE CANCELAMENTO -->
+<!-- =========================================================== -->
+
+@if (isCancellationModalOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cancel-subscription-title"
+  >
+    <!-- BACKDROP -->
+
+    <button
+      type="button"
+      aria-label="Fechar"
+      class="absolute inset-0 bg-black/50 backdrop-blur-sm cursor-default animate-fade-in"
+      (click)="closeCancellationModal()"
+    ></button>
+
+    <!-- MODAL -->
+
+    <div
+      class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-neutral-200 overflow-hidden animate-scale-in"
+    >
+      <!-- HEADER -->
+
+      <div class="p-6 border-b border-neutral-100">
+        <div class="flex items-start gap-4">
+          <div
+            class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 border border-red-100"
+          >
+            <ng-icon name="lucideTriangleAlert" size="20" class="text-red-600" />
+          </div>
+
+          <div class="flex-1">
+            <h3
+              id="cancel-subscription-title"
+              class="font-manrope text-lg font-semibold text-neutral-900"
+            >
+              Cancelar assinatura?
+            </h3>
+
+            <p class="font-manrope text-sm text-neutral-500 mt-1 leading-relaxed">
+              Confirme se deseja realmente cancelar seu plano.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            aria-label="Fechar"
+            (click)="closeCancellationModal()"
+            class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition cursor-pointer"
+          >
+            <ng-icon name="lucideX" size="17" />
+          </button>
+        </div>
+      </div>
+
+      <!-- CONTEÚDO -->
+
+      <div class="p-6">
+        <p class="font-manrope text-sm text-neutral-600 leading-relaxed">
+          Ao cancelar sua assinatura, a renovação futura será interrompida. Seu acesso continuará
+          seguindo as condições do período contratado.
+        </p>
+
+        <!-- RESUMO -->
+
+        <div class="mt-5 rounded-xl border border-neutral-200 bg-neutral-50 p-4">
+          <div class="flex items-center justify-between gap-4">
+            <span class="font-manrope text-sm text-neutral-500"> Plano atual </span>
+
+            <span class="font-manrope text-sm font-semibold text-neutral-900 text-right">
+              {{ data().name }}
+            </span>
+          </div>
+
+          @if (data().type) {
+            <div
+              class="flex items-center justify-between gap-4 mt-3 pt-3 border-t border-neutral-200"
+            >
+              <span class="font-manrope text-sm text-neutral-500"> Tipo </span>
+
+              <span class="font-manrope text-sm font-semibold text-neutral-900 capitalize">
+                {{ data().type }}
+              </span>
+            </div>
+          }
+
+          @if (expirationDate()) {
+            <div
+              class="flex items-center justify-between gap-4 mt-3 pt-3 border-t border-neutral-200"
+            >
+              <span class="font-manrope text-sm text-neutral-500"> Acesso até </span>
+
+              <span class="font-manrope text-sm font-semibold text-neutral-900">
+                {{ expirationDate() | localDate }}
+              </span>
+            </div>
+          }
+        </div>
+
+        <!-- CONSEQUÊNCIAS -->
+
+        <div class="mt-5 space-y-3">
+          <div class="flex items-start gap-3">
+            <div
+              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100"
+            >
+              <ng-icon name="lucideCheck" size="13" />
+            </div>
+
+            <p class="font-manrope text-sm text-neutral-600 leading-relaxed">
+              Seu acesso permanece disponível até o final do período contratado.
+            </p>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div
+              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100"
+            >
+              <ng-icon name="lucideCheck" size="13" />
+            </div>
+
+            <p class="font-manrope text-sm text-neutral-600 leading-relaxed">
+              A renovação futura da assinatura será interrompida.
+            </p>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div
+              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-neutral-100"
+            >
+              <ng-icon name="lucideCheck" size="13" />
+            </div>
+
+            <p class="font-manrope text-sm text-neutral-600 leading-relaxed">
+              Você poderá contratar um novo plano posteriormente.
+            </p>
+          </div>
+        </div>
+
+        <!-- AVISO -->
+
+        <div class="mt-5 rounded-xl bg-amber-50 border border-amber-100 p-4">
+          <div class="flex items-start gap-3">
+            <ng-icon name="lucideTriangleAlert" size="16" class="shrink-0 text-amber-600 mt-0.5" />
+
+            <p class="font-manrope text-xs text-amber-700 leading-relaxed">
+              O cancelamento interrompe a renovação da assinatura. Valores já pagos seguem as regras
+              de cancelamento e reembolso aplicáveis ao seu plano.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- AÇÕES DO MODAL -->
+
+      <div class="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 p-6 pt-0">
+        <button
+          type="button"
+          (click)="closeCancellationModal()"
+          class="font-manrope w-full sm:w-auto px-5 py-2.5 rounded-xl border border-neutral-200 text-sm font-medium text-neutral-700 hover:bg-neutral-50 transition cursor-pointer"
+        >
+          Voltar
+        </button>
+
+        <button
+          type="button"
+          (click)="confirmCancellation()"
+          class="font-manrope w-full sm:w-auto px-5 py-2.5 rounded-xl bg-neutral-900 text-sm font-medium text-white hover:bg-neutral-800 transition cursor-pointer"
+        >
+          Sim, cancelar assinatura
+        </button>
+      </div>
+    </div>
+  </div>
+}

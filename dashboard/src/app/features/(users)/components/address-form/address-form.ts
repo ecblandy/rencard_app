@@ -1,17 +1,19 @@
-import { Component, inject, signal, effect } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { form, min, minLength, required, submit } from '@angular/forms/signals';
+import { toast } from 'ngx-sonner';
+
 import { DashboardTitle } from '../dashboard-title/dashboard-title';
 import { Surface } from '../../../../shared/components/surface/surface';
 import { SurfaceTitle } from '../surface-title/surface-title';
 import { UiLabel } from '../../../../shared/ui/label/label';
 import { UiInput } from '../../../../shared/ui/input/input';
-import { form, min, minLength, required, submit } from '@angular/forms/signals';
 import { UiButton } from '../../../../shared/ui/button/button';
+import { Loader } from '../../../../shared/components/loader/loader';
+
 import { Auth } from '../../../auth/services/facade/auth';
 import { CepService } from '../../../../core/services/cep/cep.service';
-import { firstValueFrom } from 'rxjs';
-import { toast } from 'ngx-sonner';
 import { formatErrorList } from '../../../../shared/utils/format-error';
-import { Loader } from "../../../../shared/components/loader/loader";
 
 interface AddressModel {
   cep: string;
@@ -35,7 +37,6 @@ export class AddressForm {
 
   isInitialLoading = signal(true);
 
-  // modelo do formulário
   addressModel = signal<AddressModel>({
     cep: '',
     city: '',
@@ -46,25 +47,46 @@ export class AddressForm {
     state: '',
   });
 
-  // formulário com validações
   addressForm = form(this.addressModel, (schema) => {
-    required(schema.cep, { message: 'CEP é obrigatório' });
-    minLength(schema.cep, 8, { message: 'CEP deve ter 8 caracteres' });
+    required(schema.cep, {
+      message: 'CEP é obrigatório',
+    });
 
-    required(schema.street, { message: 'Rua é obrigatória' });
-    required(schema.number, { message: 'Número é obrigatório' });
-    min(schema.number, 1, { message: 'Número deve ser positivo' });
+    minLength(schema.cep, 8, {
+      message: 'CEP deve ter 8 caracteres',
+    });
 
-    required(schema.neighborhood, { message: 'Bairro é obrigatório' });
-    required(schema.city, { message: 'Cidade é obrigatória' });
-    required(schema.state, { message: 'Estado é obrigatório' });
+    required(schema.street, {
+      message: 'Rua é obrigatória',
+    });
+
+    required(schema.number, {
+      message: 'Número é obrigatório',
+    });
+
+    min(schema.number, 1, {
+      message: 'Número deve ser positivo',
+    });
+
+    required(schema.neighborhood, {
+      message: 'Bairro é obrigatório',
+    });
+
+    required(schema.city, {
+      message: 'Cidade é obrigatória',
+    });
+
+    required(schema.state, {
+      message: 'Estado é obrigatório',
+    });
   });
 
   ngOnInit() {
-    // carregar usuário e inicializar o formulário
     this.authService.loadUser().subscribe({
       next: (user) => {
-        if (!user) return;
+        if (!user) {
+          return;
+        }
 
         this.addressModel.set({
           cep: user.cep || '',
@@ -72,36 +94,47 @@ export class AddressForm {
           neighborhood: user.neighborhood || '',
           complement: user.complement || '',
           street: user.street || '',
-          number: user.number || null,
+          number: user.number ? Number(user.number) : null,
           state: user.state || '',
         });
       },
-      error: (err) => console.error('Erro ao carregar usuário:', err),
-      complete: () => this.isInitialLoading.set(false),
+
+      error: (err) => {
+        console.error('Erro ao carregar usuário:', err);
+        this.isInitialLoading.set(false);
+      },
+
+      complete: () => {
+        this.isInitialLoading.set(false);
+      },
     });
   }
 
-  // busca automática de endereço pelo CEP
   async onCepChange(event: Event) {
-    const cep = (event.target as HTMLInputElement).value;
+    const input = event.target as HTMLInputElement;
 
-    if (cep.length === 9) {
-      try {
-        const res = await firstValueFrom(this.cepService.getCep(cep));
-        this.addressModel.update((v) => ({
-          ...v,
-          city: res.localidade,
-          state: res.uf,
-          street: res.logradouro,
-          neighborhood: res.bairro,
-        }));
-      } catch (err) {
-        console.error('Erro ao buscar CEP:', err);
-      }
+    const cep = input.value.replace(/\D/g, '');
+
+    if (cep.length !== 8) {
+      return;
+    }
+
+    try {
+      const res = await firstValueFrom(this.cepService.getCep(cep));
+
+      this.addressModel.update((value) => ({
+        ...value,
+
+        city: res.localidade || '',
+        state: res.uf || '',
+        street: res.logradouro || '',
+        neighborhood: res.bairro || '',
+      }));
+    } catch (err) {
+      console.error('Erro ao buscar CEP:', err);
     }
   }
 
-  // envio do formulário
   onSubmit(event: Event) {
     event.preventDefault();
 
@@ -109,19 +142,22 @@ export class AddressForm {
       const payload = this.addressModel();
 
       console.log('Enviando endereço:', payload);
-      const loadingToast = toast.loading('Atualizando dados...');
+
+      const loadingToast = toast.loading('Atualizando seus dados...');
 
       try {
         await firstValueFrom(this.authService.updateUser(payload));
-        toast.success('Sucesso!', {
-          description: 'Seus dados foram atualizados com sucesso.',
+
+        toast.success('Dados atualizados', {
+          description: 'Seu endereço foi atualizado com sucesso.',
           id: loadingToast,
         });
       } catch (err: any) {
         const backendError = err?.error ?? err;
+
         const errorMessages = formatErrorList(backendError);
 
-        toast.error('Ops, algo deu errado!', {
+        toast.error('Não foi possível atualizar', {
           description: errorMessages.join('\n'),
           id: loadingToast,
         });

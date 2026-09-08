@@ -84,8 +84,12 @@ export default function Hero() {
           <Button
             sizeH="sm"
             variant="outline"
-            href="#plans"
-            className="first-letter:uppercase"
+            onClick={() => {
+              document
+                .getElementById("plans")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="first-letter:uppercase hover:cursor-pointer"
           >
             ver planos
           </Button>

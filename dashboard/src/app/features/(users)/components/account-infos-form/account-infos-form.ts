@@ -1,14 +1,18 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
+
+import { disabled, form, submit } from '@angular/forms/signals';
+
 import { SurfaceTitle } from '../surface-title/surface-title';
 import { UiLabel } from '../../../../shared/ui/label/label';
 import { UiInput } from '../../../../shared/ui/input/input';
 import { UiButton } from '../../../../shared/ui/button/button';
 import { Surface } from '../../../../shared/components/surface/surface';
-import { disabled, form, submit } from '@angular/forms/signals';
 import { Auth } from '../../../auth/services/facade/auth';
+import { AuthState } from '../../../auth/services/state/auth/auth-state';
 import { ChangeEmailModal } from '../change-email-modal/change-email-modal';
-import { Loader } from '../../../../shared/components/loader/loader';
 import { ChangePasswordModal } from '../change-password-modal/change-password-modal';
+import { Loader } from '../../../../shared/components/loader/loader';
+import { DashboardTitle } from '../dashboard-title/dashboard-title';
 
 interface AccountInfosModel {
   cpf_cnpj: string;
@@ -35,6 +39,7 @@ interface AccountInfosModel {
 })
 export class AccountInfosForm {
   private readonly authService = inject(Auth);
+  private readonly authState = inject(AuthState);
 
   isInitialLoading = signal(true);
 
@@ -54,6 +59,38 @@ export class AccountInfosForm {
   emailModalOpen = signal(false);
   passwordModalOpen = signal(false);
 
+  constructor() {
+    effect(() => {
+      const user = this.authState.user();
+
+      if (!user) {
+        return;
+      }
+
+      this.accountInfosModel.set({
+        cpf_cnpj: user.cpf_cnpj || '',
+        phone_number: user.phone_number || '',
+        full_name: user.full_name || '',
+        email: user.email || '',
+        password: '',
+      });
+    });
+  }
+
+  ngOnInit() {
+    this.authService.loadUser().subscribe({
+      error: (err) => {
+        console.error('Erro ao carregar usuário:', err);
+
+        this.isInitialLoading.set(false);
+      },
+
+      complete: () => {
+        this.isInitialLoading.set(false);
+      },
+    });
+  }
+
   openEmailModal() {
     this.emailModalOpen.set(true);
   }
@@ -62,28 +99,23 @@ export class AccountInfosForm {
     this.passwordModalOpen.set(true);
   }
 
-  ngOnInit() {
-    this.authService.loadUser().subscribe({
-      next: (user) => {
-        this.accountInfosModel.set({
-          cpf_cnpj: user.cpf_cnpj || '',
-          phone_number: user.phone_number || '',
-          full_name: user.full_name || '',
-          email: user.email || '',
-          password: user.password || '',
-        });
-      },
-      error(err) {
-        console.error('Erro ao carregar usuário:', err);
-      },
-      complete: () => this.isInitialLoading.set(false),
-    });
-  }
-
   onSubmit(event: Event) {
     event.preventDefault();
+
     submit(this.accountInfosForm, async () => {
-      const payload = this.accountInfosModel();
+      const payload = {
+        cpf_cnpj: this.accountInfosModel().cpf_cnpj,
+        phone_number: this.accountInfosModel().phone_number,
+        full_name: this.accountInfosModel().full_name,
+      };
+
+      console.log('Atualizando informações da conta:', payload);
+
+      // Aqui entra sua chamada:
+      //
+      // await firstValueFrom(
+      //   this.authService.updateUser(payload)
+      // );
     });
   }
 }

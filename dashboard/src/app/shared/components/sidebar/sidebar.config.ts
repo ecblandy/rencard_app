@@ -30,5 +30,6 @@ export const SIDEBAR_LINKS: Record<UserRole, SidebarLink[]> = {
     { label: 'Códigos & Apps', path: '/client/apps', icon: 'lucideQrCode' },
     { label: 'Configurações', path: '/client/settings', icon: 'lucideSettings' },
     { label: 'Suporte', path: '/client/support', icon: 'bootstrapHeadset' },
+    { label: 'Entrega', path: '/client/delivery-information', icon: 'lucideTruck' },
   ],
 };

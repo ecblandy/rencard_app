@@ -1,11 +1,18 @@
 <app-auth-form
-  title="Verifique seu e-mail"
-  subtitle="Enviamos um código de confirmação para o seu e-mail."
+  [title]="
+    confirmationType() === 'change-email' ? 'Confirme seu novo e-mail' : 'Verifique seu e-mail'
+  "
+  [subtitle]="
+    confirmationType() === 'change-email'
+      ? 'Enviamos um código para seu novo e-mail. Digite-o abaixo.'
+      : 'Enviamos um código de confirmação para seu e-mail.'
+  "
   (submitForm)="onSubmit($event)"
 >
-  <!-- Code -->
+  <!-- Código -->
   <div class="flex flex-col gap-2">
-    <app-label variant="auth" for="code">Código de verificação</app-label>
+    <app-label variant="auth" for="code"> Código de verificação </app-label>
+
     <app-input
       variant="default"
       id="code"
@@ -16,70 +23,86 @@
       sizeH="xl"
       [formField]="confirmEmailForm.code"
     />
+
     @if (confirmEmailForm.code().touched() && confirmEmailForm.code().invalid()) {
       <ul>
         @for (error of confirmEmailForm.code().errors(); track error) {
-          <li class="text-error">{{ error.message }}</li>
+          <li class="text-error text-sm">
+            {{ error.message }}
+          </li>
         }
       </ul>
     }
   </div>
 
-  <button
-    type="button"
-    class="text-sm text-muted-foreground underline w-fit"
-    (click)="openChangeEmailModal()"
+  <!-- E-mail -->
+  <div class="bg-neutral-100 border border-neutral-300 rounded-lg p-3 sm:p-4">
+    <p class="text-xs sm:text-sm text-neutral-700">
+      E-mail:
+
+      <span class="font-semibold text-neutral-900">
+        {{ maskedEmail() }}
+      </span>
+    </p>
+  </div>
+
+  <!-- Ações -->
+  <div
+    class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 pt-2 border-t border-neutral-200"
   >
-    Errou o e-mail? Alterar
-  </button>
-
-  <app-button type="submit" class="w-full" sizeH="xl">Confirmar código</app-button>
-</app-auth-form>
-
-@if (isChangeEmailOpen()) {
-  <app-modal [isOpen]="isChangeEmailOpen()" (close)="closeChangeEmailModal()">
-    <form
-      class="mx-auto flex w-full max-w-[26rem] flex-col gap-6 rounded-[.75rem] bg-white p-6"
-      (submit)="onChangeEmailSubmit($event)"
+    <button
+      type="button"
+      class="text-sm font-medium text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 px-3 py-2 rounded-md transition-all duration-200"
+      (click)="changeEmail()"
     >
-      <div class="flex flex-col gap-1">
-        <h2 class="text-lg font-semibold text-foreground">Alterar e-mail</h2>
-        <p class="text-sm text-muted-foreground">
-          Informe o e-mail correto. Enviaremos um novo código de confirmação para ele.
-        </p>
-      </div>
+      Trocar e-mail
+    </button>
 
-      <div class="flex flex-col gap-2">
-        <app-label variant="auth" for="new-email">Novo e-mail</app-label>
-        <app-input
-          variant="default"
-          id="new-email"
-          type="email"
-          placeholder="Digite o novo e-mail."
-          sizeH="xl"
-          [formField]="changeEmailForm.email"
-        />
-        @if (changeEmailForm.email().touched() && changeEmailForm.email().invalid()) {
-          <ul>
-            @for (error of changeEmailForm.email().errors(); track error) {
-              <li class="text-error">{{ error.message }}</li>
-            }
-          </ul>
-        }
-      </div>
+    @if (canResendCode()) {
+      <button
+        type="button"
+        class="text-sm font-medium text-neutral-900 hover:text-black hover:bg-neutral-100 px-3 py-2 rounded-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        [disabled]="isResending()"
+        (click)="resendCode()"
+      >
+        <span class="inline-flex items-center gap-1">
+          @if (isResending()) {
+            <svg
+              class="animate-spin h-4 w-4"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
 
-      <div class="flex gap-3">
-        <app-button
-          type="button"
-          variant="destructive"
-          class="w-full"
-          sizeH="xl"
-          (click)="closeChangeEmailModal()"
-        >
-          Cancelar
-        </app-button>
-        <app-button type="submit" class="w-full" sizeH="xl">Salvar</app-button>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+
+            Reenviando...
+          } @else {
+            Reenviar código
+          }
+        </span>
+      </button>
+    } @else {
+      <div class="text-sm font-medium text-neutral-500 px-3 py-2">
+        Reenviar em
+
+        <span class="font-semibold text-neutral-700"> {{ resendCountdown() }}s </span>
       </div>
-    </form>
-  </app-modal>
-}
+    }
+  </div>
+
+  <app-button type="submit" class="w-full" sizeH="xl"> Confirmar código </app-button>
+</app-auth-form>

@@ -1,15 +1,118 @@
-<div class="mt-[.75rem]">
+<div class="mt-3">
   @if (hasData()) {
-    <canvas
-      baseChart
-      [type]="chartConfig.type"
-      [data]="chartConfig.data"
-      [options]="chartConfig.options"
-    ></canvas>
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
+
+    <div class="flex flex-col gap-4 mb-6">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="font-urbanist font-bold text-lg text-neutral-900">Visualizações</h3>
+
+            <span class="period-badge">
+              {{ rangeLabel() }}
+            </span>
+          </div>
+
+          <p class="font-manrope text-xs text-neutral-500 mt-1">
+            Acompanhe o desempenho do seu perfil
+          </p>
+        </div>
+
+        <div class="chart-icon">
+          <ng-icon name="lucideChartNoAxesColumnIncreasing" class="text-lg"></ng-icon>
+        </div>
+      </div>
+
+      <!-- =================================================== -->
+      <!-- PRINCIPAL -->
+      <!-- =================================================== -->
+
+      <div class="flex items-end gap-2">
+        <span class="font-urbanist font-bold text-3xl text-neutral-900 tracking-tight">
+          {{ totalViews() | number }}
+        </span>
+
+        <span class="font-manrope text-xs text-neutral-500 pb-1"> visualizações </span>
+      </div>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- MÉTRICAS -->
+    <!-- ===================================================== -->
+
+    <div class="grid grid-cols-3 gap-3 mb-6">
+      <!-- MÉDIA -->
+
+      <div class="metric-card">
+        <div class="metric-icon">
+          <ng-icon name="lucideChartAverage" class="text-sm"></ng-icon>
+        </div>
+
+        <span class="metric-label"> Média </span>
+
+        <strong class="metric-value">
+          {{ averageViews() | number }}
+        </strong>
+      </div>
+
+      <!-- PICO -->
+
+      <div class="metric-card">
+        <div class="metric-icon">
+          <ng-icon name="lucideTrendingUp" class="text-sm"></ng-icon>
+        </div>
+
+        <span class="metric-label"> Pico </span>
+
+        <strong class="metric-value">
+          {{ peakViews() | number }}
+        </strong>
+      </div>
+
+      <!-- MOMENTO -->
+
+      <div class="metric-card">
+        <div class="metric-icon">
+          <ng-icon name="lucideClock3" class="text-sm"></ng-icon>
+        </div>
+
+        <span class="metric-label"> Pico em </span>
+
+        <strong class="metric-value truncate" [title]="peakLabel()">
+          {{ peakLabel() }}
+        </strong>
+      </div>
+    </div>
+
+    <!-- ===================================================== -->
+    <!-- GRÁFICO -->
+    <!-- ===================================================== -->
+
+    <div class="chart-wrapper">
+      <canvas
+        baseChart
+        [type]="chartConfig.type"
+        [data]="chartConfig.data"
+        [options]="chartConfig.options"
+      ></canvas>
+    </div>
   } @else {
-    <div class="flex flex-col items-center justify-center gap-2 py-10 text-neutral-soft">
-      <ng-icon name="lucideChartNoAxesColumn" class="text-[2rem]"></ng-icon>
-      <p class="font-manrope text-sm">Nenhuma visualização no período selecionado.</p>
+    <!-- ===================================================== -->
+    <!-- EMPTY STATE -->
+    <!-- ===================================================== -->
+
+    <div class="empty-state">
+      <div class="empty-icon">
+        <ng-icon name="lucideChartNoAxesColumn" class="text-2xl"></ng-icon>
+      </div>
+
+      <h3 class="font-urbanist font-semibold text-sm text-neutral-800">Nenhuma visualização</h3>
+
+      <p class="font-manrope text-xs text-neutral-500 max-w-xs text-center leading-relaxed">
+        Ainda não existem visualizações registradas para o período selecionado.
+      </p>
     </div>
   }
 </div>

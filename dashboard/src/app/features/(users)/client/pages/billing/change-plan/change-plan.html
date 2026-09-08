@@ -1,80 +1,326 @@
 <div class="mx-auto px-[1.25rem] mb-[3.75rem] max-w-[79.875rem] w-full h-full">
   <app-onboarding-title
-    title="Trocar plano de assinatura"
-    description="Selecione o novo plano ideal para a sua conta e aproveite os recursos disponíveis."
+    [title]="pageTitle()"
+    [description]="pageDescription()"
   ></app-onboarding-title>
 
+  <!-- ====================================================== -->
+  <!-- LOADING -->
+  <!-- ====================================================== -->
+
   @if (isInitialLoading()) {
-    <!-- Loading -->
-    <div class="flex flex-col items-center justify-center mt-[6.25rem]">
+    <div class="flex flex-col items-center justify-center py-24 animate-fade-in">
       <app-loader></app-loader>
-      <p class="mt-4 text-gray-600">Carregando seus planos, aguarde...</p>
+
+      <p class="mt-5 font-manrope text-sm text-neutral-500">Carregando planos disponíveis...</p>
     </div>
-  } @else {
-    <div class="flex gap-[1.5rem]">
-      <!-- Plans -->
-      <ul class="flex gap-[1.5rem] items-start">
-        @for (plan of plans(); track plan) {
-          <li
-            class="p-6 border max-w-[28.125rem] w-full rounded-[1.25rem] h-auto transition-all relative"
-            [class.pro]="plan.type === 'pro'"
-            [class.border-neutral-medium]="plan.type !== 'pro'"
-            [class.ring-2]="currentPlan()?.id === plan.id"
-            [class.ring-purple-500]="currentPlan()?.id === plan.id"
-          >
-            <!-- Badge de plano atual -->
-            @if (currentPlan()?.id === plan.id) {
-              <span
-                class="absolute top-4 right-4 text-xs font-bold font-manrope px-3 py-1 rounded-full bg-purple-100 text-purple-700"
-              >
-                Plano atual
-              </span>
-            }
+  }
 
-            <!-- Titles -->
-            <div class="space-y-[1rem] font-urbanist mb-[2.375rem]">
-              <h2 class="text-[2.5rem] font-bold text-[2rem]">{{ plan.name }}</h2>
-              <p
-                class="font-semibold text-[1.25rem]"
-                [class.text-neutral-medium]="plan.type !== 'pro'"
-              >
-                {{ plan.description }}
-              </p>
-            </div>
+  <!-- ====================================================== -->
+  <!-- ERROR -->
+  <!-- ====================================================== -->
 
-            <!-- Features -->
-            <ul class="space-y-[2rem]">
-              @for (feature of plan.features; track feature) {
-                <li class="flex items-center gap-[.75rem]">
-                  <ng-icon
-                    name="lucideCheck"
-                    size="22"
-                    [class.text-neutral-strong]="plan.type !== 'pro'"
-                  ></ng-icon>
-                  <p
-                    class="font-semibold font-manrope"
-                    [class.text-neutral-strong]="plan.type !== 'pro'"
-                  >
-                    {{ feature }}
-                  </p>
-                </li>
-              }
-            </ul>
+  @else if (error()) {
+    <div class="flex flex-col items-center justify-center py-24 text-center animate-fade-up">
+      <div
+        class="w-14 h-14 rounded-2xl bg-neutral-100 border border-neutral-200 flex items-center justify-center mb-5"
+      >
+        <ng-icon name="lucideTriangleAlert" class="w-6 h-6 text-neutral-700"></ng-icon>
+      </div>
 
-            <app-button
-              variant="custom"
-              sizeH="xl"
-              class="w-full py-[.5625rem] rounded-[.625rem] mt-[2.375rem]"
-              [class.proButton]="plan.type === 'pro'"
-              [class.galeraButton]="plan.type !== 'pro'"
-              [disabled]="currentPlan()?.id === plan.id"
-              (click)="choosePlan(plan)"
+      <h2 class="font-urbanist font-bold text-xl text-neutral-900 mb-2">
+        Não foi possível carregar os planos
+      </h2>
+
+      <p class="font-manrope text-sm text-neutral-500 max-w-md mb-6">
+        Ocorreu um problema ao buscar os planos disponíveis. Tente novamente em alguns instantes.
+      </p>
+
+      <app-button variant="default" color="primary" size="md" (click)="retry()">
+        Tentar novamente
+      </app-button>
+    </div>
+  }
+
+  <!-- ====================================================== -->
+  <!-- CONTENT -->
+  <!-- ====================================================== -->
+
+  @else {
+    <div class="space-y-10">
+      <!-- ================================================== -->
+      <!-- CURRENT PLAN -->
+      <!-- ================================================== -->
+
+      @if (currentPlan(); as plan) {
+        <section class="animate-fade-up">
+          <div class="mb-4">
+            <p
+              class="font-manrope text-xs font-semibold uppercase tracking-[0.08em] text-neutral-500 mb-1"
             >
-              {{ currentPlan()?.id === plan.id ? 'Plano atual' : 'Trocar para ' + plan.name }}
-            </app-button>
-          </li>
-        }
-      </ul>
+              Sua assinatura
+            </p>
+
+            <h2 class="font-urbanist font-bold text-xl text-neutral-900">Plano atual</h2>
+          </div>
+
+          <div
+            class="relative overflow-hidden rounded-2xl border border-neutral-900 bg-neutral-900 p-6 md:p-7 text-white"
+          >
+            <div
+              class="absolute -right-16 -top-16 w-40 h-40 rounded-full border border-white/10"
+            ></div>
+
+            <div
+              class="absolute -right-8 -top-8 w-24 h-24 rounded-full border border-white/10"
+            ></div>
+
+            <div class="relative flex flex-col md:flex-row md:items-center gap-6">
+              <!-- ÍCONE -->
+
+              <div
+                class="w-14 h-14 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center shrink-0"
+              >
+                <ng-icon [name]="getPlanIcon(plan)" class="w-7 h-7 text-white"></ng-icon>
+              </div>
+
+              <!-- INFORMAÇÕES -->
+
+              <div class="flex-1">
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                  <h3 class="font-urbanist font-bold text-2xl">
+                    {{ plan.name }}
+                  </h3>
+
+                  <span
+                    class="inline-flex items-center px-2.5 py-1 rounded-full bg-white/10 border border-white/10 font-manrope text-[0.65rem] font-bold uppercase tracking-wide text-white"
+                  >
+                    @if (billingAction() === 'renew') {
+                      Assinatura anterior
+                    } @else {
+                      Plano atual
+                    }
+                  </span>
+                </div>
+
+                <p class="font-manrope text-sm text-neutral-300 max-w-2xl leading-relaxed">
+                  {{ plan.description }}
+                </p>
+              </div>
+
+              <!-- TIPO -->
+
+              <div class="shrink-0">
+                <span
+                  class="font-manrope text-xs font-semibold uppercase tracking-wide text-neutral-400"
+                >
+                  {{ getPlanLabel(plan) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- ================================================== -->
+      <!-- PLANS -->
+      <!-- ================================================== -->
+
+      <section class="animate-fade-up animation-delay-100">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-3 mb-6">
+          <div>
+            <p
+              class="font-manrope text-xs font-semibold uppercase tracking-[0.08em] text-neutral-500 mb-1"
+            >
+              Planos disponíveis
+            </p>
+
+            <h2 class="font-urbanist font-bold text-xl text-neutral-900 mb-1">
+              @if (billingAction() === 'subscribe') {
+                Escolha seu plano
+
+              } @else if (billingAction() === 'renew') {
+                Escolha seu plano para renovar
+
+              } @else {
+                Escolha seu novo plano
+              }
+            </h2>
+
+            <p class="font-manrope text-sm text-neutral-500 max-w-2xl">
+              @if (billingAction() === 'subscribe') {
+                Conheça as opções disponíveis e escolha o plano ideal para começar sua experiência
+                no Rencard.
+
+              } @else if (billingAction() === 'renew') {
+                Escolha o plano que deseja utilizar para renovar sua assinatura.
+
+              } @else {
+                Compare as opções disponíveis e escolha o plano que deseja utilizar na sua conta.
+              }
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 font-manrope text-xs text-neutral-500">
+            <ng-icon name="lucideLock" class="w-4 h-4"></ng-icon>
+
+            Você poderá revisar tudo na próxima etapa
+          </div>
+        </div>
+
+        <!-- ================================================== -->
+        <!-- PLAN CARDS -->
+        <!-- ================================================== -->
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          @for (plan of availablePlans(); track plan.id) {
+            <article
+              class="plan-card"
+              [class.plan-card-current]="isCurrentPlan(plan)"
+              [class.plan-card-pro]="plan.type === 'pro'"
+            >
+              <!-- ================================================= -->
+              <!-- CARD CONTENT -->
+              <!-- ================================================= -->
+
+              <div class="p-6 md:p-7">
+                <!-- HEADER -->
+
+                <div class="flex items-start justify-between gap-4 mb-7">
+                  <div
+                    class="plan-icon"
+                    [class.plan-icon-pro]="plan.type === 'pro'"
+                    [class.plan-icon-current]="isCurrentPlan(plan)"
+                  >
+                    <ng-icon [name]="getPlanIcon(plan)" class="w-6 h-6"></ng-icon>
+                  </div>
+
+                  @if (isCurrentPlan(plan)) {
+                    <span
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 border border-neutral-200 font-manrope text-[0.65rem] font-bold uppercase tracking-wide text-neutral-700"
+                    >
+                      <ng-icon name="lucideCheck" class="w-3 h-3"></ng-icon>
+
+                      Plano atual
+                    </span>
+                  }
+                </div>
+
+                <!-- PLAN INFO -->
+
+                <div class="mb-7">
+                  <p
+                    class="font-manrope text-xs font-semibold uppercase tracking-[0.08em] text-neutral-500 mb-2"
+                  >
+                    {{ getPlanLabel(plan) }}
+                  </p>
+
+                  <h3 class="font-urbanist font-bold text-2xl text-neutral-900 mb-2">
+                    {{ plan.name }}
+                  </h3>
+
+                  <p class="font-manrope text-sm text-neutral-500 leading-relaxed">
+                    {{ plan.description }}
+                  </p>
+                </div>
+
+                <!-- FEATURES -->
+
+                <div class="space-y-3 mb-8">
+                  @for (feature of getHighlightFeatures(plan); track feature) {
+                    <div class="flex items-start gap-3">
+                      <div
+                        class="w-5 h-5 rounded-full bg-neutral-100 flex items-center justify-center shrink-0 mt-0.5"
+                      >
+                        <ng-icon name="lucideCheck" class="w-3 h-3 text-neutral-700"></ng-icon>
+                      </div>
+
+                      <span class="font-manrope text-sm text-neutral-700">
+                        {{ feature }}
+                      </span>
+                    </div>
+                  }
+                </div>
+
+                <!-- FEATURE COUNT -->
+
+                @if (getFeatureCount(plan) > 5) {
+                  <p class="font-manrope text-xs text-neutral-400 mb-6">
+                    + {{ getFeatureCount(plan) - 5 }}
+                    recursos adicionais
+                  </p>
+                }
+
+                <!-- ================================================= -->
+                <!-- ACTION -->
+                <!-- ================================================= -->
+
+                <div class="pt-2">
+                  @if (isCurrentPlan(plan)) {
+                    <button type="button" disabled class="current-plan-button w-full">
+                      <ng-icon name="lucideCheck" class="w-4 h-4"></ng-icon>
+
+                      Plano atual
+                    </button>
+                  } @else {
+                    <app-button
+                      variant="default"
+                      color="primary"
+                      size="lg"
+                      class="w-full"
+                      [disabled]="navigatingPlanId() !== null"
+                      (click)="continueToCheckout(plan)"
+                    >
+                      @if (isNavigatingPlan(plan)) {
+                        <div class="flex items-center justify-center gap-2">
+                          <span
+                            class="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin"
+                          ></span>
+
+                          Carregando...
+                        </div>
+                      } @else {
+                        @if (billingAction() === 'renew') {
+                          <span> Renovar com este plano </span>
+                        } @else if (billingAction() === 'change') {
+                          <span> Alterar para este plano </span>
+                        } @else {
+                          <span> Assinar este plano </span>
+                        }
+                      }
+                    </app-button>
+                  }
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+
+      <!-- ================================================== -->
+      <!-- NEXT STEP -->
+      <!-- ================================================== -->
+
+      <section
+        class="rounded-2xl border border-neutral-200 bg-neutral-50 p-5 md:p-6 animate-fade-up animation-delay-200"
+      >
+        <div class="flex items-start gap-4">
+          <div
+            class="w-10 h-10 rounded-xl bg-white border border-neutral-200 flex items-center justify-center shrink-0"
+          >
+            <ng-icon name="lucideArrowRight" class="w-5 h-5 text-neutral-700"></ng-icon>
+          </div>
+
+          <div>
+            <h3 class="font-urbanist font-bold text-base text-neutral-900 mb-1">Próxima etapa</h3>
+
+            <p class="font-manrope text-sm text-neutral-500 leading-relaxed">
+              Após escolher seu plano, você poderá selecionar o período de cobrança e revisar os
+              detalhes antes de confirmar sua assinatura.
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   }
 </div>

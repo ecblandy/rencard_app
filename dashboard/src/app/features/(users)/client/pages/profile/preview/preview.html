@@ -8,14 +8,20 @@
   classes="flex flex-col items-center w-full px-[1.125rem]"
   [bgColor]="appearance.settings().background_color"
 >
-  <!-- Foto do perfil -->
+  <!-- ===================================================== -->
+  <!-- PROFILE IMAGE -->
+  <!-- ===================================================== -->
+
   <img
     [src]="profile().profile_image || '/images/user-placeholder.svg'"
     alt="Profile preview"
     class="rounded-[.625rem] object-cover w-[6.375rem] h-[6.375rem]"
   />
 
-  <!-- Nome -->
+  <!-- ===================================================== -->
+  <!-- NAME -->
+  <!-- ===================================================== -->
+
   <h2
     class="font-urbanist font-bold text-[.9375rem] mt-[1.125rem]"
     [style.color]="appearance.settings().text_primary"
@@ -23,7 +29,10 @@
     {{ profile().display_name || profile().owner_name || 'Nome não definido' }}
   </h2>
 
-  <!-- Subtítulo -->
+  <!-- ===================================================== -->
+  <!-- SUBTITLE -->
+  <!-- ===================================================== -->
+
   <h3
     class="font-manrope text-[.75rem] w-full text-center break-words"
     [style.color]="appearance.settings().text_secondary"
@@ -31,37 +40,156 @@
     {{ profile().subtitle || 'Sem subtítulo' }}
   </h3>
 
+  <!-- ===================================================== -->
+  <!-- RESUME -->
+  <!-- ===================================================== -->
+
   @if (profile().resume?.enabled && profile().resume?.file) {
     <div
-      class="flex items-center justify-center gap-[.75rem] border border-neutral-medium rounded-[1rem] w-full h-[1.75rem] mt-[1.875rem] cursor-pointer"
-      [style.color]="appearance.settings().text_primary"
+      class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border-2 rounded-[.875rem] mt-[1.875rem] cursor-pointer transition-all duration-200 font-manrope font-semibold text-[.875rem] hover:scale-105 shadow-sm hover:shadow-md mb-[1.75rem]"
+      [style.background-color]="appearance.settings().button_bg_primary"
+      [style.border-color]="appearance.settings().button_bg_primary"
+      [style.color]="appearance.settings().button_text_primary"
       (click)="downloadResume()"
     >
       <ng-icon name="lucideDownload" size="16"></ng-icon>
-      <p class="font-manrope font-semibold">Baixar currículo</p>
+
+      <p>Baixar currículo</p>
     </div>
   }
 
-  <iframe
-    data-testid="embed-iframe"
-    style="border-radius: 12px"
-    [src]="spotifyEmbedUrl()"
-    width="100%"
-    height="152"
-    frameBorder="0"
-    allowfullscreen=""
-    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-    loading="lazy"
-    class="my-[1.875rem]"
-    [class.hidden]="!profile().music?.enabled || !profile().music?.value"
-  ></iframe>
+  <!-- ===================================================== -->
+  <!-- MUSIC -->
+  <!-- ===================================================== -->
 
-  <!-- Redes sociais -->
+  @if (profile().music?.enabled && profile().music?.value) {
+    @if (isSpotifyUserProfile(profile().music!.value)) {
+      <div
+        class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] rounded-[.875rem] cursor-pointer transition-all duration-200 hover:scale-105 my-[1.875rem]"
+        [style.background-color]="appearance.settings().button_bg_secondary"
+        [style.color]="appearance.settings().button_text_secondary"
+        (click)="openSpotify()"
+      >
+        <ng-icon name="simpleSpotify" size="18"></ng-icon>
+
+        <p class="font-urbanist font-medium">Minha conta</p>
+      </div>
+    } @else {
+      <iframe
+        data-testid="embed-iframe"
+        style="border-radius: 12px"
+        [src]="spotifyEmbedUrl()"
+        width="100%"
+        height="152"
+        frameBorder="0"
+        scrolling="no"
+        allowfullscreen
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+        class="my-[1.875rem] block max-w-full"
+      ></iframe>
+    }
+  }
+
+  <!-- ===================================================== -->
+  <!-- PORTFOLIO IMAGENS -->
+  <!-- ===================================================== -->
+
+  @if (profile().portfolio_images.enabled && profile().portfolio_images.images.length > 0) {
+    <div class="w-full mt-[1.875rem]">
+      <h3
+        class="font-urbanist font-semibold text-[1rem] mb-[1rem]"
+        [style.color]="appearance.settings().text_primary"
+      >
+        Portfolio
+      </h3>
+
+      <ul class="grid grid-cols-3 gap-[.75rem] w-full">
+        @for (image of profile().portfolio_images.images; track image.id) {
+          <li class="aspect-square rounded-[.625rem] overflow-hidden bg-neutral-200">
+            <img
+              [src]="image.image"
+              [alt]="image.caption || 'Portfolio'"
+              (load)="onImageLoad(image.id)"
+              class="w-full h-full object-cover transition-opacity duration-300"
+              [class.opacity-0]="!isImageLoaded(image.id)"
+              [class.opacity-100]="isImageLoaded(image.id)"
+            />
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  <!-- ===================================================== -->
+  <!-- PORTFOLIO VÍDEOS -->
+  <!-- ===================================================== -->
+
+  @if (profile().portfolio_videos.enabled && profile().portfolio_videos.videos.length > 0) {
+    <div class="w-full mt-[1.875rem]">
+      <h3
+        class="font-urbanist font-semibold text-[1rem] mb-[1rem]"
+        [style.color]="appearance.settings().text_primary"
+      >
+        Vídeos
+      </h3>
+
+      <ul class="flex flex-col gap-[1rem] w-full">
+        @for (video of profile().portfolio_videos.videos; track video.id) {
+          <li class="relative w-full h-[220px] overflow-hidden rounded-[.625rem] bg-neutral-200">
+            <!-- ================================================= -->
+            <!-- THUMBNAIL -->
+            <!-- ================================================= -->
+
+            @if (!isVideoLoaded(video.id)) {
+              <img
+                [src]="getYoutubeThumbnailUrl(video.youtube_url)"
+                alt=""
+                class="absolute inset-0 w-full h-full object-cover"
+              />
+            }
+
+            <!-- ================================================= -->
+            <!-- YOUTUBE -->
+            <!-- ================================================= -->
+
+            <iframe
+              [src]="youtubeEmbedUrls()[video.id]"
+              width="100%"
+              height="220"
+              frameborder="0"
+              scrolling="no"
+              allow="
+                accelerometer;
+                autoplay;
+                clipboard-write;
+                encrypted-media;
+                gyroscope;
+                picture-in-picture;
+                web-share;
+              "
+              allowfullscreen
+              loading="lazy"
+              (load)="onVideoLoad(video.id)"
+              class="relative w-full h-full block transition-opacity duration-300"
+              [class.opacity-0]="!isVideoLoaded(video.id)"
+              [class.opacity-100]="isVideoLoaded(video.id)"
+            ></iframe>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  <!-- ===================================================== -->
+  <!-- SOCIALS -->
+  <!-- ===================================================== -->
+
   <ul class="flex flex-col w-full space-y-[1.125rem] my-[1.875rem]">
-    @for (socials of profile().social_links; track socials) {
+    @for (socials of getFilteredSocials(); track socials.value) {
       @if (socials.enabled) {
         <li
-          class="flex items-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border border-neutral-extra-soft rounded-[.875rem] cursor-pointer"
+          class="flex items-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] rounded-[.875rem] cursor-pointer transition-all duration-200 hover:scale-105"
           [style.background-color]="appearance.settings().button_bg_secondary"
           [style.color]="appearance.settings().button_text_secondary"
           (click)="openSocial(socials.value)"
@@ -76,30 +204,70 @@
     }
   </ul>
 
-  <!-- Botões -->
+  <!-- ===================================================== -->
+  <!-- EMAIL -->
+  <!-- ===================================================== -->
+
+  @if (getEmailSocial(); as emailSocial) {
+    <div
+      class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border-2 rounded-[.875rem] cursor-pointer transition-all duration-200 font-manrope font-semibold text-[.875rem] hover:scale-105 shadow-sm hover:shadow-md mb-[1.75rem]"
+      [style.background-color]="appearance.settings().button_bg_primary"
+      [style.border-color]="appearance.settings().button_bg_primary"
+      [style.color]="appearance.settings().button_text_primary"
+      (click)="openEmailSocial(emailSocial.value)"
+    >
+      <ng-icon [name]="emailSocial.icon" size="18"></ng-icon>
+
+      <p>Enviar email</p>
+    </div>
+  }
+
+  <!-- ===================================================== -->
+  <!-- BUTTONS -->
+  <!-- ===================================================== -->
+
   <ul class="w-full space-y-[1rem]">
-    @for (button of profile().buttons; track button) {
+    @for (button of profile().buttons; track button.id) {
       @if (button.enabled) {
         <li
-          class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border border-neutral-extra-soft rounded-[.875rem] cursor-pointer"
+          class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] rounded-[.875rem] cursor-pointer transition-all duration-200 hover:scale-105"
           [style.background-color]="appearance.settings().button_bg_primary"
           [style.color]="appearance.settings().button_text_primary"
           (click)="handleButton(button)"
         >
           <ng-icon [name]="getButtonIcon(button.type)" size="16"></ng-icon>
-          <p class="font-manrope font-semibold text-[.875rem]">{{ getButtonLabel(button.type) }}</p>
+
+          <p class="font-manrope font-semibold text-[.875rem]">
+            {{ getButtonLabel(button.type) }}
+          </p>
         </li>
       }
     }
   </ul>
+
+  <!-- ===================================================== -->
+  <!-- FOOTER -->
+  <!-- ===================================================== -->
 
   <p
     class="font-manrope font-medium mt-[1.875rem]"
     [style.color]="appearance.settings().text_secondary"
   >
     Feito com
-    <span class="font-bold" [style.color]="appearance.settings().text_primary">Rencard</span>
+    <a
+      class="font-bold hover:underline"
+      [style.color]="appearance.settings().text_primary"
+      href="/"
+    >
+      Rencard
+    </a>
   </p>
 </app-surface>
 
-<app-button class="w-full mt-[1.875rem]">Visualizar em tela cheia</app-button>
+<!-- ======================================================= -->
+<!-- FULLSCREEN -->
+<!-- ======================================================= -->
+
+<app-button class="w-full mt-[1.875rem]" (click)="goToRecardPublickProfile()">
+  Visualizar em tela cheia
+</app-button>

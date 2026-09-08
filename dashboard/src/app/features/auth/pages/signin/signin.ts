@@ -82,4 +82,8 @@ export class Signin {
     const targetRoute = roleRoutes[role] || '/client/dashboard';
     this.router.navigate([targetRoute]);
   }
+
+  goToSelelectPlan() {
+    window.location.href = '/#plans';
+  }
 }

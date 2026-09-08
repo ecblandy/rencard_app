@@ -117,6 +117,12 @@ export class Terms {
       message:
         'Você poderá reativar esses recursos a qualquer momento escolhendo um de nossos planos.',
     },
+
+    {
+      step: 5,
+      message:
+        'Fica claro que, se no ato da compra você optou apenas pela aquisição do produto 100% digital, nesta opção não estarão inclusos os produtos físicos, ou seja, cartão e tag.',
+    },
   ]);
 
   readonly currentStep = computed(() => this.route.snapshot.data['step'] as number);
@@ -161,5 +167,9 @@ export class Terms {
     }
 
     this.router.navigate(['/auth/signup']);
+  }
+
+  goBack() {
+    window.history.back();
   }
 }

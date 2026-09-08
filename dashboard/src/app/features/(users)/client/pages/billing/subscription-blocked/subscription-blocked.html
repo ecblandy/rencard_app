@@ -1,0 +1,35 @@
+<div class="min-h-[calc(100vh-8rem)] w-full flex items-center justify-center px-5 py-12">
+  <div class="w-full max-w-[38rem] text-center">
+    <div
+      class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-neutral-100 border border-neutral-200"
+    >
+      <ng-icon name="lucideLockKeyhole" class="h-9 w-9 text-neutral-600"></ng-icon>
+    </div>
+
+    <h1 class="font-urbanist font-bold text-2xl md:text-3xl text-neutral-800 mb-3">
+      {{ getTitle() }}
+    </h1>
+
+    <p class="font-manrope text-base leading-7 text-neutral-500 max-w-[34rem] mx-auto">
+      {{ getDescription() }}
+    </p>
+
+    <div class="mt-8 flex flex-col items-center gap-3">
+      <a
+        routerLink="/client/billing/preview"
+        class="inline-flex items-center justify-center gap-2 rounded-lg bg-neutral-900 px-6 py-3 font-manrope font-semibold text-sm text-white transition hover:bg-neutral-800"
+      >
+        {{ getButtonLabel() }}
+
+        <ng-icon name="lucideArrowRight" class="h-4 w-4"></ng-icon>
+      </a>
+
+      <a
+        routerLink="/client/billing/change-plan"
+        class="font-manrope text-sm font-medium text-neutral-500 transition hover:text-neutral-800"
+      >
+        Ver planos disponíveis
+      </a>
+    </div>
+  </div>
+</div>

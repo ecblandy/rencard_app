@@ -1,0 +1,595 @@
+<div>
+  <app-dashboard-title
+    title="Assinatura"
+    description="Escolha o plano e o período ideal para você"
+  ></app-dashboard-title>
+
+  <div class="max-w-6xl mx-auto">
+    <!-- ================================================= -->
+    <!-- CARREGANDO PLANO -->
+    <!-- ================================================= -->
+
+    @if (isLoadingPlan()) {
+      <div class="flex items-center justify-center py-24">
+        <div class="flex flex-col items-center gap-4">
+          <div
+            class="w-10 h-10 border-4 border-neutral-200 border-t-neutral-900 rounded-full animate-spin"
+          ></div>
+
+          <p class="font-manrope text-sm text-neutral-500">Carregando plano...</p>
+        </div>
+      </div>
+    }
+
+    <!-- ================================================= -->
+    <!-- CHECKOUT -->
+    <!-- ================================================= -->
+
+    @if (!isLoadingPlan() && plan(); as currentPlan) {
+      <!-- VOLTAR -->
+
+      <button
+        type="button"
+        (click)="goBack()"
+        class="flex items-center gap-2 mb-8 font-manrope text-sm text-neutral-500 hover:text-neutral-900 transition"
+      >
+        <ng-icon name="bootstrapArrowLeft" size="16"></ng-icon>
+
+        Voltar para assinatura
+      </button>
+
+      <!-- HEADER -->
+
+      <div class="mb-10">
+        <p
+          class="font-manrope text-xs font-semibold uppercase tracking-wider text-neutral-500 mb-2"
+        >
+          Finalize sua assinatura
+        </p>
+
+        <h1 class="font-urbanist font-bold text-[2rem] md:text-[2.5rem] text-neutral-900 mb-3">
+          Escolha como você quer assinar
+        </h1>
+
+        <p class="font-manrope text-base text-neutral-600 max-w-2xl">
+          Selecione o período da sua assinatura e aproveite todos os recursos do
+          {{ currentPlan.name }}.
+        </p>
+      </div>
+
+      <!-- ================================================= -->
+      <!-- CONTEÚDO -->
+      <!-- ================================================= -->
+
+      <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-8 items-start">
+        <!-- ================================================= -->
+        <!-- ESQUERDA -->
+        <!-- ================================================= -->
+
+        <div class="space-y-6">
+          <!-- PLANO -->
+
+          <app-surface classes="p-6 bg-white border border-neutral-200">
+            <div class="flex items-start gap-5">
+              <!-- ÍCONE DO PLANO -->
+
+              <div
+                class="w-14 h-14 rounded-xl bg-neutral-900 text-white flex items-center justify-center shrink-0"
+              >
+                @if (currentPlan.type === 'pro') {
+                  <ng-icon name="lucideCrown" size="28"></ng-icon>
+                } @else {
+                  <ng-icon name="lucideHandshake" size="28"></ng-icon>
+                }
+              </div>
+
+              <!-- INFORMAÇÕES -->
+
+              <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-3 mb-2">
+                  <h2 class="font-urbanist font-bold text-2xl text-neutral-900">
+                    {{ currentPlan.name }}
+                  </h2>
+
+                  <span
+                    class="px-2.5 py-1 rounded-full bg-neutral-100 border border-neutral-200 font-manrope text-[0.65rem] font-bold uppercase text-neutral-600"
+                  >
+                    {{ currentPlan.type }}
+                  </span>
+                </div>
+
+                <p class="font-manrope text-sm text-neutral-600">
+                  {{ currentPlan.description }}
+                </p>
+              </div>
+            </div>
+          </app-surface>
+
+          <!-- ================================================= -->
+          <!-- PERÍODO -->
+          <!-- ================================================= -->
+
+          <app-surface classes="p-6 bg-white border border-neutral-200">
+            <div class="mb-6">
+              <h2 class="font-urbanist font-bold text-xl text-neutral-900 mb-1">
+                Período da assinatura
+              </h2>
+
+              <p class="font-manrope text-sm text-neutral-500">
+                Quanto maior o período, maior a economia.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+              @for (price of availablePrices(); track price.id) {
+                <button
+                  type="button"
+                  (click)="selectCycle(price.cycle)"
+                  [disabled]="isWaitingPayment() || isPaymentReady()"
+                  class="relative text-left p-5 rounded-xl border-2 transition duration-200 disabled:cursor-not-allowed disabled:opacity-60 flex flex-col min-h-[230px]"
+                  [class.border-neutral-900]="selectedCycle() === price.cycle"
+                  [class.bg-neutral-50]="selectedCycle() === price.cycle"
+                  [class.border-neutral-200]="selectedCycle() !== price.cycle"
+                  [class.hover:border-neutral-400]="selectedCycle() !== price.cycle"
+                >
+                  <!-- CHECK -->
+
+                  @if (selectedCycle() === price.cycle) {
+                    <div
+                      class="absolute top-4 right-4 w-6 h-6 rounded-full bg-neutral-900 text-white flex items-center justify-center"
+                    >
+                      <ng-icon name="bootstrapCheck" size="16"></ng-icon>
+                    </div>
+                  }
+
+                  <!-- DESCONTO -->
+
+                  <div class="h-[25px] mb-4 flex items-start">
+                    @if (price.discount_pct > 0) {
+                      <span
+                        class="inline-flex px-2.5 py-1 rounded-full bg-neutral-900 text-white font-manrope text-[0.65rem] font-bold uppercase leading-none"
+                      >
+                        Economize
+                        {{ price.discount_pct }}%
+                      </span>
+                    }
+                  </div>
+
+                  <!-- CICLO -->
+
+                  <div class="min-h-[62px]">
+                    <p class="font-urbanist font-bold text-lg text-neutral-900 mb-1">
+                      {{ getCycleLabel(price.cycle) }}
+                    </p>
+
+                    <p class="font-manrope text-xs text-neutral-500 leading-relaxed">
+                      {{ getCycleDescription(price.cycle) }}
+                    </p>
+                  </div>
+
+                  <!-- PREÇO -->
+
+                  <div class="mt-auto pt-5">
+                    <div class="flex items-baseline gap-1">
+                      <span class="font-urbanist font-bold text-2xl text-neutral-900">
+                        {{ formatPrice(price.price_cents) }}
+                      </span>
+
+                      <span class="font-manrope text-xs text-neutral-500">
+                        {{ getPricePeriod(price) }}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              }
+            </div>
+          </app-surface>
+
+          <!-- ================================================= -->
+          <!-- RECURSOS -->
+          <!-- ================================================= -->
+
+          <app-surface classes="p-6 bg-white border border-neutral-200">
+            <div class="mb-6">
+              <h2 class="font-urbanist font-bold text-xl text-neutral-900 mb-1">
+                O que está incluso
+              </h2>
+
+              <p class="font-manrope text-sm text-neutral-500">
+                Tudo que você terá disponível no seu plano.
+              </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              @for (feature of currentPlan.features; track feature) {
+                <div class="flex items-start gap-3">
+                  <div class="text-neutral-800 shrink-0 mt-0.5">
+                    <ng-icon name="bootstrapCheckCircleFill" size="20"></ng-icon>
+                  </div>
+
+                  <span class="font-manrope text-sm text-neutral-600 leading-relaxed">
+                    {{ feature }}
+                  </span>
+                </div>
+              }
+            </div>
+          </app-surface>
+        </div>
+
+        <!-- ================================================= -->
+        <!-- DIREITA / RESUMO -->
+        <!-- ================================================= -->
+
+        <div class="lg:sticky lg:top-6">
+          <app-surface classes="p-6 bg-white border border-neutral-200">
+            <div class="mb-6">
+              <p
+                class="font-manrope text-xs font-semibold uppercase tracking-wide text-neutral-500 mb-2"
+              >
+                Resumo
+              </p>
+
+              <h2 class="font-urbanist font-bold text-xl text-neutral-900">Sua assinatura</h2>
+            </div>
+
+            <!-- PLANO -->
+
+            <div class="pb-5 border-b border-neutral-200 mb-5">
+              <div class="flex justify-between items-start gap-4">
+                <div>
+                  <p class="font-manrope text-xs text-neutral-500 mb-1">Plano</p>
+
+                  <p class="font-urbanist font-bold text-lg text-neutral-900">
+                    {{ currentPlan.name }}
+                  </p>
+                </div>
+
+                <span class="font-manrope text-xs font-semibold text-neutral-500 uppercase">
+                  {{ currentPlan.type }}
+                </span>
+              </div>
+            </div>
+
+            <!-- CICLO -->
+
+            <div class="flex justify-between items-center mb-4">
+              <span class="font-manrope text-sm text-neutral-500"> Período </span>
+
+              <span class="font-manrope text-sm font-semibold text-neutral-900">
+                {{ getCycleLabel(selectedCycle()) }}
+              </span>
+            </div>
+
+            <!-- VALOR -->
+
+            <div class="flex justify-between items-center mb-6">
+              <span class="font-manrope text-sm text-neutral-500"> Valor </span>
+
+              <span class="font-urbanist font-bold text-lg text-neutral-900">
+                {{ formattedPrice() }}
+              </span>
+            </div>
+
+            <!-- ================================================= -->
+            <!-- CUPOM -->
+            <!-- ================================================= -->
+
+            @if (!isWaitingPayment() && !isPaymentReady()) {
+              <div class="pb-6 mb-6 border-b border-neutral-200">
+                <div class="mb-3">
+                  <p class="font-manrope text-sm font-semibold text-neutral-900">
+                    Cupom de desconto
+                  </p>
+
+                  <p class="font-manrope text-xs text-neutral-500 mt-1">
+                    Tem um cupom? Insira o código para aplicar seu desconto.
+                  </p>
+                </div>
+
+                <div class="flex gap-2">
+                  <input
+                    type="text"
+                    [(ngModel)]="couponCode"
+                    [disabled]="isLoading()"
+                    (keyup.enter)="applyCoupon()"
+                    placeholder="Digite seu cupom"
+                    maxlength="50"
+                    autocomplete="off"
+                    class="flex-1 min-w-0 h-11 px-3.5 rounded-lg border border-neutral-200 bg-white font-manrope text-sm text-neutral-900 placeholder:text-neutral-400 outline-none transition focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 disabled:bg-neutral-100 disabled:cursor-not-allowed"
+                  />
+
+                  <button
+                    type="button"
+                    (click)="applyCoupon()"
+                    [disabled]="isLoading() || !couponCode.trim()"
+                    class="h-11 px-4 rounded-lg border border-neutral-900 bg-neutral-900 text-white font-manrope text-sm font-semibold transition hover:bg-neutral-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Aplicar
+                  </button>
+                </div>
+
+                @if (couponApplied()) {
+                  <div
+                    class="flex items-center justify-between gap-3 mt-3 px-3 py-2.5 rounded-lg bg-neutral-50 border border-neutral-200"
+                  >
+                    <div class="flex items-center gap-2 min-w-0 text-neutral-700">
+                      <ng-icon name="bootstrapCheckCircleFill" size="16"></ng-icon>
+
+                      <span class="font-manrope text-xs font-semibold truncate">
+                        Cupom
+                        {{ couponCode.trim() }}
+                        aplicado
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      (click)="removeCoupon()"
+                      class="font-manrope text-xs font-semibold text-neutral-500 hover:text-neutral-900 transition shrink-0"
+                    >
+                      Remover
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- ================================================= -->
+            <!-- TOTAL -->
+            <!-- ================================================= -->
+
+            <div class="pt-5 border-t border-neutral-200 mb-6">
+              <div class="flex justify-between items-end gap-4">
+                <div>
+                  <p class="font-manrope text-xs text-neutral-500 uppercase mb-1">Total</p>
+
+                  <p class="font-manrope text-xs text-neutral-500">
+                    {{ getCycleDescription(selectedCycle()) }}
+                  </p>
+                </div>
+
+                <span class="font-urbanist font-bold text-2xl text-neutral-900">
+                  {{ formattedPrice() }}
+                </span>
+              </div>
+            </div>
+
+            <!-- ================================================= -->
+            <!-- BOTÃO INICIAL -->
+            <!-- ================================================= -->
+
+            @if (!isWaitingPayment() && !isPaymentReady() && !paymentError()) {
+              <app-button
+                variant="default"
+                color="primary"
+                size="lg"
+                class="w-full"
+                [disabled]="!selectedPrice() || isLoading()"
+                (click)="subscribe()"
+              >
+                @if (isLoading()) {
+                  <span class="flex items-center justify-center gap-2">
+                    <span
+                      class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                    ></span>
+
+                    Preparando pagamento...
+                  </span>
+                } @else {
+                  <span class="flex items-center justify-center gap-2">
+                    Continuar para pagamento
+
+                    <ng-icon name="bootstrapArrowRight" size="16"></ng-icon>
+                  </span>
+                }
+              </app-button>
+            }
+
+            <!-- ================================================= -->
+            <!-- AGUARDANDO PAGAMENTO -->
+            <!-- ================================================= -->
+
+            @if (isWaitingPayment()) {
+              <div class="rounded-xl border border-neutral-200 bg-neutral-50 p-5">
+                <div class="flex items-start gap-4">
+                  <div
+                    class="w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center shrink-0"
+                  >
+                    <div
+                      class="w-5 h-5 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin"
+                    ></div>
+                  </div>
+
+                  <div class="min-w-0">
+                    <h3 class="font-urbanist font-bold text-base text-neutral-900 mb-1">
+                      Preparando seu pagamento
+                    </h3>
+
+                    <p class="font-manrope text-sm text-neutral-600 leading-relaxed">
+                      Estamos finalizando sua assinatura e preparando o ambiente seguro para
+                      pagamento.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mt-5 pt-4 border-t border-neutral-200">
+                  <div class="flex items-center gap-2 mb-2 text-neutral-600">
+                    <ng-icon name="bootstrapShieldCheck" size="16"></ng-icon>
+
+                    <span class="font-manrope text-xs font-semibold"> Pagamento seguro </span>
+                  </div>
+
+                  <p class="font-manrope text-xs text-neutral-500 leading-relaxed">
+                    Isso pode levar alguns segundos. Não feche esta página enquanto preparamos seu
+                    pagamento.
+                  </p>
+                </div>
+              </div>
+            }
+
+            <!-- ================================================= -->
+            <!-- PAGAMENTO PRONTO -->
+            <!-- ================================================= -->
+
+            @if (isPaymentReady() && pendingSubscription(); as pending) {
+              <div class="rounded-xl border border-neutral-200 bg-white overflow-hidden">
+                <div class="p-5 bg-neutral-50 border-b border-neutral-200">
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="w-10 h-10 rounded-full bg-neutral-900 text-white flex items-center justify-center shrink-0"
+                    >
+                      <ng-icon name="bootstrapCheck" size="20"></ng-icon>
+                    </div>
+
+                    <div>
+                      <h3 class="font-urbanist font-bold text-base text-neutral-900 mb-1">
+                        Pagamento pronto
+                      </h3>
+
+                      <p class="font-manrope text-sm text-neutral-600">
+                        Sua assinatura foi criada e o pagamento já está disponível.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-5">
+                  <div class="space-y-4">
+                    <div class="flex justify-between items-center gap-4">
+                      <span class="font-manrope text-xs text-neutral-500"> Plano </span>
+
+                      <span class="font-manrope text-sm font-semibold text-neutral-900 text-right">
+                        {{ pending.plan_name }}
+                      </span>
+                    </div>
+
+                    <div class="flex justify-between items-center gap-4">
+                      <span class="font-manrope text-xs text-neutral-500"> Período </span>
+
+                      <span class="font-manrope text-sm font-semibold text-neutral-900">
+                        {{ getCycleLabel(selectedCycle()) }}
+                      </span>
+                    </div>
+
+                    <div class="flex justify-between items-center gap-4">
+                      <span class="font-manrope text-xs text-neutral-500"> Status </span>
+
+                      <span
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-neutral-100 border border-neutral-200 font-manrope text-[0.65rem] font-bold uppercase text-neutral-700"
+                      >
+                        <span class="w-1.5 h-1.5 rounded-full bg-neutral-700"></span>
+
+                        Aguardando pagamento
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="border-t border-neutral-200 my-5"></div>
+
+                  <app-button
+                    variant="default"
+                    color="primary"
+                    size="lg"
+                    class="w-full"
+                    (click)="openPayment()"
+                  >
+                    <span class="flex items-center justify-center gap-2">
+                      Ir para pagamento
+
+                      <ng-icon name="bootstrapArrowRight" size="16"></ng-icon>
+                    </span>
+                  </app-button>
+
+                  <p
+                    class="font-manrope text-[0.7rem] text-neutral-500 text-center leading-relaxed mt-3"
+                  >
+                    O pagamento será aberto em uma nova janela. Esta página continuará disponível
+                    para acompanhar sua assinatura.
+                  </p>
+                </div>
+              </div>
+            }
+
+            <!-- ================================================= -->
+            <!-- ERRO / DEMORA -->
+            <!-- ================================================= -->
+
+            @if (paymentError()) {
+              <div class="rounded-xl border border-neutral-200 bg-neutral-50 p-5">
+                <div class="flex items-start gap-4">
+                  <div
+                    class="w-10 h-10 rounded-full bg-white border border-neutral-200 flex items-center justify-center shrink-0 text-neutral-700"
+                  >
+                    <ng-icon name="bootstrapInfoCircle" size="20"></ng-icon>
+                  </div>
+
+                  <div class="flex-1 min-w-0">
+                    <h3 class="font-urbanist font-bold text-base text-neutral-900 mb-1">
+                      Estamos demorando um pouco mais
+                    </h3>
+
+                    <p class="font-manrope text-sm text-neutral-600 leading-relaxed mb-4">
+                      Sua assinatura pode ter sido criada normalmente, mas o link de pagamento ainda
+                      não ficou disponível.
+                    </p>
+
+                    <app-button
+                      variant="default"
+                      color="primary"
+                      size="md"
+                      class="w-full"
+                      (click)="retryPayment()"
+                    >
+                      <span class="flex items-center justify-center gap-2">
+                        Verificar novamente
+
+                        <ng-icon name="bootstrapArrowRight" size="16"></ng-icon>
+                      </span>
+                    </app-button>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- ================================================= -->
+            <!-- SEGURANÇA -->
+            <!-- ================================================= -->
+
+            @if (!isWaitingPayment() && !isPaymentReady() && !paymentError()) {
+              <div class="flex items-start gap-3 mt-5 text-neutral-600">
+                <div class="flex items-center justify-center shrink-0 pt-0.5">
+                  <ng-icon name="bootstrapShieldCheck" size="20" class="block"></ng-icon>
+                </div>
+
+                <p class="font-manrope text-xs text-neutral-500 leading-relaxed m-0">
+                  O pagamento será realizado em um ambiente seguro. Seus dados de pagamento não
+                  ficam armazenados no Rencard.
+                </p>
+              </div>
+            }
+          </app-surface>
+        </div>
+      </div>
+
+      <!-- ================================================= -->
+      <!-- AVISO -->
+      <!-- ================================================= -->
+
+      <app-surface classes="mt-8 p-5 bg-neutral-50 border border-neutral-200">
+        <div class="flex items-start gap-3 text-neutral-600">
+          <ng-icon name="bootstrapInfoCircle" size="20"></ng-icon>
+
+          <p class="font-manrope text-sm text-neutral-600 leading-relaxed">
+            Ao continuar, você concorda com a contratação do
+
+            <strong class="text-neutral-900">
+              {{ currentPlan.name }}
+            </strong>
+
+            pelo período selecionado.
+          </p>
+        </div>
+      </app-surface>
+    }
+  </div>
+</div>

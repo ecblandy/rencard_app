@@ -1,0 +1,132 @@
+<!-- ========================================================= -->
+<!-- O QUE ESTÁ INCLUSO                                      -->
+<!-- ========================================================= -->
+
+<div class="mb-10">
+  <h2 class="font-urbanist font-semibold text-[1.5rem] text-neutral-700 uppercase mb-6">
+    O QUE ESTÁ INCLUSO
+  </h2>
+
+  @if (data().isPending) {
+    <app-surface classes="p-8 bg-white border border-neutral-200">
+      <div class="flex flex-col items-center justify-center text-center gap-4">
+        <div class="flex items-center justify-center w-14 h-14 rounded-full bg-neutral-100">
+          <ng-icon name="bootstrapLock" class="w-7 h-7 text-neutral-700"></ng-icon>
+        </div>
+
+        <div>
+          <h3 class="font-urbanist font-bold text-lg text-neutral-900 mb-2">
+            Recursos aguardando ativação
+          </h3>
+
+          <p class="font-manrope text-sm text-neutral-600 max-w-xl">
+            Os recursos do novo plano serão liberados automaticamente após a confirmação do
+            pagamento.
+          </p>
+        </div>
+      </div>
+    </app-surface>
+  } @else if (data().hasNoPlan) {
+    <app-surface classes="p-8 bg-white border border-neutral-200">
+      <p class="font-manrope text-neutral-500 text-center">
+        Você ainda não possui um plano contratado.
+      </p>
+    </app-surface>
+  } @else if (data().features.length > 0) {
+    <app-surface classes="p-6 bg-white border border-neutral-200">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @for (feature of data().features; track feature) {
+          <div class="flex items-start gap-4">
+            <ng-icon
+              name="bootstrapCheckCircleFill"
+              class="text-neutral-800 w-6 h-6 flex-shrink-0 mt-0.5"
+            ></ng-icon>
+
+            <p class="font-manrope text-base text-neutral-700">
+              {{ feature }}
+            </p>
+          </div>
+        }
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-neutral-200">
+        <p class="font-manrope text-sm text-neutral-500">
+          💡 Dica: Explore todas as features do seu plano na seção de configurações para aproveitar
+          ao máximo.
+        </p>
+      </div>
+    </app-surface>
+  } @else {
+    <app-surface classes="p-8 bg-white border border-neutral-200">
+      <p class="font-manrope text-neutral-500 text-center">Nenhum recurso incluído neste plano.</p>
+    </app-surface>
+  }
+</div>
+
+<!-- ========================================================= -->
+<!-- FAQ                                                       -->
+<!-- ========================================================= -->
+
+<div class="mb-10">
+  <h2 class="font-urbanist font-semibold text-[1.5rem] text-neutral-700 uppercase mb-6">
+    Perguntas Frequentes
+  </h2>
+
+  <app-surface classes="p-6 bg-white border border-neutral-200">
+    <div class="space-y-6">
+      <!-- FAQ 1 -->
+      <div class="pb-6 border-b border-neutral-200">
+        <button
+          class="w-full flex justify-between items-center text-left hover:opacity-70 transition"
+        >
+          <h4 class="font-urbanist font-semibold text-base text-neutral-900">
+            Como faço para alterar meu plano?
+          </h4>
+
+          <ng-icon name="bootstrapChevronDown" class="w-5 h-5 text-neutral-500"></ng-icon>
+        </button>
+
+        <p class="font-manrope text-sm text-neutral-600 mt-3">
+          Você pode alterar seu plano a qualquer momento clicando no botão "Alterar Plano" acima. As
+          mudanças serão refletidas na próxima renovação.
+        </p>
+      </div>
+
+      <!-- FAQ 2 -->
+      <div class="pb-6 border-b border-neutral-200">
+        <button
+          class="w-full flex justify-between items-center text-left hover:opacity-70 transition"
+        >
+          <h4 class="font-urbanist font-semibold text-base text-neutral-900">
+            Posso cancelar minha assinatura?
+          </h4>
+
+          <ng-icon name="bootstrapChevronDown" class="w-5 h-5 text-neutral-500"></ng-icon>
+        </button>
+
+        <p class="font-manrope text-sm text-neutral-600 mt-3">
+          Sim, você pode cancelar sua assinatura a qualquer momento. Você continuará tendo acesso
+          até o final do período pago.
+        </p>
+      </div>
+
+      <!-- FAQ 3 -->
+      <div>
+        <button
+          class="w-full flex justify-between items-center text-left hover:opacity-70 transition"
+        >
+          <h4 class="font-urbanist font-semibold text-base text-neutral-900">
+            O que acontece quando minha assinatura expira?
+          </h4>
+
+          <ng-icon name="bootstrapChevronDown" class="w-5 h-5 text-neutral-500"></ng-icon>
+        </button>
+
+        <p class="font-manrope text-sm text-neutral-600 mt-3">
+          Quando sua assinatura expira, você perderá o acesso aos recursos premium. Você pode
+          renovar sua assinatura a qualquer momento para restaurar o acesso.
+        </p>
+      </div>
+    </div>
+  </app-surface>
+</div>

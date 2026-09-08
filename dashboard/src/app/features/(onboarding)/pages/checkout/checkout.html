@@ -1,124 +1,224 @@
-<div class="mx-auto px-[1.25rem] mb-[3.75rem] max-w-[79.875rem] w-full h-full">
-  <app-onboarding-step [currentStep]="4"></app-onboarding-step>
-  <app-onboarding-title
-    title="Revise seu pedido e finalize o pagamento"
-    description="Confira os detalhes do seu pedido antes de prosseguir para o pagamento."
-  ></app-onboarding-title>
+<div
+  class="min-h-screen bg-gradient-to-br from-neutral-50 to-neutral-100 py-6 sm:py-10 lg:py-12 px-4 sm:px-6 lg:px-8"
+>
+  <div class="mx-auto max-w-7xl">
+    <app-onboarding-step [currentStep]="4"></app-onboarding-step>
 
-  @if (order(); as order) {
-    <div class="flex gap-[1.625rem]">
-      <div class="flex flex-col gap-y-[1.5rem] max-w-[58.4375rem] w-full">
-        <!-- Código e status -->
-        <app-surface classes="bg-[#F5F5F5]">
-          <div class="flex items-center justify-between">
-            <div class="space-y-[.25rem]">
-              <span class="block font-manrope text-[.875rem] text-neutral-medium">Pedido</span>
-              <h3 class="font-urbanist font-semibold text-[1.5rem]">{{ order.code }}</h3>
-            </div>
-            <span
-              class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-sm font-manrope font-medium"
-            >
-              Aguardando pagamento
-            </span>
-          </div>
-        </app-surface>
+    <app-onboarding-title
+      title="Revise seu pedido e finalize o pagamento"
+      description="Confira todos os detalhes antes de prosseguir para o pagamento seguro."
+    ></app-onboarding-title>
 
-        <!-- Itens -->
-        <app-surface classes="bg-[#F5F5F5]">
-          <h4 class="font-urbanist font-semibold text-[1.25rem] mb-[1rem]">Itens do pedido</h4>
-          <ul class="space-y-[.75rem]">
-            @for (item of order.items; track item.id) {
-              <li class="flex items-center justify-between font-manrope">
-                <div>
-                  <p class="font-medium">{{ item.product_name }}</p>
-                  <p class="text-sm text-neutral-medium">Qtd: {{ item.quantity }}</p>
-                </div>
-                <p class="font-semibold">{{ formatPrice(item.unit_price_cents) }}</p>
-              </li>
-            }
-          </ul>
-        </app-surface>
-
-        <!-- Entrega -->
-        @if (order.shipping_service_name) {
-          <app-surface classes="bg-[#F5F5F5]">
-            <h4 class="font-urbanist font-semibold text-[1.25rem] mb-[1rem]">Entrega</h4>
-            <div class="flex items-center justify-between font-manrope">
+    @if (order(); as order) {
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 mt-8 sm:mt-10">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 flex flex-col gap-6">
+          <!-- Order Header -->
+          <div class="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 sm:p-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <p class="font-medium">{{ order.shipping_service_name }}</p>
-                <p class="text-sm text-neutral-medium">
-                  Previsão: {{ order.shipping_deadline_days }} dias úteis ({{
-                    order.shipping_deadline_date
-                  }})
-                </p>
+                <p class="text-sm font-medium text-neutral-600 mb-1">Número do Pedido</p>
+                <h1 class="text-2xl sm:text-3xl font-bold text-neutral-900">{{ order.code }}</h1>
               </div>
-              <p class="font-semibold">{{ formatPrice(order.shipping_cents) }}</p>
-            </div>
-          </app-surface>
-        }
-
-        <!-- Resumo financeiro -->
-        <app-surface classes="bg-[#F5F5F5]">
-          <h4 class="font-urbanist font-semibold text-[1.25rem] mb-[1rem]">Resumo</h4>
-          <div class="space-y-[.5rem] font-manrope">
-            <div class="flex justify-between text-neutral-medium">
-              <span>Subtotal</span>
-              <span>{{ formatPrice(order.subtotal_cents) }}</span>
-            </div>
-
-            @if (order.discount_cents > 0) {
-              <div class="flex justify-between text-green-600">
-                <span>Desconto</span>
-                <span>- {{ formatPrice(order.discount_cents) }}</span>
+              <div
+                class="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 w-fit"
+              >
+                <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
+                <span class="text-sm font-semibold text-amber-900">Aguardando pagamento</span>
               </div>
-            }
-
-            <div class="flex justify-between text-neutral-medium">
-              <span>Frete</span>
-              <span>{{ formatPrice(order.shipping_cents) }}</span>
-            </div>
-
-            <div
-              class="flex justify-between font-semibold text-[1.125rem] border-t pt-[.75rem] mt-[.5rem]"
-            >
-              <span>Total</span>
-              <span>{{ formatPrice(order.total_cents) }}</span>
             </div>
           </div>
-        </app-surface>
 
-        <!-- Plano -->
-        @if (order.plan; as plan) {
-          <app-surface classes="bg-[#F5F5F5]">
-            <h4 class="font-urbanist font-semibold text-[1.25rem] mb-[.5rem]">Plano incluído</h4>
-            <p class="font-manrope text-neutral-medium mb-[1rem]">{{ plan.description }}</p>
-            <ul class="grid grid-cols-2 gap-[.5rem]">
-              @for (feature of plan.features; track feature) {
-                <li class="flex items-center gap-2 font-manrope text-sm">
-                  <ng-icon name="heroCheckCircle" class="text-green-500 shrink-0"></ng-icon>
-                  {{ feature }}
-                </li>
+          <!-- Itens do Pedido -->
+          <div class="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
+            <div class="px-6 sm:px-8 py-6 border-b border-neutral-100">
+              <h2 class="text-lg sm:text-xl font-bold text-neutral-900">Produtos</h2>
+            </div>
+
+            <div class="divide-y divide-neutral-100">
+              @for (item of order.items; track item.id) {
+                <div class="px-6 sm:px-8 py-4 sm:py-6 hover:bg-neutral-50 transition-colors">
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="flex-1">
+                      <p class="font-semibold text-neutral-900 text-sm sm:text-base">
+                        {{ item.product_name }}
+                      </p>
+                      <p class="text-xs sm:text-sm text-neutral-600 mt-1">
+                        Quantidade: {{ item.quantity }}
+                      </p>
+                    </div>
+                    <p class="font-semibold text-neutral-900 text-base sm:text-lg">
+                      {{ formatPrice(item.unit_price_cents * item.quantity) }}
+                    </p>
+                  </div>
+                </div>
               }
-            </ul>
-          </app-surface>
-        }
-      </div>
+            </div>
+          </div>
 
-      <!-- CTA lateral -->
-      <div class="flex flex-col gap-y-[1rem] w-full max-w-[20rem]">
-        <app-surface classes="bg-[#F5F5F5]">
-          <p class="font-manrope text-neutral-medium text-sm mb-[1rem]">
-            Você será redirecionado para o ambiente seguro do Asaas para concluir o pagamento.
-          </p>
-          <app-button variant="default" sizeH="sm" class="w-full" (click)="goToPayment()">
-            Fazer pagamento
-          </app-button>
-        </app-surface>
+          <!-- Entrega -->
+          @if (order.shipping_service_name) {
+            <div class="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
+              <div class="px-6 sm:px-8 py-6 border-b border-neutral-100">
+                <h2 class="text-lg sm:text-xl font-bold text-neutral-900">Entrega</h2>
+              </div>
+
+              <div class="px-6 sm:px-8 py-6">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div class="flex-1">
+                    <p class="font-semibold text-neutral-900 text-sm sm:text-base">
+                      {{ order.shipping_service_name }}
+                    </p>
+                    <p class="text-xs sm:text-sm text-neutral-600 mt-1">
+                      Previsão: {{ order.shipping_deadline_days }} dias úteis ({{
+                        order.shipping_deadline_date
+                      }})
+                    </p>
+                  </div>
+                  <p class="font-semibold text-neutral-900 text-base sm:text-lg">
+                    {{ formatPrice(order.shipping_cents) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Plano -->
+          @if (order.plan; as plan) {
+            <div
+              class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-sm border border-blue-200 overflow-hidden"
+            >
+              <div class="px-6 sm:px-8 py-6 border-b border-blue-200">
+                <h2 class="text-lg sm:text-xl font-bold text-blue-900">{{ plan.name }}</h2>
+                <p class="text-sm text-blue-800 mt-2">{{ plan.description }}</p>
+              </div>
+
+              <div class="px-6 sm:px-8 py-6">
+                <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  @for (feature of plan.features; track feature) {
+                    <li class="flex items-start gap-3">
+                      <svg
+                        class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fill-rule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clip-rule="evenodd"
+                        />
+                      </svg>
+                      <span class="text-sm text-blue-900">{{ feature }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Sidebar Pagamento -->
+        <div class="lg:col-span-1">
+          <!-- Resumo Financeiro -->
+          <div
+            class="bg-white rounded-2xl shadow-sm border border-neutral-200 p-6 sm:p-8 sticky top-4"
+          >
+            <h3 class="text-lg font-bold text-neutral-900 mb-6">Resumo do Pedido</h3>
+
+            <div class="space-y-3 mb-6 pb-6 border-b border-neutral-100">
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-neutral-600">Subtotal</span>
+                <span class="font-semibold text-neutral-900">{{
+                  formatPrice(getSubtotal(order))
+                }}</span>
+              </div>
+
+              @if (order.discount_cents && order.discount_cents > 0) {
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-neutral-600">Desconto</span>
+                  <span class="font-semibold text-green-600"
+                    >- {{ formatPrice(order.discount_cents) }}</span
+                  >
+                </div>
+              }
+
+              <div class="flex justify-between items-center">
+                <span class="text-sm text-neutral-600">Frete</span>
+                <span class="font-semibold text-neutral-900">{{
+                  formatPrice(order.shipping_cents)
+                }}</span>
+              </div>
+            </div>
+
+            <!-- Total -->
+            <div class="mb-6">
+              <div class="flex justify-between items-center mb-2">
+                <span class="text-base font-semibold text-neutral-900">Total</span>
+                <span class="text-2xl sm:text-3xl font-bold text-neutral-900">
+                  {{ formatPrice(order.total_cents) }}
+                </span>
+              </div>
+              <p class="text-xs text-neutral-500">Incluindo todas as taxas</p>
+            </div>
+
+            <!-- CTA Button -->
+            <app-button
+              variant="default"
+              sizeH="xl"
+              class="w-full mb-4 text-base font-semibold"
+              (click)="goToPayment()"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              Ir para Pagamento
+            </app-button>
+
+            <p class="text-xs text-neutral-500 text-center">
+              Você será redirecionado para o ambiente seguro do Asaas
+            </p>
+
+            <!-- Segurança -->
+            <div class="mt-6 pt-6 border-t border-neutral-100">
+              <div class="flex items-center justify-center gap-2 text-xs text-neutral-600">
+                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 111.414 1.414L7.414 9l3.293 3.293a1 1 0 11-1.414 1.414l-4-4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                Pagamento 100% seguro
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  } @else {
-    <div class="flex flex-col items-center justify-center mt-[6.25rem]">
-      <p class="text-neutral-medium font-manrope">Nenhum pedido encontrado.</p>
-    </div>
-  }
+    } @else {
+      <div class="flex flex-col items-center justify-center py-16 sm:py-24">
+        <div class="text-center">
+          <svg
+            class="w-16 h-16 mx-auto mb-4 text-neutral-300"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+            />
+          </svg>
+          <p class="text-neutral-600 font-medium">Nenhum pedido encontrado</p>
+          <p class="text-neutral-500 text-sm mt-1">Retorne ao carrinho e tente novamente</p>
+        </div>
+      </div>
+    }
+  </div>
 </div>

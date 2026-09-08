@@ -4,13 +4,20 @@
     description="Adicione imagens e vídeos dos seus trabalhos."
   />
 
-  <!-- Imagens -->
-  <div class="bg-[#e2e2e2] w-full rounded-[.625rem] px-[1rem] py-[1.5rem] h-auto mt-[3.5rem]">
+  <!-- ===================================================== -->
+  <!-- IMAGENS -->
+  <!-- ===================================================== -->
+
+  <div class="bg-[#e2e2e2] w-full rounded-[.625rem] px-[1rem] py-[1.5rem] mt-[3.5rem]">
+    <!-- HEADER -->
+
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-[.75rem]">
         <ng-icon name="lucideImages" size="20"></ng-icon>
-        <span class="font-urbanist font-semibold text-[1.25rem]">Imagens</span>
+
+        <span class="font-urbanist font-semibold text-[1.25rem]"> Imagens </span>
       </div>
+
       <app-switch-button
         [checked]="imagesEnabled()"
         (checkedChange)="toggleImages($event)"
@@ -19,34 +26,51 @@
 
     @if (imagesEnabled()) {
       <div class="mt-[1.1875rem]">
-        <span class="font-manrope text-[.75rem] text-neutral-medium">(máx. 6)</span>
+        <span class="font-manrope text-[.75rem] text-neutral-medium"> (máx. 6) </span>
+
+        <!-- ============================================= -->
+        <!-- GRID -->
+        <!-- ============================================= -->
+
         <ul class="grid grid-cols-3 gap-[.75rem] mt-[.75rem]">
-          @for (image of selectedImages(); track image; let i = $index) {
-            <li class="relative aspect-square rounded-[.625rem] overflow-hidden">
+          @for (image of profile().portfolio_images.images; track image.id) {
+            <li class="relative aspect-square rounded-[.625rem] overflow-hidden bg-neutral-200">
               <img
-                [src]="image.preview"
-                alt="Imagem {{ i + 1 }}"
-                class="w-full h-full object-cover"
+                [src]="image.image"
+                [alt]="image.caption || 'Imagem do portfolio'"
+                (load)="onImageLoad(image.id)"
+                class="w-full h-full object-cover transition-opacity duration-300"
+                [class.opacity-0]="!isImageLoaded(image.id)"
+                [class.opacity-100]="isImageLoaded(image.id)"
               />
+
+              <!-- REMOVER -->
+
               <button
                 type="button"
-                (click)="removeImage(i)"
-                class="absolute top-[.25rem] right-[.25rem] bg-black/60 text-white rounded-full w-[1.25rem] h-[1.25rem] flex items-center justify-center"
+                class="absolute top-[.25rem] right-[.25rem] bg-black/70 text-white rounded-full w-[1.5rem] h-[1.5rem] flex items-center justify-center hover:scale-110 transition-transform"
+                (click)="removeImage(image)"
               >
-                <ng-icon name="lucideX" size="12"></ng-icon>
+                <ng-icon name="lucideX" size="13"></ng-icon>
               </button>
             </li>
           }
 
-          @if (selectedImages().length < 6) {
+          <!-- =========================================== -->
+          <!-- ADICIONAR -->
+          <!-- =========================================== -->
+
+          @if (profile().portfolio_images.images.length < 6) {
             <li
-              class="aspect-square rounded-[.625rem] border-2 border-dashed border-neutral-extra-soft flex items-center justify-center cursor-pointer"
+              class="aspect-square rounded-[.625rem] border-2 border-dashed border-neutral-extra-soft flex items-center justify-center cursor-pointer hover:bg-white/50 transition-colors"
               (click)="fileInput.click()"
             >
               <ng-icon name="lucidePlus" size="24" class="text-neutral-medium"></ng-icon>
             </li>
           }
         </ul>
+
+        <!-- FILE INPUT -->
 
         <input
           #fileInput
@@ -58,19 +82,35 @@
         />
       </div>
 
-      <app-button sizeH="sm" class="w-full mt-[1.5rem]" (click)="submitImages()">
-        Salvar imagens
+      <!-- ============================================= -->
+      <!-- SALVAR -->
+      <!-- ============================================= -->
+
+      <app-button
+        sizeH="sm"
+        class="w-full mt-[1.5rem]"
+        [disabled]="isSavingImages()"
+        (click)="submitImages()"
+      >
+        {{ isSavingImages() ? 'Salvando...' : 'Salvar imagens' }}
       </app-button>
     }
   </div>
 
-  <!-- Vídeo -->
-  <div class="bg-[#e2e2e2] w-full rounded-[.625rem] px-[1rem] py-[1.5rem] h-auto mt-[2rem]">
+  <!-- ===================================================== -->
+  <!-- VÍDEO -->
+  <!-- ===================================================== -->
+
+  <div class="bg-[#e2e2e2] w-full rounded-[.625rem] px-[1rem] py-[1.5rem] mt-[2rem]">
+    <!-- HEADER -->
+
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-[.75rem]">
         <ng-icon name="lucideYoutube" size="20"></ng-icon>
-        <span class="font-urbanist font-semibold text-[1.25rem]">Vídeo</span>
+
+        <span class="font-urbanist font-semibold text-[1.25rem]"> Vídeo </span>
       </div>
+
       <app-switch-button
         [checked]="videoEnabled()"
         (checkedChange)="toggleVideo($event)"
@@ -78,16 +118,51 @@
     </div>
 
     @if (videoEnabled()) {
+      <!-- ============================================= -->
+      <!-- URL -->
+      <!-- ============================================= -->
+
       <input
         type="text"
         placeholder="Link do Youtube"
         class="block w-full mt-[1.1875rem] px-[.75rem] h-[2.375rem] rounded-[.625rem] bg-white border border-neutral-extra-soft font-manrope text-[.875rem] outline-none"
         [value]="youtubeUrl()"
-        (input)="youtubeUrl.set($any($event.target).value)"
+        (input)="onYoutubeUrlChange($any($event.target).value)"
       />
 
-      <app-button sizeH="sm" class="w-full mt-[1.5rem]" (click)="submitVideo()">
-        Salvar vídeo
+      <!-- ============================================= -->
+      <!-- VÍDEO SALVO / PREVIEW -->
+      <!-- ============================================= -->
+
+      @if (hasVideo()) {
+        <div class="mt-[1rem] rounded-[.625rem] bg-white p-[.75rem]">
+          <div class="flex items-center justify-between gap-[.75rem]">
+            <span class="font-manrope text-[.75rem] text-neutral-medium truncate">
+              {{ youtubeUrl() }}
+            </span>
+
+            <button
+              type="button"
+              class="shrink-0 bg-black text-white rounded-full w-[1.5rem] h-[1.5rem] flex items-center justify-center hover:scale-110 transition-transform"
+              (click)="removeVideo()"
+            >
+              <ng-icon name="lucideX" size="13"></ng-icon>
+            </button>
+          </div>
+        </div>
+      }
+
+      <!-- ============================================= -->
+      <!-- SALVAR -->
+      <!-- ============================================= -->
+
+      <app-button
+        sizeH="sm"
+        class="w-full mt-[1.5rem]"
+        [disabled]="isSavingVideo()"
+        (click)="submitVideo()"
+      >
+        {{ isSavingVideo() ? 'Salvando...' : 'Salvar vídeo' }}
       </app-button>
     }
   </div>

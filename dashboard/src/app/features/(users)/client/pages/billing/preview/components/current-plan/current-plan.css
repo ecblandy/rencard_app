@@ -1,0 +1,276 @@
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInDelay {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes featureIn {
+  from {
+    opacity: 0;
+    transform: translateX(-15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   ANIMAÇÕES
+   ============================================================ */
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out both;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease-out both;
+}
+
+.animate-slide-in-delay {
+  animation: slideInDelay 0.5s ease-out 0.15s both;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.5s ease-out 0.2s both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+/* ============================================================
+   BENEFÍCIOS
+   ============================================================ */
+
+.feature-item {
+  opacity: 0;
+  animation: featureIn 0.4s ease-out var(--feature-delay, 0ms) both;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.feature-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================================
+   CARDS DE DETALHES
+   ============================================================ */
+
+.detail-card {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.detail-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+}
+
+/* ============================================================
+   PAGAMENTO
+   ============================================================ */
+
+.payment-card {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.payment-card:hover {
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================================================
+   SUPERFÍCIE PRINCIPAL
+   ============================================================ */
+
+:host {
+  display: block;
+}
+
+app-surface {
+  display: block;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+
+  transition:
+    box-shadow 0.3s ease,
+    transform 0.3s ease;
+}
+
+app-surface:hover {
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================================
+   BARRA DE PROGRESSO
+   ============================================================ */
+
+.progress-bar {
+  transform-origin: left center;
+  animation: progressBarIn 0.9s ease-out 0.35s both;
+}
+
+@keyframes progressBarIn {
+  from {
+    width: 0 !important;
+    opacity: 0.5;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+
+[class*='badge'] {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+[class*='badge']:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ============================================================
+   BOTÕES
+   ============================================================ */
+
+app-button {
+  display: inline-block;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+app-button:hover {
+  transform: translateY(-2px);
+}
+
+app-button:active {
+  transform: translateY(0);
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+.fixed.bg-black {
+  backdrop-filter: blur(4px);
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .animate-slide-in {
+    animation-duration: 0.4s;
+  }
+
+  .animate-scale-in {
+    animation-duration: 0.3s;
+  }
+}
+
+/* ============================================================
+   REDUÇÃO DE MOVIMENTO
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

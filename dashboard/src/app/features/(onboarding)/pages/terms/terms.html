@@ -1,37 +1,43 @@
-<div class="mx-auto px-[1.25rem] mb-[3.75rem] max-w-[79.875rem] w-full h-full">
+<div
+  class="mx-auto px-4 sm:px-6 lg:px-[1.25rem] mb-8 sm:mb-12 lg:mb-[3.75rem] max-w-full lg:max-w-[79.875rem] w-full h-full"
+>
   <app-onboarding-step [currentStep]="currentStep()"></app-onboarding-step>
   <app-onboarding-title
     title="Entenda sua compra"
     description="Leia atentamente as informações abaixo antes de prosseguir."
   ></app-onboarding-title>
 
-  <section class="flex gap-x-[1.5rem]">
+  <section class="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:gap-x-[1.5rem]">
     <!-- Container left -->
-    <div>
+    <div class="w-full lg:max-w-[58.375rem]">
       <!-- How With Works -->
-      <div class="max-w-[58.375rem] w-full border border-neutral-extra-soft rounded-[.625rem]">
+      <div class="w-full border border-neutral-extra-soft rounded-[.625rem]">
         <!-- Title -->
         <div
-          class="flex items-center gap-[1rem] py-[1rem] px-[1.5rem] bg-neutral-extra-soft rounded-t-[.625rem]"
+          class="flex items-center gap-2 sm:gap-3 lg:gap-[1rem] py-3 sm:py-4 lg:py-[1rem] px-4 sm:px-6 lg:px-[1.5rem] bg-neutral-extra-soft rounded-t-[.625rem]"
         >
           <div
-            class="flex items-center justify-center h-[2rem] w-[2rem] rounded-[.25rem] bg-neutral-strong"
+            class="flex items-center justify-center h-6 sm:h-7 lg:h-[2rem] w-6 sm:w-7 lg:w-[2rem] rounded-[.25rem] bg-neutral-strong flex-shrink-0"
           >
             <ng-icon name="lucideHandshake" size="16" color="white"></ng-icon>
           </div>
-          <h2 class="font-urbanist font-semibold text-[1.5rem]">Como funciona o Rencard</h2>
+          <h2 class="font-urbanist font-semibold text-base sm:text-lg lg:text-[1.5rem]">
+            Como funciona o Rencard
+          </h2>
         </div>
 
         <!-- Infos -->
-        <ul class="space-y-[1.5rem] px-[1.5rem] py-[1rem]">
+        <ul
+          class="space-y-3 sm:space-y-4 lg:space-y-[1.5rem] px-4 sm:px-6 lg:px-[1.5rem] py-3 sm:py-4 lg:py-[1rem]"
+        >
           @for (step of steps(); track step) {
-            <li class="flex gap-x-[1rem]">
+            <li class="flex gap-2 sm:gap-3 lg:gap-x-[1rem]">
               <div
-                class="flex items-center justify-center h-[2rem] w-[2rem] rounded-[.25rem] bg-neutral-strong text-white"
+                class="flex items-center justify-center h-6 sm:h-7 lg:h-[2rem] w-6 sm:w-7 lg:w-[2rem] rounded-[.25rem] bg-neutral-strong text-white text-xs sm:text-sm lg:text-base font-semibold flex-shrink-0"
               >
                 {{ step.step }}
               </div>
-              <div class="flex-1 flex items-center font-manrope">
+              <div class="flex-1 flex items-center font-manrope text-xs sm:text-sm lg:text-base">
                 {{ step.message }}
               </div>
             </li>
@@ -40,12 +46,17 @@
 
         <!-- Footer -->
         <div
-          class="flex items-center gap-[1rem] py-[1rem] px-[1.5rem] bg-[#F5F5F5] rounded-b-[.625rem] border-t border-neutral-extra-soft"
+          class="flex items-start sm:items-center gap-2 sm:gap-3 lg:gap-[1rem] py-3 sm:py-4 lg:py-[1rem] px-4 sm:px-6 lg:px-[1.5rem] bg-[#F5F5F5] rounded-b-[.625rem] border-t border-neutral-extra-soft"
         >
-          <div>
-            <ng-icon name="lucideTriangleAlert" size="22" color="#7a7a7a"></ng-icon>
+          <div class="flex-shrink-0">
+            <ng-icon
+              name="lucideTriangleAlert"
+              size="20"
+              color="#7a7a7a"
+              class="sm:w-6 sm:h-6"
+            ></ng-icon>
           </div>
-          <p class="font-manrope text-[.875rem] text-neutral-medium">
+          <p class="font-manrope text-xs sm:text-sm lg:text-[.875rem] text-neutral-medium">
             Seu cartão físico e tag NFC funcionarão normalmente. A assinatura é para você poder
             editar e ter acesso a todos os recursos disponíveis no plano que você escolher.
           </p>
@@ -53,33 +64,45 @@
       </div>
 
       <!-- Accept terms -->
-      <app-surface classes="my-[2.5rem] max-w-[58.375rem] w-full">
-        <label for="terms" class="flex items-center gap-x-[1rem] font-manrope font-semibold">
+      <app-surface classes="my-4 sm:my-6 lg:my-[2.5rem] w-full">
+        <label
+          for="terms"
+          class="flex items-start sm:items-center gap-2 sm:gap-3 lg:gap-x-[1rem] font-manrope font-semibold text-xs sm:text-sm lg:text-base px-4 sm:px-0"
+        >
           <input
             type="checkbox"
             id="terms"
-            class="h-[1.25rem] w-[1.25rem] rounded-[.625rem]"
+            class="h-4 sm:h-5 lg:h-[1.25rem] w-4 sm:w-5 lg:w-[1.25rem] rounded-[.625rem] flex-shrink-0 mt-0.5 sm:mt-0"
             [checked]="acceptedTerms()"
             (change)="acceptedTerms.set($any($event.target).checked)"
           />
-          Li e entendi como funciona o uso do Rencard e do perfil digital.
+          <span>Li e entendi como funciona o uso do Rencard e do perfil digital.</span>
         </label>
       </app-surface>
 
       <!-- Actions Buttons -->
-      <div class="flex gap-x-[1rem]">
-        <app-button variant="outline" class="w-full">Voltar</app-button>
-        <app-button class="w-full" [disabled]="!acceptedTerms()" (click)="goToSignup()">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 lg:gap-x-[1rem]">
+        <app-button variant="outline" class="w-full order-2 sm:order-1" (click)="goBack()">
+          Voltar
+        </app-button>
+        <app-button
+          class="w-full order-1 sm:order-2"
+          [disabled]="!acceptedTerms()"
+          (click)="goToSignup()"
+        >
           Continuar cadastro
         </app-button>
       </div>
 
-      <span class="block text-neutral-soft font-manrope text-center mt-[.5rem]"
+      <span
+        class="block text-neutral-soft font-manrope text-center text-xs sm:text-sm lg:text-base mt-2 sm:mt-3 lg:mt-[.5rem]"
         >Você precisa aceitar os termos para continuar</span
       >
     </div>
 
     <!-- Container Right -->
-    <app-onboarding-cart [items]="cartItems()"></app-onboarding-cart>
+    <div class="w-full lg:w-auto">
+      <app-onboarding-cart [items]="cartItems()"></app-onboarding-cart>
+    </div>
   </section>
 </div>

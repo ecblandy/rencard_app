@@ -59,8 +59,8 @@
   <p class="text-center mt-[3.125rem] max-sm:mt-0 font-manrope text-neutral-strong">
     Não tem uma conta?
     <a
-      [routerLink]="['/auth/signup']"
       class="text-black font-semibold hover:text-neutral-strong hover:underline transition-colors duration-300"
+      (click)="goToSelelectPlan()"
       >Criar conta</a
     >
   </p>

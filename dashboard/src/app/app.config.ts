@@ -52,42 +52,75 @@ import {
   lucideX,
   lucideArrowRight,
   lucideLock,
+  lucideMailOpen,
+  lucideInfo,
+  lucideMessageSquare,
+  lucideTruck,
 } from '@ng-icons/lucide';
 
 import { svglTiktok } from '@ng-icons/svgl';
+
 import {
   bootstrapArrowLeft,
+  bootstrapArrowRight,
+  bootstrapArrowClockwise,
+  bootstrapBox,
+  bootstrapCalendarEvent,
+  bootstrapCheck,
+  bootstrapCheckCircle,
   bootstrapCheckCircleFill,
+  bootstrapChevronDown,
+  bootstrapClockHistory,
   bootstrapCloudUpload,
+  bootstrapCreditCard,
   bootstrapCurrencyDollar,
+  bootstrapExclamationTriangle,
   bootstrapFileEarmarkWordFill,
   bootstrapGraphUp,
   bootstrapHeadset,
+  bootstrapHourglassSplit,
+  bootstrapInfoCircle,
   bootstrapLink,
   bootstrapLinkedin,
+  bootstrapLock,
   bootstrapLockFill,
   bootstrapMusicNoteBeamed,
+  bootstrapPerson,
+  bootstrapQuestionCircle,
+  bootstrapReceipt,
+  bootstrapShieldCheck,
+  bootstrapShieldLock,
   bootstrapSpotify,
   bootstrapTelegram,
   bootstrapTicketPerforated,
   bootstrapTwitterX,
   bootstrapWhatsapp,
+  bootstrapXCircle,
+  bootstrapLightbulb,
 } from '@ng-icons/bootstrap-icons';
 
 import { monoClipboardCheck, monoCreditCard, monoPause } from '@ng-icons/mono-icons';
+
 import { aspectsSocialFacebook, aspectsSocialYoutube } from '@ng-icons/ux-aspects';
+
 import { dripWeb } from '@ng-icons/dripicons';
+
 import { remixFeedbackLine, remixPixFill, remixSuitcase2Line } from '@ng-icons/remixicon';
+
 import { provideNgxMask, provideEnvironmentNgxMask } from 'ngx-mask';
+
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app.routes';
+
 import { authInterceptor } from './core/http/auth.interceptors';
+
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+
     provideRouter(routes),
 
     provideIcons({
@@ -109,17 +142,8 @@ export const appConfig: ApplicationConfig = {
       lucideImages,
       lucideUpload,
       lucideInstagram,
-      svglTiktok,
-      bootstrapLinkedin,
-      bootstrapCurrencyDollar,
       lucideFacebook,
-      aspectsSocialFacebook,
-      aspectsSocialYoutube,
-      bootstrapTelegram,
       lucideMail,
-      bootstrapTwitterX,
-      dripWeb,
-      bootstrapSpotify,
       lucideCheckCircle,
       lucideTag,
       lucideCreditCard,
@@ -131,45 +155,86 @@ export const appConfig: ApplicationConfig = {
       lucideLoader2,
       lucidePhone,
       lucideFileText,
-      monoClipboardCheck,
-      remixFeedbackLine,
-      monoPause,
       lucideXCircle,
-      bootstrapGraphUp,
-      bootstrapLink,
-      monoCreditCard,
-      bootstrapTicketPerforated,
       lucideChevronRight,
       lucideChevronsRight,
       lucideChevronLeft,
       lucideChevronsLeft,
-      remixSuitcase2Line,
       lucidePlus,
-      bootstrapArrowLeft,
       lucideRefreshCcw,
-      bootstrapLockFill,
       lucideCopy,
-      bootstrapCloudUpload,
-      bootstrapFileEarmarkWordFill,
       lucideContact,
       lucideLink,
       lucideLockKeyhole,
       lucideFileUser,
-      remixPixFill,
-      bootstrapWhatsapp,
-      bootstrapMusicNoteBeamed,
+      lucideVideo,
       lucideYoutube,
       lucideDownload,
-      bootstrapCheckCircleFill,
       lucideX,
       lucideArrowRight,
       lucideLock,
+      lucideMailOpen,
+      lucideInfo,
+      lucideMessageSquare,
+      svglTiktok,
+      lucideTruck,
+      bootstrapArrowLeft,
+      bootstrapArrowRight,
+      bootstrapArrowClockwise,
+      bootstrapBox,
+      bootstrapCalendarEvent,
+      bootstrapCheck,
+      bootstrapCheckCircle,
+      bootstrapCheckCircleFill,
+      bootstrapChevronDown,
+      bootstrapClockHistory,
+      bootstrapCloudUpload,
+      bootstrapCreditCard,
+      bootstrapCurrencyDollar,
+      bootstrapExclamationTriangle,
+      bootstrapFileEarmarkWordFill,
+      bootstrapGraphUp,
       bootstrapHeadset,
+      bootstrapHourglassSplit,
+      bootstrapInfoCircle,
+      bootstrapLink,
+      bootstrapLinkedin,
+      bootstrapLock,
+      bootstrapLockFill,
+      bootstrapMusicNoteBeamed,
+      bootstrapPerson,
+      bootstrapQuestionCircle,
+      bootstrapReceipt,
+      bootstrapShieldCheck,
+      bootstrapShieldLock,
+      bootstrapSpotify,
+      bootstrapTelegram,
+      bootstrapTicketPerforated,
+      bootstrapTwitterX,
+      bootstrapWhatsapp,
+      bootstrapXCircle,
+      bootstrapLightbulb,
+
+      monoClipboardCheck,
+      monoCreditCard,
+      monoPause,
+
+      aspectsSocialFacebook,
+      aspectsSocialYoutube,
+
+      dripWeb,
+
+      remixFeedbackLine,
+      remixPixFill,
+      remixSuitcase2Line,
     }),
 
     provideEnvironmentNgxMask(),
+
     provideNgxMask(),
+
     provideHttpClient(withInterceptors([authInterceptor])),
+
     provideCharts(withDefaultRegisterables()),
   ],
 };

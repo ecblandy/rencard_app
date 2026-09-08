@@ -42,6 +42,12 @@ export const authRoutes: Routes = [
     loadComponent: () => import('../pages/confirm-email/confirm-email').then((m) => m.ConfirmEmail),
     title: 'Confirmação de E-mail – Rencard',
   },
+
+  {
+    path: 'change-email',
+    loadComponent: () => import('../pages/change-email/change-email').then((m) => m.ChangeEmail),
+    title: 'Alterar E-mail – Rencard',
+  },
   {
     path: 'forgot-password',
     loadComponent: () =>

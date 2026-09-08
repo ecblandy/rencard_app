@@ -127,7 +127,14 @@
       <p
         class="font-urbanist font-semibold text-[1.25rem] max-sm:text-[1rem] text-neutral-soft wrap-break-word"
       >
-        Aceitar os termos de uso
+        Aceitar os
+        <a
+          routerLink="/terms-of-use"
+          target="_blank"
+          class="underline underline-offset-[.2rem] decoration-neutral-soft hover:text-neutral-strong hover:decoration-neutral-strong transition-colors"
+        >
+          termos de uso
+        </a>
       </p>
     </label>
 
@@ -142,8 +149,12 @@
       </ul>
     }
   </div>
-
-  <app-button type="submit" class="w-full" sizeH="xl">Cadastrar</app-button>
+  <div class="flex flex-col mt-[1.875rem]">
+    <app-button type="submit" class="w-full" sizeH="xl">Cadastrar</app-button>
+    <app-button variant="outline" class="w-full mt-3" sizeH="xl" (click)="goBack()"
+      >Voltar</app-button
+    >
+  </div>
 
   <!-- Register -->
   <p class="text-center mt-[3.125rem] font-manrope text-neutral-strong">

@@ -8,6 +8,8 @@ import { UsersActiveGraph } from '../../../components/users-active-graph/users-a
 import { DashboardQrcode } from '../../components/dashboard-qrcode/dashboard-qrcode';
 import { ClientService } from '../../services/facade/client.service';
 import { DashboardClient } from '../../types/dashboard';
+import { SubscriptionAccessService } from '../../../../../shared/services/subscription-access';
+import { SubscriptionBlocked } from "../billing/subscription-blocked/subscription-blocked";
 
 @Component({
   selector: 'app-dashboard',
@@ -19,12 +21,15 @@ import { DashboardClient } from '../../types/dashboard';
     Surface,
     SurfaceTitle,
     DashboardQrcode,
-  ],
+    SubscriptionBlocked
+],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
   private clientServices = inject(ClientService);
+
+  protected readonly subscriptionAccess = inject(SubscriptionAccessService);
   period = signal<'today' | '7d' | '30d'>('30d');
   dashboardData = signal<Partial<DashboardClient>>({});
   isLoading = signal(false);

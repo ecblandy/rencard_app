@@ -101,4 +101,8 @@ export class Address {
       });
     }
   }
+
+  goBack() {
+    window.history.back();
+  }
 }

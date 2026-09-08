@@ -1,0 +1,86 @@
+:host {
+  display: block;
+}
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.analytics-card {
+  animation: analyticsEnter 0.4s ease-out both;
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.analytics-card:hover {
+  border-color: rgb(212 212 212);
+
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* =========================================================
+   ANIMAÇÃO DE ENTRADA
+   ========================================================= */
+
+@keyframes analyticsEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   ÍCONE
+   ========================================================= */
+
+.analytics-icon {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.analytics-card:hover .analytics-icon {
+  transform: translateY(-3px);
+
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* =========================================================
+   BOTÃO
+   ========================================================= */
+
+.analytics-button {
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.analytics-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.97);
+}
+
+.analytics-button:active {
+  transform: translateY(0);
+}
+
+/* =========================================================
+   ACESSIBILIDADE
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .analytics-card,
+  .analytics-icon,
+  .analytics-button {
+    animation: none;
+    transition: none;
+  }
+}

@@ -8,4 +8,4 @@ import { AddressForm } from '../../../components/address-form/address-form';
   templateUrl: './settings.html',
   styleUrl: './settings.css',
 })
-export class Settings {}
+export class Support {}

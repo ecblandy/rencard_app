@@ -1,47 +1,70 @@
-<app-surface classes="max-w-[32.6875rem] w-full">
-  <app-surface-title
-    title="Seu QR Code"
-    description="Compartilhe seu perfil digital instantaneamente"
-  >
-  </app-surface-title>
-
-  <section class="flex gap-x-[2rem] pt-[2.1875rem]">
+<app-surface classes="max-w-full w-full">
+  <div class="space-y-[2rem]">
+    <!-- Header -->
     <div>
-      <img [src]="imageQrCOde()" alt="imagem do qrcode" />
-      <app-button
-        variant="default"
-        sizeH="sm"
-        class="w-[9.1875rem] mt-[1.5rem]"
-        (click)="copyToClipboard()"
-      >
-        Baixar QR Code
-      </app-button>
+      <app-surface-title
+        title="Compartilhe seu Perfil"
+        description="Escaneie o código QR ou use o link personalizado"
+      ></app-surface-title>
     </div>
 
-    <div class="flex-1 space-y-[1.5rem]">
-      <span class="block font-urbanist font-semibold text-[1.25rem]">Link personalizado</span>
-      <div class="flex border border-neutral-soft rounded-[.625rem]">
-        <p
-          class="flex items-center justify-center font-manrope font-semibold bg-[#F5F5F5] text-neutral-medium border-r border-neutral-soft max-w-[7.75rem] w-full h-[2.375rem] rounded-l-[.625rem]"
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-[2.5rem]">
+      <!-- QR Code Card -->
+      <div class="flex flex-col items-center space-y-[1.5rem]">
+        <div
+          class="bg-white rounded-[1rem] p-[1.5rem] shadow-sm border border-neutral-soft w-full flex justify-center"
         >
-          rencard.app/
-        </p>
-        <p
-          class="flex items-center justify-center font-manrope font-semibold border-l border-neutral-soft text-neutral-soft w-full h-[2.375rem] rounded-r-[.625rem]"
+          <img [src]="imageQrCOde()" alt="QR Code" class="w-[12rem] h-[12rem] object-contain" />
+        </div>
+
+        <app-button
+          variant="default"
+          sizeH="sm"
+          class="w-full flex justify-center items-center gap-[.5rem]"
+          (click)="downloadQrCode()"
         >
-          {{ username() }}
-        </p>
+          <ng-icon name="lucideDownload" size="18"></ng-icon>
+          <span>Baixar QR Code</span>
+        </app-button>
       </div>
 
-      <app-button
-        variant="default"
-        sizeH="sm"
-        class="w-full flex justify-center items-center gap-2"
-        (click)="copyToClipboard()"
-      >
-        <ng-icon name="lucideCopy" size="16" class="text-w"></ng-icon>
-        <p>Copiar</p>
-      </app-button>
+      <!-- URL Card -->
+      <div class="flex flex-col justify-center space-y-[1.5rem]">
+        <div class="space-y-[.75rem]">
+          <span class="block font-urbanist font-semibold text-[1.125rem]">
+            Link Personalizado
+          </span>
+          <p class="text-neutral-soft font-manrope text-[.875rem]">
+            Compartilhe este link com seus contatos
+          </p>
+        </div>
+
+        <!-- URL Display -->
+        <div class="bg-[#F5F5F5] rounded-[.875rem] p-[1rem] border border-neutral-soft">
+          <p class="font-manrope font-semibold text-[.9375rem] text-neutral-medium break-all">
+            rencard.app/{{ username() }}
+          </p>
+        </div>
+
+        <!-- Copy Button -->
+        <app-button
+          variant="default"
+          sizeH="sm"
+          class="w-full flex justify-center items-center gap-[.5rem]"
+          (click)="copyToClipboard()"
+        >
+          <ng-icon name="lucideCopy" size="18"></ng-icon>
+          <span>Copiar Link</span>
+        </app-button>
+
+        <!-- Info -->
+        <div class="bg-black-50 rounded-[.75rem] px-[1rem] py-[.75rem] border border-blue-100">
+          <p class="text-[.8125rem] text-black font-manrope">
+            ✓ Seu perfil está disponível publicamente em rencard.app/{{ username() }}
+          </p>
+        </div>
+      </div>
     </div>
-  </section>
+  </div>
 </app-surface>

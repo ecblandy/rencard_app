@@ -28,24 +28,52 @@ export class AuthApi {
     return this.http.get<User>(`${this.baseUrl}/users/me/`);
   }
 
-  // PATCH
   updateMe(payload: any) {
     return this.http.patch<User>(`${this.baseUrl}/users/me/`, payload);
   }
 
   confirmEmail(code: string, email?: string) {
-    console.log('code no auth api:', code);
     return this.http.post<{ code: string }>(`${this.baseUrl}/auth/email/confirm/`, {
-      code: code,
-      email: email,
+      code,
+      email,
+    });
+  }
+
+  confirmChangeEmail(code: string) {
+    return this.http.post(`${this.baseUrl}/auth/email/change/confirm/`, { code });
+  }
+
+  resendConfirmationCode(email: string) {
+    return this.http.post(`${this.baseUrl}/auth/email/resend/`, {
+      email,
     });
   }
 
   changeEmail(newEmail: string) {
-    return this.http.post(`${this.baseUrl}/auth/email/change/`, { new_email: newEmail });
+    return this.http.post(`${this.baseUrl}/auth/email/change/`, {
+      new_email: newEmail,
+    });
   }
 
   registerClient(credentials: User) {
     return this.http.post<User>(`${this.baseUrl}/users/register_client/`, credentials);
+  }
+
+  // =========================================================
+  // RECUPERAÇÃO / REDEFINIÇÃO DE SENHA
+  // =========================================================
+
+  requestPasswordReset(email: string) {
+    return this.http.post<{ detail: string }>(`${this.baseUrl}/auth/password/reset/`, {
+      email,
+    });
+  }
+
+  confirmPasswordReset(uid: string, token: string, newPassword: string) {
+    return this.http.post<{ detail: string }>(`${this.baseUrl}/auth/password/confirm/`, {
+      uid,
+      token,
+      new_password: newPassword,
+    });
   }
 }
