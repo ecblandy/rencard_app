@@ -2,7 +2,8 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
-import { toast } from 'ngx-sonner'; // ajuste o import se a lib de toast for outra
+import { toast } from 'ngx-sonner';
+
 import { Loader } from '../../../../shared/components/loader/loader';
 import { Surface } from '../../../../shared/components/surface/surface';
 import { PaymentService } from '../../services/facade/payment.service';
@@ -12,6 +13,7 @@ import { OnboardingCart } from '../../../(users)/client/components/onboarding-ca
 import { OnboardingStateService } from '../../onboarding-state.service';
 import { OnboardingTitle } from '../../../(users)/client/components/onboarding-title/onboarding-title';
 import { OnboardingStep } from '../../../(users)/client/components/onboarding-step/onboarding-step';
+
 import {
   ShippingCalculationResponse,
   ShippingOption,
@@ -26,8 +28,10 @@ interface ProductsData {
   additional: ProductModel[];
 }
 
-const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
+
 const ACCEPTED_LOGO_TYPES = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
+
 const CEP_DEBOUNCE_MS = 500;
 
 @Component({
@@ -42,11 +46,20 @@ export class Products {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
-  // --- Passo atual do onboarding ---
-  private routeData = toSignal(this.route.data, { initialValue: this.route.snapshot.data });
+  // =========================================================
+  // PASSO ATUAL DO ONBOARDING
+  // =========================================================
+
+  private routeData = toSignal(this.route.data, {
+    initialValue: this.route.snapshot.data,
+  });
+
   readonly currentStep = computed(() => this.routeData()['step'] as number);
 
-  // --- Produto selecionado (via query param ou estado salvo) ---
+  // =========================================================
+  // PRODUTO / PLANO
+  // =========================================================
+
   private queryParams = toSignal(this.route.queryParams, {
     initialValue: {} as Record<string, string>,
   });
@@ -58,17 +71,25 @@ export class Products {
   });
 
   constructor() {
-    // Sincroniza o plan da URL com o estado salvo
+    // =======================================================
+    // SINCRONIZA PLANO DA URL COM O ESTADO
+    // =======================================================
+
     effect(() => {
       const plan = this.planFromUrl();
+
       if (plan) {
         this.onboardingState.setPlan(plan);
       }
     });
 
-    // Gera/revoga URLs de preview conforme os arquivos de logo mudam
+    // =======================================================
+    // PREVIEW DAS LOGOS
+    // =======================================================
+
     effect((onCleanup) => {
       const files = this.logoFiles();
+
       const urls: Record<string, string> = {};
 
       for (const [id, file] of Object.entries(files)) {
@@ -80,43 +101,65 @@ export class Products {
       this.logoPreviewUrls.set(urls);
 
       onCleanup(() => {
-        Object.values(urls).forEach((url) => URL.revokeObjectURL(url));
+        Object.values(urls).forEach((url) => {
+          URL.revokeObjectURL(url);
+        });
       });
     });
 
-    // Calcula o frete automaticamente quando o CEP estiver completo
-    // e o modo físico estiver ativo com algo selecionado (com debounce)
+    // =======================================================
+    // CÁLCULO AUTOMÁTICO DO FRETE
+    // =======================================================
+
     effect((onCleanup) => {
       const cep = this.cepDigits();
       const hasPhysical = this.hasPhysicalProductSelected();
 
-      if (cep.length !== 8 || !hasPhysical) return;
+      if (cep.length !== 8 || !hasPhysical) {
+        return;
+      }
 
       const timeoutId = setTimeout(() => this.calculateShipping(), CEP_DEBOUNCE_MS);
-      onCleanup(() => clearTimeout(timeoutId));
+
+      onCleanup(() => {
+        clearTimeout(timeoutId);
+      });
     });
   }
 
-  // --- Busca de produtos ---
+  // =========================================================
+  // BUSCA DE PRODUTOS
+  // =========================================================
+
   private productsResource = rxResource<ProductsData, string | null>({
     params: () => this.selectedProduct(),
+
     stream: ({ params }) =>
       this.paymentService.fetchProducts().pipe(
         map((data) => ({
           products: data.fisico.filter((p: ProductModel) => p.plan_type === params),
+
           digital: data.digital.filter((p: ProductModel) => p.plan_type === params),
+
           additional: data.adicional,
         })),
       ),
   });
 
   readonly isInitialLoading = computed(() => this.productsResource.isLoading());
+
   readonly products = computed(() => this.productsResource.value()?.products ?? []);
+
   readonly digitalProducts = computed(() => this.productsResource.value()?.digital ?? []);
+
   readonly aditionalProducts = computed(() => this.productsResource.value()?.additional ?? []);
+
   readonly resourceError = computed(() => this.productsResource.error());
 
-  // --- Modo de seleção: físico (cartão/tag) ou apenas digital ---
+  // =========================================================
+  // MODO DE SELEÇÃO
+  // =========================================================
+
   readonly selectionMode = signal<'fisico' | 'digital' | null>(null);
 
   selectMode(mode: 'fisico' | 'digital') {
@@ -124,40 +167,62 @@ export class Products {
 
     if (mode === 'digital') {
       const digital = this.digitalProducts()[0];
+
       this.selectedItems.set(
-        digital ? [{ id: digital.id.toString(), price: digital.price_cents }] : [],
+        digital
+          ? [
+              {
+                id: digital.id.toString(),
+                price: digital.price_cents,
+              },
+            ]
+          : [],
       );
+
       this.logoFiles.set({});
       this.logoErrors.set({});
+
       this.resetShipping();
       this.resetCoupon();
     } else {
-      // trocou pra físico -> limpa qualquer seleção digital anterior
       this.selectedItems.set([]);
+
       this.resetShipping();
       this.resetCoupon();
     }
   }
 
-  // --- Card específico selecionado (controla exibição da logo) ---
+  // =========================================================
+  // CARTÃO SELECIONADO
+  // =========================================================
+
   readonly hasCardSelected = computed(
     () =>
       this.selectionMode() === 'fisico' &&
-      this.products().some((p) => p.type === 'card' && this.isSelected(p.id.toString())),
+      this.products().some(
+        (product) => product.type === 'card' && this.isSelected(product.id.toString()),
+      ),
   );
+
+  // =========================================================
+  // PERSONALIZAÇÃO COM LOGO
+  // =========================================================
 
   readonly showAdditionalProducts = computed(
     () => this.selectedProduct() === 'pro' && this.hasCardSelected(),
   );
 
-  // --- Produto adicional de logo selecionado (só existe um do tipo "logo") ---
   readonly selectedLogoAdditional = computed(
     () =>
-      this.aditionalProducts().find((a) => a.type === 'logo' && this.isSelected(a.id.toString())) ??
-      null,
+      this.aditionalProducts().find(
+        (additional) => additional.type === 'logo' && this.isSelected(additional.id.toString()),
+      ) ?? null,
   );
 
-  // --- Carrinho / itens selecionados ---
+  // =========================================================
+  // CARRINHO
+  // =========================================================
+
   readonly selectedItems = signal<{ id: string; price: number }[]>([]);
 
   readonly subtotal = computed(() =>
@@ -166,15 +231,21 @@ export class Products {
 
   readonly cartItems = computed(() => {
     const shippingResponse = this.shippingCalculationResponse();
+
     const coupon = this.couponResponse();
     const shipping = this.selectedShipping();
     const subtotal = this.subtotal();
 
     const discount = shippingResponse?.discount_cents ?? coupon?.discount_cents ?? 0;
+
     const total = Math.max(0, subtotal - discount + (shipping?.price_cents ?? 0));
 
     return [
-      { label: 'Perfil', value: this.selectedProduct() ?? 'Falha ao carregar' },
+      {
+        label: 'Perfil',
+        value: this.selectedProduct() ?? 'Falha ao carregar',
+      },
+
       {
         label: 'Produtos Selecionados',
         value:
@@ -182,8 +253,21 @@ export class Products {
             ? `${this.selectedItems().length} produto(s)`
             : 'Nenhum selecionado',
       },
-      { label: 'Subtotal', value: this.formatPrice(subtotal) },
-      ...(discount > 0 ? [{ label: 'Desconto', value: `- ${this.formatPrice(discount)}` }] : []),
+
+      {
+        label: 'Subtotal',
+        value: this.formatPrice(subtotal),
+      },
+
+      ...(discount > 0
+        ? [
+            {
+              label: 'Desconto',
+              value: `- ${this.formatPrice(discount)}`,
+            },
+          ]
+        : []),
+
       ...(this.hasPhysicalProductSelected()
         ? [
             {
@@ -192,18 +276,30 @@ export class Products {
             },
           ]
         : []),
-      { label: 'Total', value: this.formatPrice(total) },
+
+      {
+        label: 'Total',
+        value: this.formatPrice(total),
+      },
     ];
   });
 
-  // --- Cupom de desconto ---
+  // =========================================================
+  // CUPOM
+  // =========================================================
+
   readonly couponCode = signal<string>('');
+
   readonly couponStatus = signal<'idle' | 'valid' | 'invalid' | 'loading'>('idle');
+
   readonly couponResponse = signal<CouponValidateResponse | null>(null);
 
   applyCoupon() {
     const code = this.couponCode().trim();
-    if (!code) return;
+
+    if (!code) {
+      return;
+    }
 
     this.couponStatus.set('loading');
 
@@ -216,11 +312,14 @@ export class Products {
       next: (response: CouponValidateResponse) => {
         this.couponResponse.set(response);
         this.couponStatus.set('valid');
+
         toast.success('Cupom aplicado com sucesso!');
       },
+
       error: () => {
         this.couponResponse.set(null);
         this.couponStatus.set('invalid');
+
         toast.error('Cupom inválido ou expirado.');
       },
     });
@@ -232,9 +331,14 @@ export class Products {
     this.couponResponse.set(null);
   }
 
-  // --- Logos dos produtos adicionais (personalização) ---
+  // =========================================================
+  // LOGOS
+  // =========================================================
+
   readonly logoFiles = signal<Record<string, File | null>>({});
+
   readonly logoPreviewUrls = signal<Record<string, string>>({});
+
   readonly logoErrors = signal<Record<string, string | null>>({});
 
   logoPreviewFor(id: string): string | null {
@@ -251,16 +355,21 @@ export class Products {
 
   onLogoSelected(id: string, event: Event) {
     const input = event.target as HTMLInputElement;
+
     const file = input.files?.[0] ?? null;
 
-    if (!file) return;
+    if (!file) {
+      return;
+    }
 
     if (!ACCEPTED_LOGO_TYPES.includes(file.type)) {
       this.logoErrors.update((errors) => ({
         ...errors,
         [id]: 'Formato inválido. Use PNG, JPG, SVG ou WEBP.',
       }));
+
       input.value = '';
+
       return;
     }
 
@@ -269,67 +378,117 @@ export class Products {
         ...errors,
         [id]: 'Arquivo muito grande. Máximo de 5MB.',
       }));
+
       input.value = '';
+
       return;
     }
 
-    this.logoErrors.update((errors) => ({ ...errors, [id]: null }));
-    this.logoFiles.update((files) => ({ ...files, [id]: file }));
+    this.logoErrors.update((errors) => ({
+      ...errors,
+      [id]: null,
+    }));
+
+    this.logoFiles.update((files) => ({
+      ...files,
+      [id]: file,
+    }));
   }
 
   removeLogo(id: string) {
-    this.logoFiles.update((files) => ({ ...files, [id]: null }));
-    this.logoErrors.update((errors) => ({ ...errors, [id]: null }));
+    this.logoFiles.update((files) => ({
+      ...files,
+      [id]: null,
+    }));
+
+    this.logoErrors.update((errors) => ({
+      ...errors,
+      [id]: null,
+    }));
   }
 
-  // Converte o File selecionado da logo pra base64 (formato aceito por ShippingOrder.logo_image)
+  // =========================================================
+  // FILE -> BASE64
+  // =========================================================
+
   private fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(reader.error);
+
+      reader.onload = () => {
+        resolve(reader.result as string);
+      };
+
+      reader.onerror = () => {
+        reject(reader.error);
+      };
+
       reader.readAsDataURL(file);
     });
   }
 
   private async getLogoImageBase64(): Promise<string | undefined> {
     const additional = this.selectedLogoAdditional();
-    if (!additional) return undefined;
+
+    if (!additional) {
+      return undefined;
+    }
 
     const file = this.logoFiles()[additional.id.toString()];
-    if (!file) return undefined;
+
+    if (!file) {
+      return undefined;
+    }
 
     return this.fileToBase64(file);
   }
 
+  // =========================================================
+  // SELEÇÃO DE PRODUTOS
+  // =========================================================
+
   isSelected(id: string): boolean {
-    return this.selectedItems().some((i) => i.id === id);
+    return this.selectedItems().some((item) => item.id === id);
   }
 
   selectItem(item: { id: string; price: number }) {
-    const existingIndex = this.selectedItems().findIndex((i) => i.id === item.id);
+    const existingIndex = this.selectedItems().findIndex(
+      (selectedItem) => selectedItem.id === item.id,
+    );
+
     if (existingIndex > -1) {
-      this.selectedItems.update((items) => items.filter((_, i) => i !== existingIndex));
+      this.selectedItems.update((items) => items.filter((_, index) => index !== existingIndex));
+
       this.removeLogo(item.id);
     } else {
       this.selectedItems.update((items) => [...items, item]);
     }
 
-    // qualquer mudança na seleção invalida frete e cupom calculados anteriormente
     this.resetShipping();
     this.resetCoupon();
   }
 
+  // =========================================================
+  // PREÇO
+  // =========================================================
+
   formatPrice(priceCents: number) {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(
-      priceCents / 100,
-    );
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(priceCents / 100);
   }
 
-  // --- Cálculo de frete ---
+  // =========================================================
+  // FRETE
+  // =========================================================
+
   readonly cepDigits = signal('');
+
   readonly shippingCalculationResponse = signal<ShippingCalculationResponse | null>(null);
+
   readonly isCalculatingShipping = signal(false);
+
   readonly selectedShipping = signal<ShippingOption | null>(null);
 
   readonly shippingOptions = computed(
@@ -342,30 +501,39 @@ export class Products {
 
   private resetShipping() {
     this.shippingCalculationResponse.set(null);
+
     this.selectedShipping.set(null);
   }
 
-  // Frete só se estiver no modo físico e algo selecionado
   readonly hasPhysicalProductSelected = computed(
     () => this.selectionMode() === 'fisico' && this.selectedItems().length > 0,
   );
 
   private physicalSelectedItems = computed(() =>
-    this.selectedItems().filter((item) => this.products().some((p) => p.id.toString() === item.id)),
+    this.selectedItems().filter((item) =>
+      this.products().some((product) => product.id.toString() === item.id),
+    ),
   );
 
   readonly cepDisplay = computed(() => this.formatCep(this.cepDigits()));
 
   private formatCep(digits: string): string {
-    if (digits.length <= 5) return digits;
+    if (digits.length <= 5) {
+      return digits;
+    }
+
     return `${digits.slice(0, 5)}-${digits.slice(5)}`;
   }
 
   onCepInput(event: Event) {
     const input = event.target as HTMLInputElement;
+
     const digits = input.value.replace(/\D/g, '').slice(0, 8);
+
     this.cepDigits.set(digits);
+
     input.value = this.formatCep(digits);
+
     this.resetShipping();
   }
 
@@ -381,26 +549,46 @@ export class Products {
 
     const shippingData = {
       postal_code: this.cepDigits(),
+
       items: shippingItems,
     };
 
     this.isCalculatingShipping.set(true);
-    const loadingToast = toast.loading('Aguarde, buscando informações...', { description: '' });
+
+    const loadingToast = toast.loading('Aguarde, buscando informações...', {
+      description: '',
+    });
 
     this.paymentService.searchShipping(shippingData).subscribe({
       next: (response: ShippingCalculationResponse) => {
-        toast.success('Informações encontradas', { description: '', id: loadingToast });
+        toast.success('Informações encontradas', {
+          description: '',
+          id: loadingToast,
+        });
+
         this.shippingCalculationResponse.set(response);
-        this.selectedShipping.set(null); // usuário precisa escolher a opção
+
+        this.selectedShipping.set(null);
+
         this.isCalculatingShipping.set(false);
       },
+
       error: (error) => {
-        toast.error('Erro ao buscar informações', { description: '', id: loadingToast });
+        toast.error('Erro ao buscar informações', {
+          description: '',
+          id: loadingToast,
+        });
+
         console.error('Erro ao buscar informações:', error);
+
         this.isCalculatingShipping.set(false);
       },
     });
   }
+
+  // =========================================================
+  // PODE CONTINUAR?
+  // =========================================================
 
   canContinue(): boolean {
     if (this.selectionMode() === 'digital') {
@@ -409,10 +597,13 @@ export class Products {
 
     if (this.selectionMode() === 'fisico') {
       const baseValid = this.selectedItems().length > 0 && this.selectedShipping() !== null;
-      if (!baseValid) return false;
 
-      // se a logo foi marcada mas o arquivo ainda não foi enviado, trava o avanço
+      if (!baseValid) {
+        return false;
+      }
+
       const logoAdditional = this.selectedLogoAdditional();
+
       if (logoAdditional && this.isLogoMissing(logoAdditional.id.toString())) {
         return false;
       }
@@ -423,22 +614,37 @@ export class Products {
     return false;
   }
 
-  // --- Envio final: cria carrinho temporário e avança pro próximo passo ---
+  // =========================================================
+  // ENVIO FINAL
+  // =========================================================
+
   readonly isSubmitting = signal(false);
 
   async continueToNextStep() {
-    if (!this.canContinue() || this.isSubmitting()) return;
+    if (!this.canContinue() || this.isSubmitting()) {
+      return;
+    }
 
     this.isSubmitting.set(true);
-    const loadingToast = toast.loading('Preparando seu carrinho...', { description: '' });
+
+    const loadingToast = toast.loading('Preparando seu carrinho...', {
+      description: '',
+    });
 
     let logoImage: string | undefined;
+
     try {
       logoImage = await this.getLogoImageBase64();
     } catch (error) {
-      toast.error('Erro ao processar a imagem da logo.', { description: '', id: loadingToast });
+      toast.error('Erro ao processar a imagem da logo.', {
+        description: '',
+        id: loadingToast,
+      });
+
       console.error('Erro ao converter logo para base64:', error);
+
       this.isSubmitting.set(false);
+
       return;
     }
 
@@ -449,52 +655,80 @@ export class Products {
 
     const payload: ShippingOrder = {
       items,
+
       postal_code: this.selectionMode() === 'fisico' ? this.cepDigits() : '',
+
       shipping_service_code:
         this.selectionMode() === 'fisico' ? (this.selectedShipping()?.service_code ?? '') : '',
+
       ...(this.couponStatus() === 'valid' && this.couponCode().trim()
-        ? { coupon_code: this.couponCode().trim() }
+        ? {
+            coupon_code: this.couponCode().trim(),
+          }
         : {}),
-      ...(logoImage ? { logo_image: logoImage } : {}),
+
+      ...(logoImage
+        ? {
+            logo_image: logoImage,
+          }
+        : {}),
     };
 
     this.paymentService.createTemporaryCart(payload).subscribe({
       next: (response) => {
-        toast.success('Carrinho criado com sucesso!', { description: '', id: loadingToast });
+        toast.success('Carrinho criado com sucesso!', {
+          description: '',
+          id: loadingToast,
+        });
+
         this.isSubmitting.set(false);
 
         const temporaryCart = {
           id: response.id,
           expiresAt: response.expires_at,
+
           subtotal: this.subtotal(),
+
           discount:
             this.shippingCalculationResponse()?.discount_cents ??
             this.couponResponse()?.discount_cents ??
             0,
+
           shipping: this.selectedShipping()?.price_cents ?? 0,
+
           total:
             this.subtotal() -
             (this.shippingCalculationResponse()?.discount_cents ??
               this.couponResponse()?.discount_cents ??
               0) +
             (this.selectedShipping()?.price_cents ?? 0),
+
           shippingService: this.selectedShipping()?.service_name ?? '',
         };
 
         localStorage.setItem('temporaryCart', JSON.stringify(temporaryCart));
+
         console.log(response);
+
         this.router.navigate(['/onboarding/terms']);
       },
+
       error: (error) => {
         toast.error('Erro ao criar carrinho. Tente novamente.', {
           description: '',
           id: loadingToast,
         });
+
         console.error('Erro ao criar carrinho temporário:', error);
+
         this.isSubmitting.set(false);
       },
     });
   }
+
+  // =========================================================
+  // VOLTAR
+  // =========================================================
 
   goBack() {
     window.history.back();

@@ -1,15 +1,16 @@
-import { toast } from 'ngx-sonner';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { toast } from 'ngx-sonner';
+
 import { AdminService } from '../../../services/facade/admin.service';
 import { Coupon } from '../../../types/coupons-filter';
+
 import { UiButton } from '../../../../../../shared/ui/button/button';
 import { NgIcon } from '@ng-icons/core';
 import { Loader } from '../../../../../../shared/components/loader/loader';
 import { Surface } from '../../../../../../shared/components/surface/surface';
 import { SurfaceTitle } from '../../../../components/surface-title/surface-title';
 import { LocalDatePipe } from '../../../../../../shared/pipes/local-date.pipe.ts-pipe';
-import { form, submit } from '@angular/forms/signals';
 import { UpdateCoupon } from '../../../components/update-coupon/update-coupon';
 
 @Component({
@@ -19,88 +20,132 @@ import { UpdateCoupon } from '../../../components/update-coupon/update-coupon';
   styleUrl: './coupon-details.css',
 })
 export class CouponDetails {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly adminServices = inject(AdminService);
 
   couponState = signal<Coupon>({
-    id: '',
+    id: 0,
     code: '',
+    status: 'active',
+    affiliate: null,
+    affiliate_name: '',
+    affiliate_email: '',
+    affiliate_payment: null,
     discount_type: 'percent',
     discount_value: 0,
+    commission_type: 'none',
+    commission_value: 0,
     applicable_to: 'subscription',
-    status: 'active',
-    status_label: '',
     starts_at: '',
     ends_at: '',
     total_uses: 0,
-    commission_percent: 0,
-    affiliate: '',
-    affiliate_name: '',
-    affiliate_email: '',
-    affiliate_payment: {
-      available_commission_cents: 0,
-      pix_key: '',
-      pix_key_type: '',
-      pix_owner_name: '',
-    },
-    total_commission_cents: 0,
     total_revenue_cents: 0,
+    total_commission_cents: 0,
     created_at: '',
     updated_at: '',
   });
 
-  couponForm = form(this.couponState);
-  isLoadingCoupon = signal<boolean>(false);
+  isLoadingCoupon = signal(false);
+  modalOpen = signal(false);
 
-  ngOnInit() {
+  ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
 
-    this.loadCoupon(Number(id));
+    if (!id) {
+      this.router.navigate(['/admin/coupons']);
+      return;
+    }
+
+    const couponId = Number(id);
+
+    if (!Number.isFinite(couponId) || couponId <= 0) {
+      this.router.navigate(['/admin/coupons']);
+      return;
+    }
+
+    this.loadCoupon(couponId);
   }
 
-  private loadCoupon(couponId: number | string) {
+  private loadCoupon(couponId: number): void {
     this.isLoadingCoupon.set(true);
+
     this.adminServices.fetchCouponId(couponId).subscribe({
       next: (coupon) => {
         this.couponState.set(coupon);
       },
-      error: console.error,
-      complete: () => this.isLoadingCoupon.set(false),
+
+      error: (err) => {
+        console.error('Erro ao carregar cupom:', err);
+
+        this.isLoadingCoupon.set(false);
+
+        toast.error('Erro ao carregar cupom', {
+          description: 'Não foi possível carregar os dados do cupom.',
+        });
+      },
+
+      complete: () => {
+        this.isLoadingCoupon.set(false);
+      },
     });
   }
 
-  async copyPixKey() {
-    const pixKey = this.couponState()?.affiliate_payment?.pix_key;
+  async copyPixKey(): Promise<void> {
+    const pixKey = this.couponState().affiliate_payment?.pix_key;
 
     if (!pixKey) {
       toast.warning('Chave PIX indisponível', {
         description: 'Nenhuma chave PIX foi cadastrada para este afiliado.',
       });
+
       return;
     }
 
     try {
       await navigator.clipboard.writeText(pixKey);
+
       toast.success('Chave PIX copiada!', {
         description: 'A chave foi copiada para a área de transferência.',
       });
     } catch (err) {
+      console.error('Erro ao copiar chave PIX:', err);
+
       toast.error('Falha ao copiar', {
         description: 'Não foi possível copiar a chave PIX. Tente novamente.',
       });
     }
   }
 
-  goBack() {
+  goBack(): void {
     this.router.navigate(['/admin/coupons']);
   }
 
-  formatDiscount(coupon: any): string {
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'active':
+        return 'Ativo';
+
+      case 'inactive':
+        return 'Inativo';
+
+      case 'expired':
+        return 'Expirado';
+
+      default:
+        return status;
+    }
+  }
+
+  formatDiscount(coupon: Coupon): string {
     return this.formatValue(coupon.discount_value, coupon.discount_type);
   }
 
-  formatCommission(coupon: any): string {
+  formatCommission(coupon: Coupon): string {
+    if (coupon.commission_type === 'none') {
+      return 'N/A';
+    }
+
     return this.formatValue(coupon.commission_value, coupon.commission_type);
   }
 
@@ -115,24 +160,39 @@ export class CouponDetails {
     }).format(value / 100);
   }
 
-  onPauseCoupon() {
+  onPauseCoupon(): void {
     const currentCoupon = this.couponState();
-    const newStatus = currentCoupon.status === 'active' ? 'inactive' : 'active';
+
+    if (currentCoupon.status !== 'active' && currentCoupon.status !== 'inactive') {
+      toast.warning('Cupom expirado', {
+        description: 'Um cupom expirado não pode ser ativado ou pausado.',
+      });
+
+      return;
+    }
+
+    const newStatus: 'active' | 'inactive' =
+      currentCoupon.status === 'active' ? 'inactive' : 'active';
 
     this.adminServices
-      .updateCoupon({
-        id: currentCoupon.id,
+      .updateCoupon(currentCoupon.id, {
         status: newStatus,
       })
       .subscribe({
         next: (updatedCoupon) => {
-          this.couponState.set({ ...currentCoupon, ...updatedCoupon });
+          this.couponState.set({
+            ...currentCoupon,
+            ...updatedCoupon,
+          });
+
           toast.success('Status atualizado!', {
             description: `Cupom ${newStatus === 'active' ? 'ativado' : 'pausado'} com sucesso.`,
           });
         },
+
         error: (err) => {
-          console.error(err);
+          console.error('Erro ao atualizar status do cupom:', err);
+
           toast.error('Erro ao atualizar status', {
             description: 'Não foi possível atualizar o cupom. Tente novamente.',
           });
@@ -140,20 +200,18 @@ export class CouponDetails {
       });
   }
 
-  formatPrice(price: number) {
-    return Intl.NumberFormat('pt-BR', {
+  formatPrice(price: number): string {
+    return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format(price / 1000);
+    }).format(price / 100);
   }
 
-  modalOpen = signal(false);
-
-  open() {
+  open(): void {
     this.modalOpen.set(true);
   }
 
-  close() {
+  close(): void {
     this.modalOpen.set(false);
   }
 }

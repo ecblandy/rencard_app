@@ -1,9 +1,9 @@
 <app-surface>
-  <app-surface-title title="Currículo" description="Faça upload do seu currículo em PDF" />
+  <app-surface-title title="Anexo" description="Faça upload de um arquivo em PDF" />
 
   @if (curriculum().enabled) {
     <div class="flex flex-col gap-y-[1rem] mt-[3.5rem]">
-      <span class="font-manrope font-semibold text-neutral-medium"> Arquivo em PDF </span>
+      <span class="font-manrope font-semibold text-neutral-medium"> Arquivo PDF </span>
 
       <label
         class="text-center h-[7.625rem] border border-neutral-soft rounded-[.625rem] cursor-pointer"
@@ -19,9 +19,9 @@
 
             <span class="text-xs text-neutral-medium"> Novo arquivo selecionado </span>
           } @else if (hasExistingFile()) {
-            <span class="text-neutral-medium font-medium"> Currículo já enviado </span>
+            <span class="text-neutral-medium font-medium"> Anexo já enviado </span>
 
-            <span class="text-xs text-neutral-medium"> Clique para substituir o arquivo </span>
+            <span class="text-xs text-neutral-medium"> Clique para substituir o anexo </span>
           } @else {
             <span class="text-neutral-medium"> Arraste ou anexe para enviar </span>
           }
@@ -37,7 +37,7 @@
       </label>
 
       <p class="text-neutral-medium font-manrope font-medium">
-        O botão "Baixar currículo" aparecerá automaticamente no seu perfil quando um arquivo for
+        O botão "Baixar anexo" aparecerá automaticamente no seu perfil quando um arquivo for
         enviado.
       </p>
     </div>

@@ -1,25 +1,58 @@
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../../../../environments/environments';
+
 import { HttpClient, HttpParams } from '@angular/common/http';
+
+import { environment } from '../../../../../../environments/environments';
+
 import { User } from '../../../../../shared/types/user.model';
-import { SubscriptionSummary } from '../../types/subscription-summary';
+
 import { PaginatedResponse } from '../../../../../shared/types/pagionation';
-import { Coupon, CouponFilters, ResultCouponList } from '../../types/coupons-filter';
+
+import { SubscriptionSummary } from '../../types/subscription-summary';
+
+import {
+  Coupon,
+  CouponCreatePayload,
+  CouponFilters,
+  CouponUpdatePayload,
+  ResultCouponList,
+} from '../../types/coupons-filter';
+
 import { UserFilters } from '../../types/user-filter';
+
 import { PhysicalSummary } from '../../types/physical-summary';
+
 import { PhysicalCard } from '../../types/physical-card';
+
 import { PhysicalFilters } from '../../types/physical-filter';
-import { Affiliate, AffiliateFilters } from '../../types/affiliate-model';
+
+import {
+  Affiliate,
+  AffiliateCreatePayload,
+  AffiliateCreateResponse,
+  AffiliateFilters,
+} from '../../types/affiliate-model';
+
 import { DashboardFilters, DashboardModel } from '../../types/dashboard-model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ApiAdmin {
-  private readonly baseUrl = environment.apiUrl;
   private readonly http = inject(HttpClient);
 
-  listUsers(params: UserFilters & { page: number; page_size: number }) {
+  private readonly baseUrl = environment.apiUrl;
+
+  // ============================================================
+  // CLIENTES
+  // ============================================================
+
+  listUsers(
+    params: UserFilters & {
+      page: number;
+      page_size: number;
+    },
+  ) {
     let httpParams = new HttpParams()
       .set('page', params.page.toString())
       .set('page_size', params.page_size.toString());
@@ -27,9 +60,11 @@ export class ApiAdmin {
     if (params.q) {
       httpParams = httpParams.set('q', params.q);
     }
+
     if (params.plan_type) {
       httpParams = httpParams.set('plan_type', params.plan_type);
     }
+
     if (params.status) {
       httpParams = httpParams.set('status', params.status);
     }
@@ -39,23 +74,36 @@ export class ApiAdmin {
     });
   }
 
-  dashboardDetails(params: DashboardFilters) {
-    let httpParams = new HttpParams().set('period', params.period);
+  // ============================================================
+  // RESUMO
+  // ============================================================
 
-    if (params.period) {
-      httpParams = httpParams.set('period', params.period);
-    }
+  subscriptionSummary() {
+    return this.http.get<SubscriptionSummary>(`${this.baseUrl}/users/clients/summary/`);
+  }
+
+  // ============================================================
+  // DASHBOARD
+  // ============================================================
+
+  dashboardDetails(params: DashboardFilters) {
+    const httpParams = new HttpParams().set('period', params.period);
 
     return this.http.get<DashboardModel>(`${this.baseUrl}/users/admin/dashboard/`, {
       params: httpParams,
     });
   }
 
-  subscriptionSummary() {
-    return this.http.get<SubscriptionSummary>(`${this.baseUrl}/users/clients/summary/`);
-  }
+  // ============================================================
+  // CUPONS
+  // ============================================================
 
-  listCoupons(params: CouponFilters & { page: number; page_size: number }) {
+  listCoupons(
+    params: CouponFilters & {
+      page: number;
+      page_size: number;
+    },
+  ) {
     let httpParams = new HttpParams()
       .set('page', params.page.toString())
       .set('page_size', params.page_size.toString());
@@ -63,34 +111,56 @@ export class ApiAdmin {
     if (params.q) {
       httpParams = httpParams.set('q', params.q);
     }
+
     return this.http.get<ResultCouponList>(`${this.baseUrl}/coupons/admin/coupons/`, {
       params: httpParams,
     });
   }
 
-  createCoupon(coupon: Partial<Coupon>) {
-    return this.http.post<Partial<Coupon>>(`${this.baseUrl}/coupons/admin/coupons/`, coupon);
-  }
-
+  /**
+   * GET /coupons/admin/coupons/<id>/
+   */
   couponId(couponId: string | number) {
     return this.http.get<Coupon>(`${this.baseUrl}/coupons/admin/coupons/${couponId}/`);
   }
 
-  updateCoupon(coupon: Partial<Coupon>) {
-    const id = coupon.id;
-    return this.http.patch<Partial<Coupon>>(`${this.baseUrl}/coupons/admin/coupons/${id}/`, coupon);
+  /**
+   * POST /coupons/admin/coupons/
+   */
+  createCoupon(payload: CouponCreatePayload) {
+    return this.http.post<Coupon>(`${this.baseUrl}/coupons/admin/coupons/`, payload);
   }
 
-  listAffiliatesWithParams(params: AffiliateFilters & { page: number; page_size: number }) {
-    let httpParams = new HttpParams();
+  /**
+   * PATCH /coupons/admin/coupons/<id>/
+   */
+  updateCoupon(couponId: string | number, payload: CouponUpdatePayload) {
+    return this.http.patch<Coupon>(`${this.baseUrl}/coupons/admin/coupons/${couponId}/`, payload);
+  }
+
+  /**
+   * DELETE /coupons/admin/coupons/<id>/
+   */
+  deleteCoupon(couponId: string | number) {
+    return this.http.delete<void>(`${this.baseUrl}/coupons/admin/coupons/${couponId}/`);
+  }
+
+  // ============================================================
+  // AFILIADOS
+  // ============================================================
+
+  listAffiliatesWithParams(
+    params: AffiliateFilters & {
+      page: number;
+      page_size: number;
+    },
+  ) {
+    let httpParams = new HttpParams()
+      .set('page', params.page.toString())
+      .set('page_size', params.page_size.toString());
 
     if (params.q) {
       httpParams = httpParams.set('q', params.q);
-    }
-
-    if (params.page && params.page_size) {
-      httpParams = httpParams.set('page', params.page);
-      httpParams = httpParams.set('page_size', params.page_size);
     }
 
     return this.http.get<PaginatedResponse<Affiliate>>(`${this.baseUrl}/users/affiliates/`, {
@@ -98,19 +168,48 @@ export class ApiAdmin {
     });
   }
 
-  listAllAffiliates() {
-    return this.http.get<Affiliate[]>(`${this.baseUrl}/users/affiliates/`);
-  }
-
+  /**
+   * GET /users/affiliates/<id>/
+   */
   affiliateId(id: number) {
-    return this.http.get(`${this.baseUrl}/users/affiliates/${id}/`);
+    return this.http.get<Affiliate>(`${this.baseUrl}/users/affiliates/${id}/`);
   }
 
+  /**
+   * POST /users/affiliates/
+   */
+  createAffiliate(payload: AffiliateCreatePayload) {
+    return this.http.post<AffiliateCreateResponse>(`${this.baseUrl}/users/affiliates/`, payload);
+  }
+
+  // ============================================================
+  // FÍSICO
+  // ============================================================
+
+  /**
+   * GET /physical/admin/cards/summary/
+   */
   physicalSummary() {
     return this.http.get<PhysicalSummary>(`${this.baseUrl}/physical/admin/cards/summary/`);
   }
 
-  physicalCards(params: PhysicalFilters & { page: number; page_size: number }) {
+  /**
+   * GET /physical/admin/cards/
+   *
+   * Filtros:
+   * - q
+   * - status
+   *
+   * Paginação:
+   * - page
+   * - page_size
+   */
+  physicalCards(
+    params: PhysicalFilters & {
+      page: number;
+      page_size: number;
+    },
+  ) {
     let httpParams = new HttpParams()
       .set('page', params.page.toString())
       .set('page_size', params.page_size.toString());
@@ -128,15 +227,83 @@ export class ApiAdmin {
     });
   }
 
+  /**
+   * GET /physical/admin/cards/<id>/
+   */
   physicalId(physicalId: string) {
     return this.http.get<PhysicalCard>(`${this.baseUrl}/physical/admin/cards/${physicalId}/`);
   }
 
-  updatePhysicalCards(payload: Partial<PhysicalCard>) {
-    const normalyzed = {
-      status: payload.status,
-      shipping_code: payload.shipping_code,
-    };
-    return this.http.patch(`${this.baseUrl}/physical/admin/cards/${payload.id}/`, normalyzed);
+  /**
+   * PATCH /physical/admin/cards/<id>/
+   *
+   * A API aceita atualização parcial.
+   *
+   * Payload documentado:
+   *
+   * {
+   *   "status": "in_production",
+   *   "shipping_code": "BR123456789"
+   * }
+   */
+  updatePhysicalCards(payload: Pick<Partial<PhysicalCard>, 'id' | 'status' | 'shipping_code'>) {
+    if (!payload.id) {
+      throw new Error('ID do cartão é obrigatório para atualização.');
+    }
+
+    const normalizedPayload: {
+      status?: string;
+      shipping_code?: string;
+    } = {};
+
+    if (payload.status !== undefined && payload.status !== '') {
+      normalizedPayload.status = payload.status;
+    }
+
+    if (payload.shipping_code !== undefined) {
+      normalizedPayload.shipping_code = payload.shipping_code;
+    }
+
+    return this.http.patch<PhysicalCard>(
+      `${this.baseUrl}/physical/admin/cards/${payload.id}/`,
+      normalizedPayload,
+    );
+  }
+
+  // ============================================================
+  // SCANS
+  // ============================================================
+
+  /**
+   * GET /physical/admin/scans/
+   */
+  listScans(params: { page: number; page_size: number }) {
+    const httpParams = new HttpParams()
+      .set('page', params.page.toString())
+      .set('page_size', params.page_size.toString());
+
+    return this.http.get<PaginatedResponse<unknown>>(`${this.baseUrl}/physical/admin/scans/`, {
+      params: httpParams,
+    });
+  }
+
+  // ============================================================
+  // ASSIGNMENTS
+  // ============================================================
+
+  /**
+   * GET /physical/admin/assignments/
+   */
+  listAssignments(params: { page: number; page_size: number }) {
+    const httpParams = new HttpParams()
+      .set('page', params.page.toString())
+      .set('page_size', params.page_size.toString());
+
+    return this.http.get<PaginatedResponse<unknown>>(
+      `${this.baseUrl}/physical/admin/assignments/`,
+      {
+        params: httpParams,
+      },
+    );
   }
 }

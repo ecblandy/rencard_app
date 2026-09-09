@@ -1,6 +1,6 @@
 <section>
   @if (isInitialLoading()) {
-    <div class="flex items-center justify-center mt-[6.25rem]">
+    <div class="flex items-center justify-center mt-25">
       <app-loader></app-loader>
     </div>
   } @else {
@@ -12,8 +12,9 @@
       ></app-dashboard-title>
 
       <app-button
+        type="button"
         (click)="open()"
-        class="flex items-center gap-[.5rem] max-sm:w-full justify-center"
+        class="flex items-center gap-2 max-sm:w-full justify-center"
       >
         <ng-icon name="lucidePlus" size="20"></ng-icon>
         <p>Criar cupom</p>
@@ -21,7 +22,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="mb-[2.5625rem]">
+    <div class="mb-10.25">
       <app-input
         placeholder="Buscar por código ou influenciador..."
         sizeH="xl"
@@ -30,48 +31,67 @@
     </div>
 
     @if (isLoadingCupons()) {
-      <div class="flex items-center justify-center mt-[6.25rem]">
+      <div class="flex items-center justify-center mt-25">
         <app-loader></app-loader>
       </div>
     } @else {
       @if (coupons().results.length > 0) {
         <!-- Coupon List -->
         <div class="grid grid-cols-[repeat(auto-fill,minmax(18rem,1fr))] gap-x-2 gap-y-12 w-full">
-          @for (coupon of coupons().results; track coupon) {
+          @for (coupon of coupons().results; track coupon.id) {
             <app-surface classes="bg-white">
               <!-- Header -->
-              <div class="flex items-center justify-between mb-[1.5rem]">
-                <span class="font-urbanist font-bold text-[1.25rem]">{{ coupon.code }}</span>
+              <div class="flex items-center justify-between mb-6">
+                <span class="font-urbanist font-bold text-[1.25rem]">
+                  {{ coupon.code }}
+                </span>
+
                 <span
-                  class="bg-black text-white rounded-[.625rem] px-[1rem] py-[.5rem] capitalize font-manrope text-sm"
+                  class="bg-black text-white rounded-[.625rem] px-4 py-2 capitalize font-manrope text-sm"
                 >
-                  {{ coupon.status_label }}
+                  {{ getStatusLabel(coupon.status) }}
                 </span>
               </div>
 
               <!-- Body -->
-              <div class="space-y-[1.5rem]">
+              <div class="space-y-6">
                 <!-- Affiliate -->
                 <div class="font-manrope">
                   <h2 class="text-neutral-medium">Afiliado</h2>
-                  <p class="font-semibold">{{ coupon.affiliate_name }}</p>
+
+                  <p class="font-semibold">
+                    {{ coupon.affiliate_name || 'N/A' }}
+                  </p>
                 </div>
 
+                <!-- Discount / Commission -->
                 <div class="flex items-center justify-between">
-                  <!-- discount -->
+                  <!-- Discount -->
                   <div>
                     <h2 class="text-neutral-medium">Desconto</h2>
-                    <p class="font-semibold">{{ formatDiscount(coupon) }}</p>
+
+                    <p class="font-semibold">
+                      {{ formatDiscount(coupon) }}
+                    </p>
                   </div>
 
-                  <!-- commission -->
+                  <!-- Commission -->
                   <div>
                     <h2 class="text-neutral-medium">Comissão</h2>
-                    <p class="font-semibold">{{ formatCommission(coupon) }}</p>
+
+                    <p class="font-semibold">
+                      {{ formatCommission(coupon) }}
+                    </p>
                   </div>
                 </div>
 
-                <app-button variant="outline" class="w-full" (click)="viewCouponDetails(coupon.id)">
+                <!-- Details -->
+                <app-button
+                  type="button"
+                  variant="outline"
+                  class="w-full"
+                  (click)="viewCouponDetails(coupon.id)"
+                >
                   Ver detalhes
                 </app-button>
               </div>
@@ -85,17 +105,18 @@
           [pageSizeOptions]="pageSizeOptions"
           (pageChange)="onPageChange($event)"
           (pageSizeChange)="onPageSizeChange($event)"
-          class="block mt-[2.5625rem]"
-        />
+          class="block mt-10.25"
+        ></app-pagination>
       } @else {
         <!-- Empty State -->
-        <div class="flex flex-col items-center justify-center mt-[6.25rem] text-center">
+        <div class="flex flex-col items-center justify-center mt-25 text-center">
           <p class="font-manrope text-neutral-medium text-lg">Nenhum cupom encontrado</p>
         </div>
       }
     }
   }
 
+  <!-- Create Coupon Modal -->
   <app-create-coupon
     [isOpen]="modalOpen()"
     (close)="close()"

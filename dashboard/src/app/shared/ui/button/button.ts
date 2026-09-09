@@ -22,7 +22,7 @@ export class UiButton {
   class = input<string | undefined>(undefined);
 
   private sizeMap: Record<ButtonSize, string> = {
-    sm: 'h-[2.5rem]',
+    sm: 'h-[2.375rem]',
     xl: 'h-[3.75rem]',
   };
 

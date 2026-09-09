@@ -2,6 +2,7 @@
   class="mx-auto px-4 sm:px-6 lg:px-[1.25rem] mb-12 sm:mb-[3.75rem] max-w-full sm:max-w-[79.875rem] w-full h-full"
 >
   <app-onboarding-step [currentStep]="currentStep()"></app-onboarding-step>
+
   <app-onboarding-title
     title="Agora escolha como você quer compartilhar seu Rencard"
     description="Você pode optar por um produto físico conectado ao seu perfil ou usar apenas a versão digital."
@@ -10,11 +11,15 @@
   @if (isInitialLoading()) {
     <div class="flex flex-col items-center justify-center mt-10 sm:mt-[6.25rem]">
       <app-loader></app-loader>
+
       <p class="mt-4 text-gray-600">Carregando produtos, aguarde...</p>
     </div>
   } @else {
     <div>
-      <!-- Seleção de modo: físico ou digital -->
+      <!-- ========================================================= -->
+      <!-- MODO DE SELEÇÃO -->
+      <!-- ========================================================= -->
+
       <div class="flex flex-col sm:flex-row gap-3 sm:gap-[1.5rem] mb-6 sm:mb-[2.5rem]">
         <button
           type="button"
@@ -25,6 +30,7 @@
           (click)="selectMode('fisico')"
         >
           <h3 class="font-urbanist font-semibold text-lg sm:text-[1.25rem]">Cartão e Tag</h3>
+
           <p class="font-manrope text-neutral-medium text-sm">
             Produto físico conectado ao seu perfil.
           </p>
@@ -39,6 +45,7 @@
           (click)="selectMode('digital')"
         >
           <h3 class="font-urbanist font-semibold text-lg sm:text-[1.25rem]">Apenas Digital</h3>
+
           <p class="font-manrope text-neutral-medium text-sm">
             Sem produto físico, acesso 100% digital ao seu perfil.
           </p>
@@ -51,6 +58,10 @@
         </p>
       }
 
+      <!-- ========================================================= -->
+      <!-- PRODUTOS FÍSICOS -->
+      <!-- ========================================================= -->
+
       @if (selectionMode() === 'fisico') {
         <h2
           class="uppercase mb-4 sm:mb-[1.5rem] font-urbanist font-semibold text-xl sm:text-[1.5rem] text-neutral-soft"
@@ -60,153 +71,191 @@
 
         <section class="flex flex-col gap-y-4 sm:gap-y-[1.5rem]">
           <div class="flex flex-col lg:flex-row gap-4 sm:gap-[1.625rem] items-start">
-            <!-- Coluna esquerda: produtos + logo -->
-            <div class="flex flex-col gap-y-4 sm:gap-y-[1.5rem] w-full lg:max-w-[58.4375rem]">
-              <ul class="flex flex-col sm:flex-row justify-between w-full gap-3 sm:gap-4">
-                @for (product of products(); track product) {
-                  <li
-                    class="rounded-xl transition-all self-start w-full sm:flex-1"
-                    [class.ring-2]="isSelected(product.id.toString())"
-                    [class.ring-blue-500]="isSelected(product.id.toString())"
-                  >
-                    <app-surface classes="bg-[#F5F5F5]">
-                      <img
-                        src="{{ product.image }}"
-                        alt="{{ product.name }}"
-                        class="w-full h-32 sm:h-[13.75rem] object-cover"
-                      />
+            <!-- ===================================================== -->
+            <!-- PRODUTOS -->
+            <!-- ===================================================== -->
 
-                      <div class="my-4 sm:my-[2.5rem] space-y-2 sm:space-y-[1rem] px-4 sm:px-0">
-                        <span
-                          class="block font-manrope font-medium text-xs sm:text-[.875rem] text-neutral-medium"
-                          >{{ product.subtitle }}</span
-                        >
-                        <h3 class="font-urbanist font-semibold text-lg sm:text-[1.5rem]">
-                          {{ product.name }}
-                        </h3>
-                        <p class="font-manrope text-neutral-medium text-sm">
-                          {{ product.description }}
-                        </p>
-                        <p class="font-manrope text-neutral-medium text-sm">
-                          {{ formatPrice(product.price_cents) }}
-                        </p>
-                      </div>
+            <div class="w-full lg:max-w-[58.4375rem]">
+              <div class="flex flex-col sm:flex-row items-start w-full gap-3 sm:gap-4">
+                @for (product of products(); track product.id) {
+                  <div class="w-full sm:flex-1 min-w-0">
+                    <!-- ================================================= -->
+                    <!-- CARD DO PRODUTO -->
+                    <!-- ================================================= -->
 
-                      <app-button
-                        variant="default"
-                        sizeH="sm"
-                        class="w-full"
-                        (click)="
-                          selectItem({ id: product.id.toString(), price: product.price_cents })
-                        "
-                      >
-                        {{ isSelected(product.id.toString()) ? 'Selecionado' : 'Selecionar' }}
-                      </app-button>
-                    </app-surface>
-                  </li>
-                }
-              </ul>
-
-              @if (showAdditionalProducts()) {
-                @for (additional of aditionalProducts(); track additional.id) {
-                  <app-surface
-                    classes="flex flex-col gap-y-4 sm:gap-y-[1rem] w-full bg-[#F5F5F5] p-4 sm:p-[1.5rem]"
-                  >
-                    <div class="flex items-start sm:items-center gap-x-3 sm:gap-x-[1rem]">
-                      <input
-                        type="checkbox"
-                        class="h-[34px] w-[2.125rem] mt-1 sm:mt-0"
-                        [checked]="isSelected(additional.id.toString())"
-                        (change)="
-                          selectItem({
-                            id: additional.id.toString(),
-                            price: additional.price_cents,
-                          })
-                        "
-                      />
-                      <div class="font-manrope space-y-1 sm:space-y-[.5rem] flex-1">
-                        <h3 class="font-semibold text-sm sm:text-base">
-                          Adicionar personalização com logo
-                        </h3>
-                        <p class="text-neutral-medium text-sm">
-                          {{ formatPrice(additional.price_cents) }}
-                        </p>
-                      </div>
-                    </div>
-
-                    @if (isSelected(additional.id.toString())) {
-                      <div class="pl-4 sm:pl-[3rem] space-y-2 sm:space-y-[.5rem]">
-                        @if (logoPreviewFor(additional.id.toString()); as previewUrl) {
-                          <div
-                            class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-x-[1rem]"
-                          >
-                            <img
-                              [src]="previewUrl"
-                              alt="Preview da logo"
-                              class="h-16 w-16 object-contain rounded border border-neutral-medium bg-white"
-                            />
-                            <div class="flex flex-col gap-y-1 sm:gap-y-[.25rem]">
-                              <label
-                                [for]="'logo-input-' + additional.id"
-                                class="text-xs sm:text-sm font-manrope font-medium text-blue-600 cursor-pointer underline"
-                              >
-                                Trocar imagem
-                              </label>
-                              <button
-                                type="button"
-                                class="text-xs sm:text-sm font-manrope text-red-500 text-left"
-                                (click)="removeLogo(additional.id.toString())"
-                              >
-                                Remover
-                              </button>
-                            </div>
-                          </div>
-                        } @else {
-                          <label
-                            [for]="'logo-input-' + additional.id"
-                            class="flex flex-col items-center justify-center gap-y-2 sm:gap-y-[.5rem] w-full h-24 sm:h-[6rem] border-2 border-dashed border-neutral-medium rounded-lg cursor-pointer hover:border-blue-500 transition-colors"
-                          >
-                            <span
-                              class="text-xs sm:text-sm font-manrope text-neutral-medium text-center px-2"
-                            >
-                              Clique para enviar sua logo
-                            </span>
-                            <span class="text-xs font-manrope text-neutral-medium">
-                              PNG, JPG, SVG ou WEBP · até 5MB
-                            </span>
-                          </label>
-                        }
-
-                        <input
-                          [id]="'logo-input-' + additional.id"
-                          type="file"
-                          accept="image/png,image/jpeg,image/svg+xml,image/webp"
-                          class="hidden"
-                          (change)="onLogoSelected(additional.id.toString(), $event)"
+                    <div
+                      class="rounded-xl transition-all"
+                      [class.ring-2]="isSelected(product.id.toString())"
+                      [class.ring-blue-500]="isSelected(product.id.toString())"
+                    >
+                      <app-surface classes="bg-[#F5F5F5]">
+                        <img
+                          [src]="product.image"
+                          [alt]="product.name"
+                          class="w-full h-32 sm:h-[13.75rem] object-cover"
                         />
 
-                        @if (logoErrorFor(additional.id.toString()); as error) {
-                          <p class="text-xs sm:text-sm font-manrope text-red-500">{{ error }}</p>
-                        }
+                        <div class="my-4 sm:my-[2.5rem] space-y-2 sm:space-y-[1rem] px-4 sm:px-0">
+                          <span
+                            class="block font-manrope font-medium text-xs sm:text-[.875rem] text-neutral-medium"
+                          >
+                            {{ product.subtitle }}
+                          </span>
 
-                        @if (isLogoMissing(additional.id.toString())) {
-                          <p class="text-xs sm:text-sm font-manrope text-amber-600">
-                            Envie uma imagem para concluir a personalização.
+                          <h3 class="font-urbanist font-semibold text-lg sm:text-[1.5rem]">
+                            {{ product.name }}
+                          </h3>
+
+                          <p class="font-manrope text-neutral-medium text-sm">
+                            {{ product.description }}
                           </p>
+
+                          <p class="font-manrope text-neutral-medium text-sm">
+                            {{ formatPrice(product.price_cents) }}
+                          </p>
+                        </div>
+
+                        <app-button
+                          variant="default"
+                          sizeH="sm"
+                          class="w-full"
+                          (click)="
+                            selectItem({
+                              id: product.id.toString(),
+                              price: product.price_cents,
+                            })
+                          "
+                        >
+                          {{ isSelected(product.id.toString()) ? 'Selecionado' : 'Selecionar' }}
+                        </app-button>
+                      </app-surface>
+                    </div>
+
+                    <!-- ================================================= -->
+                    <!-- PERSONALIZAÇÃO -->
+                    <!-- SOMENTE ABAIXO DO CARD -->
+                    <!-- ================================================= -->
+
+                    @if (product.type === 'card' && showAdditionalProducts()) {
+                      <div class="w-full mt-4">
+                        @for (additional of aditionalProducts(); track additional.id) {
+                          <app-surface classes="w-full bg-[#F5F5F5] p-4 sm:p-[1.5rem]">
+                            <!-- Cabeçalho -->
+
+                            <div class="flex items-start sm:items-center gap-x-3 sm:gap-x-[1rem]">
+                              <input
+                                type="checkbox"
+                                class="h-[34px] w-[2.125rem] mt-1 sm:mt-0"
+                                [checked]="isSelected(additional.id.toString())"
+                                (change)="
+                                  selectItem({
+                                    id: additional.id.toString(),
+                                    price: additional.price_cents,
+                                  })
+                                "
+                              />
+
+                              <div class="font-manrope space-y-1 sm:space-y-[.5rem] flex-1">
+                                <h3 class="font-semibold text-sm sm:text-base">
+                                  Adicionar personalização com logo
+                                </h3>
+
+                                <p class="text-neutral-medium text-sm">
+                                  {{ formatPrice(additional.price_cents) }}
+                                </p>
+                              </div>
+                            </div>
+
+                            <!-- Upload da logo -->
+
+                            @if (isSelected(additional.id.toString())) {
+                              <div class="mt-4 sm:mt-[1rem] space-y-2 sm:space-y-[.5rem]">
+                                @if (logoPreviewFor(additional.id.toString()); as previewUrl) {
+                                  <div
+                                    class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-x-[1rem]"
+                                  >
+                                    <img
+                                      [src]="previewUrl"
+                                      alt="Preview da logo"
+                                      class="h-16 w-16 object-contain rounded border border-neutral-medium bg-white"
+                                    />
+
+                                    <div class="flex flex-col gap-y-1 sm:gap-y-[.25rem]">
+                                      <label
+                                        [for]="'logo-input-' + additional.id"
+                                        class="text-xs sm:text-sm font-manrope font-medium text-blue-600 cursor-pointer underline"
+                                      >
+                                        Trocar imagem
+                                      </label>
+
+                                      <button
+                                        type="button"
+                                        class="text-xs sm:text-sm font-manrope text-red-500 text-left"
+                                        (click)="removeLogo(additional.id.toString())"
+                                      >
+                                        Remover
+                                      </button>
+                                    </div>
+                                  </div>
+                                } @else {
+                                  <label
+                                    [for]="'logo-input-' + additional.id"
+                                    class="flex flex-col items-center justify-center gap-y-2 sm:gap-y-[.5rem] w-full h-24 sm:h-[6rem] border-2 border-dashed border-neutral-medium rounded-lg cursor-pointer hover:border-blue-500 transition-colors"
+                                  >
+                                    <span
+                                      class="text-xs sm:text-sm font-manrope text-neutral-medium text-center px-2"
+                                    >
+                                      Clique para enviar sua logo
+                                    </span>
+
+                                    <span class="text-xs font-manrope text-neutral-medium">
+                                      PNG, JPG, SVG ou WEBP · até 5MB
+                                    </span>
+                                  </label>
+                                }
+
+                                <input
+                                  [id]="'logo-input-' + additional.id"
+                                  type="file"
+                                  accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                                  class="hidden"
+                                  (change)="onLogoSelected(additional.id.toString(), $event)"
+                                />
+
+                                @if (logoErrorFor(additional.id.toString()); as error) {
+                                  <p class="text-xs sm:text-sm font-manrope text-red-500">
+                                    {{ error }}
+                                  </p>
+                                }
+
+                                @if (isLogoMissing(additional.id.toString())) {
+                                  <p class="text-xs sm:text-sm font-manrope text-amber-600">
+                                    Envie uma imagem para concluir a personalização.
+                                  </p>
+                                }
+                              </div>
+                            }
+                          </app-surface>
                         }
                       </div>
                     }
-                  </app-surface>
+                  </div>
                 }
-              }
+              </div>
             </div>
 
-            <!-- Coluna direita: carrinho + cupom + frete (responsivo) -->
+            <!-- ===================================================== -->
+            <!-- CARRINHO -->
+            <!-- ===================================================== -->
+
             <div class="w-full lg:w-auto lg:min-w-[300px]">
               <app-onboarding-cart class="flex-1" [items]="cartItems()"></app-onboarding-cart>
 
+              <!-- ================================================= -->
+              <!-- CUPOM -->
+              <!-- ================================================= -->
+
               @if (selectedItems().length > 0) {
-                <!-- Campo de cupom -->
                 <div class="mt-4 sm:mt-[1rem]">
                   <p class="text-xs sm:text-sm font-medium text-neutral-medium mb-2 sm:mb-[0.5rem]">
                     Cupom de desconto
@@ -232,12 +281,15 @@
                       @if (couponStatus() === 'valid') {
                         <span
                           class="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-sm"
-                          >✓</span
                         >
+                          ✓
+                        </span>
                       } @else if (couponStatus() === 'invalid') {
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-sm"
-                          >✕</span
+                        <span
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-sm"
                         >
+                          ✕
+                        </span>
                       }
                     </div>
 
@@ -260,6 +312,10 @@
                 </div>
               }
 
+              <!-- ================================================= -->
+              <!-- CEP / FRETE -->
+              <!-- ================================================= -->
+
               @if (hasPhysicalProductSelected()) {
                 <div class="mt-4 sm:mt-[1.5rem] space-y-2 sm:space-y-[.5rem]">
                   <label
@@ -268,6 +324,7 @@
                   >
                     CEP para cálculo de frete
                   </label>
+
                   <input
                     id="cep-input"
                     type="text"
@@ -275,6 +332,7 @@
                     placeholder="00000-000"
                     maxlength="9"
                     class="w-full rounded-lg border border-neutral-medium px-3 sm:px-[1rem] py-2 sm:py-[.75rem] font-manrope text-sm"
+                    [value]="cepDisplay()"
                     (input)="onCepInput($event)"
                   />
 
@@ -326,8 +384,10 @@
                               <p class="text-xs sm:text-sm font-medium font-manrope">
                                 {{ option.service_name }}
                               </p>
+
                               <p class="text-xs font-manrope text-neutral-medium">
-                                {{ option.deadline_days }} dias úteis
+                                {{ option.deadline_days }}
+                                dias úteis
                               </p>
                             </div>
                           </div>
@@ -344,6 +404,10 @@
             </div>
           </div>
 
+          <!-- ===================================================== -->
+          <!-- TEXTO FINAL -->
+          <!-- ===================================================== -->
+
           <span
             class="block text-center text-neutral-soft text-lg sm:text-[1.25rem] font-semibold font-urbanist px-2"
           >
@@ -351,6 +415,10 @@
           </span>
         </section>
       }
+
+      <!-- ========================================================= -->
+      <!-- DIGITAL -->
+      <!-- ========================================================= -->
 
       @if (selectionMode() === 'digital') {
         @for (digital of digitalProducts(); track digital.id) {
@@ -366,7 +434,11 @@
                 <h4 class="font-urbanist font-semibold text-lg sm:text-[1.5rem]">
                   {{ digital.name }}
                 </h4>
-                <p class="font-manrope text-neutral-medium text-sm">{{ digital.description }}</p>
+
+                <p class="font-manrope text-neutral-medium text-sm">
+                  {{ digital.description }}
+                </p>
+
                 <p class="font-manrope text-neutral-medium text-sm">
                   {{ formatPrice(digital.price_cents) }}
                 </p>
@@ -375,7 +447,6 @@
               <app-onboarding-cart class="flex-1" [items]="cartItems()"></app-onboarding-cart>
 
               @if (selectedItems().length > 0) {
-                <!-- Campo de cupom -->
                 <div class="mt-4 sm:mt-[1rem]">
                   <p class="text-xs sm:text-sm font-medium text-neutral-medium mb-2 sm:mb-[0.5rem]">
                     Cupom de desconto
@@ -401,12 +472,15 @@
                       @if (couponStatus() === 'valid') {
                         <span
                           class="absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-sm"
-                          >✓</span
                         >
+                          ✓
+                        </span>
                       } @else if (couponStatus() === 'invalid') {
-                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-sm"
-                          >✕</span
+                        <span
+                          class="absolute right-3 top-1/2 -translate-y-1/2 text-red-500 text-sm"
                         >
+                          ✕
+                        </span>
                       }
                     </div>
 
@@ -433,6 +507,10 @@
         }
       }
 
+      <!-- ========================================================= -->
+      <!-- NAVEGAÇÃO -->
+      <!-- ========================================================= -->
+
       <div class="mt-6 sm:mt-[2.5rem]">
         <div class="flex flex-col sm:flex-row gap-3 sm:gap-x-[1rem]">
           <app-button
@@ -440,8 +518,10 @@
             sizeH="sm"
             class="w-full order-2 sm:order-1"
             (click)="goBack()"
-            >Voltar</app-button
           >
+            Voltar
+          </app-button>
+
           <app-button
             variant="default"
             sizeH="sm"

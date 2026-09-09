@@ -1,5 +1,542 @@
-<app-modal [isOpen]="isOpen()" (close)="close.emit()">
-  <div
-    class="bg-white rounded-[.625rem] w-[47.125rem] max-w-[calc(100vw-2rem)] max-h-[90vh] overflow-y-auto"
-  ></div>
+<app-modal [isOpen]="isOpen()" (close)="onClose()">
+  <div class="w-full max-w-[50rem] max-h-[92vh] overflow-hidden bg-white rounded-2xl shadow-xl">
+    <!-- Header -->
+    <div class="px-6 py-6 md:px-8 md:py-7 border-b border-neutral-100">
+      <div class="space-y-1.5">
+        <span
+          class="inline-flex items-center rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600"
+        >
+          Novo parceiro
+        </span>
+
+        <h2 class="font-urbanist font-bold text-[1.625rem] leading-8 text-neutral-900">
+          Cadastrar parceiro
+        </h2>
+
+        <p class="font-manrope text-sm leading-5 text-neutral-medium max-w-[36rem]">
+          Preencha os dados abaixo para cadastrar um novo afiliado e configurar seus dados de
+          recebimento.
+        </p>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="max-h-[calc(92vh-9.5rem)] overflow-y-auto">
+      <form novalidate (submit)="onSubmit($event)" class="px-6 py-7 md:px-8 md:py-8">
+        <div class="space-y-10">
+          <!-- ================================================== -->
+          <!-- 01 - DADOS DO AFILIADO -->
+          <!-- ================================================== -->
+          <section>
+            <div class="flex items-start gap-4 pb-5 border-b border-neutral-100">
+              <div
+                class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100"
+              >
+                <span class="text-sm font-bold text-neutral-700"> 01 </span>
+              </div>
+
+              <div class="space-y-1">
+                <h3 class="font-manrope font-semibold text-base leading-6 text-neutral-900">
+                  Dados do afiliado
+                </h3>
+
+                <p class="font-manrope text-sm leading-5 text-neutral-medium">
+                  Informações pessoais e de contato do parceiro.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
+              <!-- Nome -->
+              <div class="space-y-1.5">
+                <app-input
+                  placeholder="Nome completo"
+                  sizeH="xl"
+                  [formField]="affiliateForm.full_name"
+                ></app-input>
+
+                @if (affiliateForm.full_name().touched() && affiliateForm.full_name().invalid()) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.full_name().errors()[0].message }}
+                  </p>
+                }
+              </div>
+
+              <!-- E-mail -->
+              <div class="space-y-1.5">
+                <app-input
+                  type="email"
+                  placeholder="E-mail"
+                  sizeH="xl"
+                  [formField]="affiliateForm.email"
+                ></app-input>
+
+                @if (affiliateForm.email().touched() && affiliateForm.email().invalid()) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.email().errors()[0].message }}
+                  </p>
+                }
+              </div>
+
+              <!-- CPF / CNPJ -->
+              <div class="space-y-1.5">
+                <app-input
+                  placeholder="CPF ou CNPJ"
+                  sizeH="xl"
+                  mask="CPF_CNPJ"
+                  [formField]="affiliateForm.cpf_cnpj"
+                ></app-input>
+
+                @if (affiliateForm.cpf_cnpj().touched() && affiliateForm.cpf_cnpj().invalid()) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.cpf_cnpj().errors()[0].message }}
+                  </p>
+                }
+              </div>
+
+              <!-- Telefone -->
+              <div class="space-y-1.5">
+                <app-input
+                  placeholder="Telefone"
+                  sizeH="xl"
+                  mask="(00) 00000-0000||(00) 0000-0000"
+                  [formField]="affiliateForm.phone_number"
+                ></app-input>
+
+                @if (
+                  affiliateForm.phone_number().touched() && affiliateForm.phone_number().invalid()
+                ) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.phone_number().errors()[0].message }}
+                  </p>
+                }
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================== -->
+          <!-- 02 - ENDEREÇO -->
+          <!-- ================================================== -->
+          <section>
+            <div class="flex items-start gap-4 pb-5 border-b border-neutral-100">
+              <div
+                class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100"
+              >
+                <span class="text-sm font-bold text-neutral-700"> 02 </span>
+              </div>
+
+              <div class="space-y-1">
+                <h3 class="font-manrope font-semibold text-base leading-6 text-neutral-900">
+                  Endereço
+                </h3>
+
+                <p class="font-manrope text-sm leading-5 text-neutral-medium">
+                  Informe o CEP para preencher automaticamente os dados.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
+              <!-- CEP -->
+              <div class="space-y-1.5">
+                <div class="relative">
+                  <app-input
+                    placeholder="CEP"
+                    sizeH="xl"
+                    mask="00000-000"
+                    [formField]="affiliateForm.cep"
+                  ></app-input>
+
+                  @if (isLoadingCep()) {
+                    <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                      <span class="text-xs font-medium text-neutral-medium"> Buscando... </span>
+                    </div>
+                  }
+                </div>
+
+                @if (affiliateForm.cep().touched() && affiliateForm.cep().invalid()) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.cep().errors()[0].message }}
+                  </p>
+                }
+
+                @if (cepError()) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ cepError() }}
+                  </p>
+                }
+              </div>
+
+              <!-- Número -->
+              <div class="space-y-1.5">
+                <app-input
+                  placeholder="Número"
+                  sizeH="xl"
+                  [formField]="affiliateForm.number"
+                ></app-input>
+
+                @if (affiliateForm.number().touched() && affiliateForm.number().invalid()) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.number().errors()[0].message }}
+                  </p>
+                }
+              </div>
+
+              <!-- Rua -->
+              <div class="space-y-1.5">
+                <app-input
+                  placeholder="Rua"
+                  sizeH="xl"
+                  [formField]="affiliateForm.street"
+                ></app-input>
+
+                @if (affiliateForm.street().touched() && affiliateForm.street().invalid()) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.street().errors()[0].message }}
+                  </p>
+                }
+              </div>
+
+              <!-- Complemento -->
+              <div class="space-y-1.5">
+                <app-input
+                  placeholder="Complemento"
+                  sizeH="xl"
+                  [formField]="affiliateForm.complement"
+                ></app-input>
+              </div>
+
+              <!-- Bairro -->
+              <div class="space-y-1.5">
+                <app-input
+                  placeholder="Bairro"
+                  sizeH="xl"
+                  [formField]="affiliateForm.neighborhood"
+                ></app-input>
+
+                @if (
+                  affiliateForm.neighborhood().touched() && affiliateForm.neighborhood().invalid()
+                ) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.neighborhood().errors()[0].message }}
+                  </p>
+                }
+              </div>
+
+              <!-- Cidade -->
+              <div class="space-y-1.5">
+                <app-input
+                  placeholder="Cidade"
+                  sizeH="xl"
+                  [formField]="affiliateForm.city"
+                ></app-input>
+
+                @if (affiliateForm.city().touched() && affiliateForm.city().invalid()) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.city().errors()[0].message }}
+                  </p>
+                }
+              </div>
+
+              <!-- Estado -->
+              <div class="space-y-1.5">
+                <div class="relative">
+                  <select
+                    id="affiliate-state"
+                    [formField]="affiliateForm.state"
+                    class="w-full h-[3.75rem] appearance-none rounded-[.625rem] border pl-[1rem] pr-[3rem] bg-white border-neutral-soft font-manrope text-sm text-neutral-900 outline-none cursor-pointer focus:border-neutral-strong"
+                  >
+                    <option value="" disabled>Estado</option>
+
+                    @for (
+                      uf of [
+                        'AC',
+                        'AL',
+                        'AP',
+                        'AM',
+                        'BA',
+                        'CE',
+                        'DF',
+                        'ES',
+                        'GO',
+                        'MA',
+                        'MT',
+                        'MS',
+                        'MG',
+                        'PA',
+                        'PB',
+                        'PR',
+                        'PE',
+                        'PI',
+                        'RJ',
+                        'RN',
+                        'RS',
+                        'RO',
+                        'RR',
+                        'SC',
+                        'SP',
+                        'SE',
+                        'TO',
+                      ];
+                      track uf
+                    ) {
+                      <option [value]="uf">
+                        {{ uf }}
+                      </option>
+                    }
+                  </select>
+
+                  <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center">
+                    <svg
+                      class="size-4 text-neutral-medium"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M5 7.5L10 12.5L15 7.5"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                @if (affiliateForm.state().touched() && affiliateForm.state().invalid()) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.state().errors()[0].message }}
+                  </p>
+                }
+              </div>
+
+              <!-- País -->
+              <div class="space-y-1.5">
+                <app-input
+                  placeholder="País"
+                  sizeH="xl"
+                  [formField]="affiliateForm.country"
+                ></app-input>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================== -->
+          <!-- 03 - RECEBIMENTO -->
+          <!-- ================================================== -->
+          <section>
+            <div class="flex items-start gap-4 pb-5 border-b border-neutral-100">
+              <div
+                class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100"
+              >
+                <span class="text-sm font-bold text-neutral-700"> 03 </span>
+              </div>
+
+              <div class="space-y-1">
+                <h3 class="font-manrope font-semibold text-base leading-6 text-neutral-900">
+                  Dados de recebimento
+                </h3>
+
+                <p class="font-manrope text-sm leading-5 text-neutral-medium">
+                  Configure onde o parceiro receberá suas comissões.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-6">
+              <!-- Tipo de chave PIX -->
+              <div class="space-y-1.5">
+                <div class="relative">
+                  <select
+                    id="pix-key-type"
+                    [formField]="affiliateForm.pix_key_type"
+                    class="w-full h-[3.75rem] appearance-none rounded-[.625rem] border pl-[1rem] pr-[3rem] bg-white border-neutral-soft font-manrope text-sm text-neutral-900 outline-none cursor-pointer focus:border-neutral-strong"
+                  >
+                    <option value="email">E-mail</option>
+
+                    <option value="cpf">CPF</option>
+
+                    <option value="cnpj">CNPJ</option>
+
+                    <option value="phone">Telefone</option>
+
+                    <option value="random">Chave aleatória</option>
+                  </select>
+
+                  <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center">
+                    <svg
+                      class="size-4 text-neutral-medium"
+                      viewBox="0 0 20 20"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M5 7.5L10 12.5L15 7.5"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                </div>
+
+                @if (
+                  affiliateForm.pix_key_type().touched() && affiliateForm.pix_key_type().invalid()
+                ) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.pix_key_type().errors()[0].message }}
+                  </p>
+                }
+              </div>
+
+              <!-- Chave PIX -->
+              <div class="space-y-1.5">
+                <app-input
+                  placeholder="Chave PIX"
+                  sizeH="xl"
+                  [mask]="pixKeyMask()"
+                  [formField]="affiliateForm.pix_key"
+                ></app-input>
+
+                @if (affiliateForm.pix_key().touched() && affiliateForm.pix_key().invalid()) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.pix_key().errors()[0].message }}
+                  </p>
+                }
+              </div>
+
+              <!-- Titular -->
+              <div class="md:col-span-2 space-y-1.5">
+                <app-input
+                  placeholder="Nome do titular da chave PIX"
+                  sizeH="xl"
+                  [formField]="affiliateForm.pix_owner_name"
+                ></app-input>
+
+                @if (
+                  affiliateForm.pix_owner_name().touched() &&
+                  affiliateForm.pix_owner_name().invalid()
+                ) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.pix_owner_name().errors()[0].message }}
+                  </p>
+                }
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================== -->
+          <!-- 04 - CONFIGURAÇÕES -->
+          <!-- ================================================== -->
+          <section>
+            <div class="flex items-start gap-4 pb-5 border-b border-neutral-100">
+              <div
+                class="flex size-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100"
+              >
+                <span class="text-sm font-bold text-neutral-700"> 04 </span>
+              </div>
+
+              <div class="space-y-1">
+                <h3 class="font-manrope font-semibold text-base leading-6 text-neutral-900">
+                  Configurações
+                </h3>
+
+                <p class="font-manrope text-sm leading-5 text-neutral-medium">
+                  Defina as permissões e condições do cadastro.
+                </p>
+              </div>
+            </div>
+
+            <div class="space-y-3 pt-6">
+              <!-- Afiliado ativo -->
+              <label
+                class="flex items-center gap-3 rounded-xl border border-neutral-200 px-4 py-3.5 cursor-pointer transition-colors hover:bg-neutral-50"
+              >
+                <input
+                  type="checkbox"
+                  class="size-4 shrink-0 accent-black"
+                  [formField]="affiliateForm.affiliate_active"
+                />
+
+                <div class="space-y-0.5">
+                  <span class="block text-sm font-medium text-neutral-900"> Afiliado ativo </span>
+
+                  <span class="block text-xs text-neutral-medium">
+                    O parceiro poderá atuar como afiliado imediatamente.
+                  </span>
+                </div>
+              </label>
+
+              <!-- Termos -->
+              <div class="space-y-2">
+                <label
+                  class="flex items-center gap-3 rounded-xl border border-neutral-200 px-4 py-3.5 cursor-pointer transition-colors hover:bg-neutral-50"
+                >
+                  <input
+                    type="checkbox"
+                    class="size-4 shrink-0 accent-black"
+                    [formField]="affiliateForm.terms_accepted"
+                  />
+
+                  <div class="space-y-0.5">
+                    <span class="block text-sm font-medium text-neutral-900"> Termos de uso </span>
+
+                    <span class="block text-xs text-neutral-medium">
+                      O afiliado aceita os termos de uso da plataforma.
+                    </span>
+                  </div>
+                </label>
+
+                @if (
+                  affiliateForm.terms_accepted().touched() &&
+                  affiliateForm.terms_accepted().invalid()
+                ) {
+                  <p class="px-1 text-xs leading-4 text-red-500">
+                    {{ affiliateForm.terms_accepted().errors()[0].message }}
+                  </p>
+                }
+              </div>
+            </div>
+          </section>
+
+          <!-- Erro -->
+          @if (submitError()) {
+            <div
+              class="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5"
+            >
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-red-700">
+                  Não foi possível cadastrar o parceiro
+                </p>
+
+                <p class="mt-0.5 text-sm leading-5 text-red-600">
+                  {{ submitError() }}
+                </p>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Footer -->
+        <div
+          class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 mt-10 pt-6 border-t border-neutral-100"
+        >
+          <app-button
+            variant="outline"
+            type="button"
+            (click)="onClose()"
+            [disabled]="isSubmitting()"
+          >
+            Cancelar
+          </app-button>
+
+          <app-button type="submit" [disabled]="isSubmitting()">
+            {{ isSubmitting() ? 'Cadastrando...' : 'Cadastrar parceiro' }}
+          </app-button>
+        </div>
+      </form>
+    </div>
+  </div>
 </app-modal>

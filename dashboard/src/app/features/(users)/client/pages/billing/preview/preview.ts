@@ -716,7 +716,7 @@ export class Preview implements OnInit, OnDestroy {
 
       falhou: 'Falhou',
 
-      teste: 'Teste Gratuito',
+      teste: 'Período liberado',
     };
 
     return statusMap[status ?? ''] || 'Desconhecido';
@@ -742,7 +742,11 @@ export class Preview implements OnInit, OnDestroy {
     }
 
     if (this.isFreeTrial()) {
-      return 'Você está usando nosso período de teste gratuito. ' + 'Aproveite todos os recursos!';
+      return (
+        'Você está aproveitando um mês liberado. ' +
+        'Durante esse período, você pode personalizar seu perfil da forma que quiser. ' +
+        'Lembre-se: seu cartão é vitalício e, em caso de alterações no painel, você deverá recorrer à assinatura.'
+      );
     }
 
     const status = this.user()?.active_plan?.status;

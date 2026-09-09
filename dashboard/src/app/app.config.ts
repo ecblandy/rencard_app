@@ -1,5 +1,7 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+
 import { provideRouter } from '@angular/router';
+
 import { provideIcons } from '@ng-icons/core';
 
 import {
@@ -51,11 +53,33 @@ import {
   lucideDownload,
   lucideX,
   lucideArrowRight,
+  lucideArrowLeft,
   lucideLock,
   lucideMailOpen,
   lucideInfo,
   lucideMessageSquare,
   lucideTruck,
+
+  // ==========================================
+  // ÍCONES DO CARTÃO FÍSICO
+  // ==========================================
+  lucidePackage,
+  lucideHistory,
+
+  // ==========================================
+  // ÍCONES DA PÁGINA DE PARCEIROS
+  // ==========================================
+  lucideUsers,
+  lucideShoppingBag,
+  lucideDollarSign,
+  lucideWallet,
+  lucideActivity,
+  lucideUserCheck,
+  lucideCircleCheck,
+  lucideExternalLink,
+  lucideArrowUpRight,
+  lucideUserRoundX,
+  lucideTrendingUp,
 } from '@ng-icons/lucide';
 
 import { svglTiktok } from '@ng-icons/svgl';
@@ -119,11 +143,23 @@ import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    // ==========================================
+    // ANGULAR
+    // ==========================================
+
     provideBrowserGlobalErrorListeners(),
 
     provideRouter(routes),
 
+    // ==========================================
+    // ÍCONES
+    // ==========================================
+
     provideIcons({
+      // ==========================================
+      // LUCIDE
+      // ==========================================
+
       lucideHome,
       lucideMenu,
       lucideLayoutDashboard,
@@ -172,12 +208,46 @@ export const appConfig: ApplicationConfig = {
       lucideDownload,
       lucideX,
       lucideArrowRight,
+      lucideArrowLeft,
       lucideLock,
       lucideMailOpen,
       lucideInfo,
       lucideMessageSquare,
-      svglTiktok,
       lucideTruck,
+
+      // ==========================================
+      // CARTÃO FÍSICO
+      // ==========================================
+
+      lucidePackage,
+      lucideHistory,
+
+      // ==========================================
+      // PARCEIROS
+      // ==========================================
+
+      lucideUsers,
+      lucideShoppingBag,
+      lucideDollarSign,
+      lucideWallet,
+      lucideActivity,
+      lucideUserCheck,
+      lucideCircleCheck,
+      lucideExternalLink,
+      lucideArrowUpRight,
+      lucideUserRoundX,
+      lucideTrendingUp,
+
+      // ==========================================
+      // SVG / TIKTOK
+      // ==========================================
+
+      svglTiktok,
+
+      // ==========================================
+      // BOOTSTRAP ICONS
+      // ==========================================
+
       bootstrapArrowLeft,
       bootstrapArrowRight,
       bootstrapArrowClockwise,
@@ -215,25 +285,53 @@ export const appConfig: ApplicationConfig = {
       bootstrapXCircle,
       bootstrapLightbulb,
 
+      // ==========================================
+      // MONO ICONS
+      // ==========================================
+
       monoClipboardCheck,
       monoCreditCard,
       monoPause,
 
+      // ==========================================
+      // UX ASPECTS
+      // ==========================================
+
       aspectsSocialFacebook,
       aspectsSocialYoutube,
 
+      // ==========================================
+      // DRIP ICONS
+      // ==========================================
+
       dripWeb,
+
+      // ==========================================
+      // REMIX ICONS
+      // ==========================================
 
       remixFeedbackLine,
       remixPixFill,
       remixSuitcase2Line,
     }),
 
+    // ==========================================
+    // NGX MASK
+    // ==========================================
+
     provideEnvironmentNgxMask(),
 
     provideNgxMask(),
 
+    // ==========================================
+    // HTTP
+    // ==========================================
+
     provideHttpClient(withInterceptors([authInterceptor])),
+
+    // ==========================================
+    // CHARTS
+    // ==========================================
 
     provideCharts(withDefaultRegisterables()),
   ],

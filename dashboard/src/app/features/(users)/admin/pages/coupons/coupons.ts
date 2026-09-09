@@ -1,17 +1,21 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
+import { debounce, form } from '@angular/forms/signals';
+import { NgIcon } from '@ng-icons/core';
+
 import { AdminService } from '../../services/facade/admin.service';
+
 import { Coupon, FiltersCouponModel, ResultCouponList } from '../../types/coupons-filter';
+
 import { DashboardTitle } from '../../../components/dashboard-title/dashboard-title';
+
 import { UiButton } from '../../../../../shared/ui/button/button';
 import { Loader } from '../../../../../shared/components/loader/loader';
 import { Surface } from '../../../../../shared/components/surface/surface';
 import { PaginatedResponse } from '../../../../../shared/types/pagionation';
-import { debounce, form } from '@angular/forms/signals';
 import { UiInput } from '../../../../../shared/ui/input/input';
 import { Pagination } from '../../../../../shared/components/pagination/pagination';
 import { CreateCoupon } from '../../components/create-coupon/create-coupon';
-import { NgIcon } from '@ng-icons/core';
-import { Router } from '@angular/router';
 
 interface PaginationConfig {
   currentPage: number;
@@ -30,17 +34,32 @@ interface PaginationConfig {
 })
 export class Coupons {
   private readonly adminServices = inject(AdminService);
-  private router = inject(Router);
-  isInitialLoading = signal<boolean>(true);
-  isLoadingCupons = signal<boolean>(false);
+  private readonly router = inject(Router);
+
+  isInitialLoading = signal(true);
+  isLoadingCupons = signal(false);
+
   pageSizeOptions = [5, 10, 20];
 
   currentPage = signal(1);
   pageSize = signal(this.pageSizeOptions[0]);
+
   totalPages = signal(1);
   totalCount = signal(0);
+
   hasNext = signal(false);
   hasPrevious = signal(false);
+
+  modalOpen = signal(false);
+
+  /**
+   * Incrementado sempre que precisamos forçar uma nova
+   * requisição para a lista de cupons.
+   *
+   * Isso resolve o caso em que currentPage já é 1 e,
+   * portanto, chamar currentPage.set(1) não dispara o effect.
+   */
+  private readonly refreshTrigger = signal(0);
 
   paginationConfig = computed<PaginationConfig>(() => ({
     currentPage: this.currentPage(),
@@ -71,19 +90,23 @@ export class Coupons {
     effect(() => {
       const filters = this.filters();
       const page = this.currentPage();
-      const page_size = this.pageSize();
+      const pageSize = this.pageSize();
 
-      console.log('🔄 Effect disparado:', { filters, page, page_size });
+      // Apenas ler o signal já faz o effect depender dele.
+      const refresh = this.refreshTrigger();
+
+      console.log('🔄 Effect disparado:', {
+        filters,
+        page,
+        pageSize,
+        refresh,
+      });
 
       this.loadCoupons();
     });
-
-    effect(() => {
-      console.log(this.modalOpen());
-    });
   }
 
-  private loadCoupons() {
+  private loadCoupons(): void {
     const params = {
       ...this.filters(),
       page: this.currentPage(),
@@ -91,6 +114,7 @@ export class Coupons {
     };
 
     console.log('📡 Fazendo requisição:', params);
+
     this.isLoadingCupons.set(true);
 
     this.adminServices.fetchCoupons(params).subscribe({
@@ -98,14 +122,21 @@ export class Coupons {
         console.log('✅ Dados recebidos:', data);
 
         this.coupons.set(data);
+
         this.totalPages.set(data.total_pages);
         this.totalCount.set(data.count);
+
         this.hasNext.set(!!data.next);
         this.hasPrevious.set(!!data.previous);
       },
+
       error: (error) => {
         console.error('❌ Erro ao buscar cupons:', error);
+
+        this.isInitialLoading.set(false);
+        this.isLoadingCupons.set(false);
       },
+
       complete: () => {
         this.isLoadingCupons.set(false);
         this.isInitialLoading.set(false);
@@ -113,32 +144,52 @@ export class Coupons {
     });
   }
 
-  onPageChange(page: number) {
+  onPageChange(page: number): void {
     console.log('📄 Mudando para página:', page);
+
     this.currentPage.set(page);
   }
 
-  onPageSizeChange(size: number) {
+  onPageSizeChange(size: number): void {
     console.log('📏 Mudando pageSize para:', size);
+
     this.pageSize.set(size);
     this.currentPage.set(1);
   }
 
-  modalOpen = signal(false);
-
-  open() {
+  open(): void {
     this.modalOpen.set(true);
   }
 
-  close() {
+  close(): void {
     this.modalOpen.set(false);
   }
 
-  formatDiscount(coupon: any): string {
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'active':
+        return 'Ativo';
+
+      case 'inactive':
+        return 'Inativo';
+
+      case 'expired':
+        return 'Expirado';
+
+      default:
+        return status;
+    }
+  }
+
+  formatDiscount(coupon: Coupon): string {
     return this.formatValue(coupon.discount_value, coupon.discount_type);
   }
 
-  formatCommission(coupon: any): string {
+  formatCommission(coupon: Coupon): string {
+    if (coupon.commission_type === 'none') {
+      return 'N/A';
+    }
+
     return this.formatValue(coupon.commission_value, coupon.commission_type);
   }
 
@@ -153,13 +204,20 @@ export class Coupons {
     }).format(value / 100);
   }
 
-  viewCouponDetails(couponId: string | number) {
+  viewCouponDetails(couponId: number): void {
     this.router.navigate(['/admin/coupons', couponId]);
   }
 
-  onCouponCreated() {
+  onCouponCreated(): void {
     console.log('✅ Cupom criado, recarregando lista...');
-    this.currentPage.set(1); // Volta para primeira página
-    this.loadCoupons(); // Recarrega a lista
+
+    // Volta para a primeira página.
+    this.currentPage.set(1);
+
+    // Força a execução do effect mesmo se a página já for 1.
+    this.refreshTrigger.update((value) => value + 1);
+
+    // Fecha o modal.
+    this.modalOpen.set(false);
   }
 }

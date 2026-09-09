@@ -1,38 +1,117 @@
 import { PaginationParams } from '../../../../shared/types/pagionation';
 
-interface AffiliatePayment {
-  available_commission_cents: 0;
-  pix_key: '';
-  pix_key_type: '';
-  pix_owner_name: '';
+export type CouponDiscountType = 'percent' | 'amount';
+
+export type CouponCommissionType = 'percent' | 'amount' | 'none';
+
+export type CouponApplicableTo = 'subscription' | 'physical' | 'card' | 'tag' | 'both';
+
+export type CouponStatus = 'active' | 'inactive' | 'expired';
+
+/**
+ * Dados de pagamento do afiliado
+ * retornados pela API.
+ */
+export interface AffiliatePayment {
+  pix_key: string;
+  pix_key_type: string;
+  pix_owner_name: string;
+  available_commission_cents: number;
 }
 
+/**
+ * Modelo de resposta da API.
+ *
+ * Usado para GET/listagem/detalhamento.
+ */
 export interface Coupon {
-  id: string;
+  id: number;
+
   code: string;
-  discount_type: 'percent' | 'amount';
-  discount_value: number;
-  applicable_to: 'subscription' | 'product';
-  status: 'active' | 'inactive' | 'expired';
-  status_label: '';
-  starts_at: string;
-  ends_at: string;
-  total_uses: number;
-  commission_percent: number;
-  affiliate: string;
+
+  status: string;
+
+  affiliate: number | null;
   affiliate_name: string;
   affiliate_email: string;
-  affiliate_payment: AffiliatePayment;
-  total_commission_cents: number;
+
+  affiliate_payment: AffiliatePayment | null;
+
+  discount_type: CouponDiscountType;
+  discount_value: number;
+
+  commission_type: CouponCommissionType;
+  commission_value: number;
+
+  applicable_to: CouponApplicableTo;
+
+  starts_at: string;
+  ends_at: string;
+
+  total_uses: number;
+
   total_revenue_cents: number;
+  total_commission_cents: number;
+
   created_at: string;
   updated_at: string;
 }
+
+/**
+ * POST /ren_api/coupons/admin/coupons/
+ */
+export interface CouponCreatePayload {
+  code: string;
+
+  status: 'active';
+
+  affiliate: number | null;
+
+  discount_type: CouponDiscountType;
+
+  discount_value: number;
+
+  commission_type: CouponCommissionType;
+
+  commission_value: number;
+
+  applicable_to: CouponApplicableTo;
+
+  starts_at: string;
+
+  ends_at: string;
+}
+
+/**
+ * PATCH /ren_api/coupons/admin/coupons/<id>/
+ */
+export interface CouponUpdatePayload {
+  code?: string;
+
+  status?: 'active' | 'inactive';
+
+  affiliate?: number | null;
+
+  discount_type?: CouponDiscountType;
+
+  discount_value?: number;
+
+  commission_type?: CouponCommissionType;
+
+  commission_value?: number;
+
+  applicable_to?: CouponApplicableTo;
+
+  starts_at?: string;
+
+  ends_at?: string;
+}
+
 export interface ResultCouponList {
   count: number;
+  total_pages: number;
   next: string | null;
   previous: string | null;
-  total_pages: number;
   results: Coupon[];
 }
 

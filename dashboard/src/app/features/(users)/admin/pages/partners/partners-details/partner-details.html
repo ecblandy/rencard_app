@@ -1,113 +1,596 @@
-<section>
-  @if (isLoadingUser()) {
-    <div class="flex items-center justify-center min-h-[50vh]">
-      <app-loader></app-loader>
+<section class="pb-10">
+  <!-- ========================================================= -->
+  <!-- HEADER -->
+  <!-- ========================================================= -->
+
+  <div class="flex items-center gap-4">
+    <button
+      type="button"
+      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-600 transition hover:bg-neutral-50 hover:text-neutral-950"
+      (click)="goBack()"
+      aria-label="Voltar"
+    >
+      <ng-icon name="lucideArrowLeft" size="20" />
+    </button>
+
+    <div class="space-y-0.5">
+      <p class="text-sm text-neutral-500">Parceiros</p>
+
+      <h1 class="text-2xl font-bold tracking-tight text-neutral-950">Detalhes do parceiro</h1>
     </div>
-  } @else {
-    <!-- Container -->
-    <div class="flex flex-col gap-y-10">
-      <button
-        (click)="goBack()"
-        class="flex items-center gap-x-2 font-manrope cursor-pointer hover:opacity-80 transition-opacity"
-      >
-        <ng-icon name="bootstrapArrowLeft" size="20"></ng-icon>
-        <p>Voltar para afiliados</p>
-      </button>
+  </div>
 
-      <div class="flex items-center gap-x-6">
-        <span class="font-urbanist font-bold text-[2.5rem]">{{ affiliate().full_name }}</span>
-        <p class="bg-black text-white rounded-[.625rem] px-4 py-2 capitalize">
-          {{ affiliate().affiliate_active }}
-        </p>
-      </div>
+  <!-- ========================================================= -->
+  <!-- LOADING -->
+  <!-- ========================================================= -->
 
-      <!-- Status -->
-      <app-surface classes="block space-y-6 bg-white">
-        <app-surface-title title="Status do parceiro" class="block mb-6"></app-surface-title>
-
-        <div class="font-manrope">
-          <span class="text-neutral-medium">Status atual</span>
-          <p class="font-semibold capitalize">{{ affiliate().is_active }}</p>
+  @if (isLoading()) {
+    <div class="mt-8">
+      <app-surface>
+        <div class="flex min-h-80 items-center justify-center">
+          <app-loader />
         </div>
+      </app-surface>
+    </div>
+  }
 
-        <form>
-          <div>
-            <app-label>Alterar status</app-label>
-            <div class="relative w-full">
-              <select
-                class="w-full h-[2.5rem] appearance-none bg-white border border-neutral-soft px-4 py-1 pr-10 rounded-lg text-sm text-neutral-800 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-neutral-medium transition-all cursor-pointer"
-              >
-                <option value="">Selecione novo status</option>
-                <option value="in_production">Em produção</option>
-                <option value="delivered">Entregue</option>
-                <option value="shipped">Enviado</option>
-              </select>
+  <!-- ========================================================= -->
+  <!-- ERROR -->
+  <!-- ========================================================= -->
 
-              <!-- Arrow -->
-              <span
-                class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
+  @else if (error() || !affiliate()) {
+    <div class="mt-8">
+      <app-surface>
+        <div class="flex min-h-80 flex-col items-center justify-center text-center">
+          <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-neutral-100">
+            <ng-icon name="lucideUserRoundX" size="26" class="text-neutral-500" />
+          </div>
+
+          <h2 class="mt-4 text-lg font-semibold text-neutral-950">Parceiro não encontrado</h2>
+
+          <p class="mt-1 text-sm text-neutral-500">
+            Não foi possível carregar os dados desse parceiro.
+          </p>
+
+          <button
+            type="button"
+            class="mt-5 rounded-xl bg-neutral-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800"
+            (click)="goBack()"
+          >
+            Voltar para parceiros
+          </button>
+        </div>
+      </app-surface>
+    </div>
+  }
+
+  <!-- ========================================================= -->
+  <!-- PARTNER -->
+  <!-- ========================================================= -->
+
+  @else {
+    <!-- ======================================================= -->
+    <!-- PROFILE -->
+    <!-- ======================================================= -->
+
+    <div class="mt-8">
+      <app-surface>
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <!-- Profile -->
+          <div class="flex min-w-0 items-center gap-4">
+            @if (affiliate()?.profile_image) {
+              <img
+                [src]="affiliate()?.profile_image"
+                [alt]="affiliate()?.full_name"
+                class="h-16 w-16 shrink-0 rounded-2xl object-cover"
+              />
+            } @else {
+              <div
+                class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-neutral-950 text-lg font-bold text-white"
               >
-                <ng-icon name="lucideChevronDown" size="18"></ng-icon>
-              </span>
+                {{ getInitials(affiliate()?.full_name) }}
+              </div>
+            }
+
+            <div class="min-w-0">
+              <!-- Nome + status -->
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="text-xl font-bold text-neutral-950">
+                  {{ affiliate()?.full_name }}
+                </h2>
+
+                @if (affiliate()?.is_active) {
+                  <span
+                    class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700"
+                  >
+                    Ativo
+                  </span>
+                } @else {
+                  <span
+                    class="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-semibold text-neutral-500"
+                  >
+                    Inativo
+                  </span>
+                }
+              </div>
+
+              <!-- Username -->
+              <p class="mt-1 text-sm text-neutral-500">@{{ affiliate()?.username }}</p>
+
+              <!-- Email -->
+              <p class="mt-0.5 break-all text-sm text-neutral-500">
+                {{ affiliate()?.email }}
+              </p>
             </div>
           </div>
 
-          <app-button class="mt-6 w-full">Salvar alterações</app-button>
-        </form>
-      </app-surface>
+          <!-- Affiliate status -->
+          <div
+            class="shrink-0 rounded-2xl border border-neutral-200 bg-neutral-50 px-5 py-4 lg:min-w-52"
+          >
+            <p class="text-xs font-medium text-neutral-500">Programa de afiliados</p>
 
-      <!-- About -->
-      <app-surface classes="block space-y-6 bg-white">
-        <app-surface-title title="Resumo do parceiro" class="block mb-6"></app-surface-title>
+            <div class="mt-2 flex items-center gap-2">
+              <span
+                class="h-2 w-2 shrink-0 rounded-full"
+                [class.bg-emerald-500]="affiliate()?.affiliate_active"
+                [class.bg-neutral-400]="!affiliate()?.affiliate_active"
+              ></span>
 
-        <div class="font-manrope">
-          <span class="text-neutral-medium">Tipo</span>
-          <p class="font-semibold capitalize">Afiliado</p>
-        </div>
-
-        <div class="font-manrope">
-          <span class="text-neutral-medium">E-mail</span>
-          <p class="font-semibold capitalize">{{ affiliate().email }}</p>
-        </div>
-      </app-surface>
-
-      <app-surface classes="block space-y-6 bg-white">
-        <app-surface-title title="Resumo de performace" class="block mb-6"></app-surface-title>
-
-        <div class="flex justify-between items-center font-manrope">
-          <span class="text-neutral-medium">Total de vendas</span>
-          <p class="font-semibold uppercase">{{ affiliate().confirmed_sales_count }}</p>
-        </div>
-
-        <div class="flex justify-between items-center font-manrope">
-          <span class="text-neutral-medium">Receita atribuída</span>
-          <p class="font-semibold uppercase">
-            {{ formatPrice(affiliate().attributed_revenue_cents || 0) }}
-          </p>
-        </div>
-
-        <div class="flex justify-between items-center font-manrope">
-          <span class="text-neutral-medium">Comissão total</span>
-          <p class="font-semibold uppercase">
-            {{ formatPrice(affiliate().available_commission_cents || 0) }}
-          </p>
+              <span class="text-sm font-semibold text-neutral-900">
+                {{ getAffiliateStatus() }}
+              </span>
+            </div>
+          </div>
         </div>
       </app-surface>
+    </div>
 
-      <app-surface classes="block space-y-6 bg-white">
-        <app-surface-title title="Dados para pagamento" class="block mb-6"></app-surface-title>
+    <!-- ======================================================= -->
+    <!-- METRICS -->
+    <!-- ======================================================= -->
 
-        <div class="font-manrope">
-          <span class="text-neutral-medium">Tipo de chave PIX</span>
-          <p class="font-semibold uppercase">{{ affiliate().pix_key_type }}</p>
+    <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <!-- Clicks -->
+      <app-surface>
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="text-sm text-neutral-500">Cliques</p>
+
+            <p class="mt-2 text-2xl font-bold text-neutral-950">
+              {{ affiliate()?.clicks_count ?? 0 }}
+            </p>
+          </div>
+
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100"
+          >
+            <ng-icon name="lucideMousePointerClick" size="19" />
+          </div>
         </div>
+      </app-surface>
 
-        <div class="font-manrope">
-          <span class="text-neutral-medium">Chave PIX</span>
-          <p class="font-semibold">{{ affiliate().pix_key }}</p>
+      <!-- Sales -->
+      <app-surface>
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="text-sm text-neutral-500">Vendas confirmadas</p>
+
+            <p class="mt-2 text-2xl font-bold text-neutral-950">
+              {{ affiliate()?.confirmed_sales_count ?? 0 }}
+            </p>
+          </div>
+
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100"
+          >
+            <ng-icon name="lucideShoppingBag" size="19" />
+          </div>
         </div>
+      </app-surface>
 
-        <app-button class="w-full">Copiar</app-button>
+      <!-- Revenue -->
+      <app-surface>
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="text-sm text-neutral-500">Receita atribuída</p>
+
+            <p class="mt-2 text-2xl font-bold text-neutral-950">
+              {{ formatCents(affiliate()?.attributed_revenue_cents) }}
+            </p>
+          </div>
+
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100"
+          >
+            <ng-icon name="lucideTrendingUp" size="19" />
+          </div>
+        </div>
+      </app-surface>
+
+      <!-- Commission -->
+      <app-surface>
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <p class="text-sm text-neutral-500">Comissão disponível</p>
+
+            <p class="mt-2 text-2xl font-bold text-neutral-950">
+              {{ formatCents(affiliate()?.available_commission_cents) }}
+            </p>
+          </div>
+
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100"
+          >
+            <ng-icon name="lucideWallet" size="19" />
+          </div>
+        </div>
+      </app-surface>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- CONTENT -->
+    <!-- ======================================================= -->
+
+    <div class="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
+      <!-- ===================================================== -->
+      <!-- PERSONAL DATA -->
+      <!-- ===================================================== -->
+
+      <app-surface class="xl:col-span-2">
+        <div class="space-y-6">
+          <app-surface-title
+            title="Dados pessoais"
+            description="Informações cadastrais do parceiro."
+          />
+
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Nome completo
+              </p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ affiliate()?.full_name || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Usuário</p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                @{{ affiliate()?.username || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">E-mail</p>
+
+              <p class="mt-1.5 break-all text-sm font-medium text-neutral-900">
+                {{ affiliate()?.email || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Telefone</p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ affiliate()?.phone_number || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">CPF / CNPJ</p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ affiliate()?.cpf_cnpj || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                E-mail confirmado
+              </p>
+
+              <p
+                class="mt-1.5 text-sm font-semibold"
+                [class.text-emerald-600]="affiliate()?.email_confirmed"
+                [class.text-neutral-500]="!affiliate()?.email_confirmed"
+              >
+                {{ affiliate()?.email_confirmed ? 'Confirmado' : 'Não confirmado' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </app-surface>
+
+      <!-- ===================================================== -->
+      <!-- ACCOUNT -->
+      <!-- ===================================================== -->
+
+      <app-surface>
+        <div class="space-y-6">
+          <app-surface-title title="Conta" description="Estado atual da conta." />
+
+          <div class="space-y-5">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Status da conta
+              </p>
+
+              <p
+                class="mt-1.5 text-sm font-semibold"
+                [class.text-emerald-600]="affiliate()?.is_active"
+                [class.text-neutral-500]="!affiliate()?.is_active"
+              >
+                {{ getAccountStatus() }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Programa de afiliados
+              </p>
+
+              <p
+                class="mt-1.5 text-sm font-semibold"
+                [class.text-emerald-600]="affiliate()?.affiliate_active"
+                [class.text-neutral-500]="!affiliate()?.affiliate_active"
+              >
+                {{ getAffiliateStatus() }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Termos</p>
+
+              <p class="mt-1.5 text-sm font-semibold text-neutral-900">
+                {{ affiliate()?.terms_accepted ? 'Aceitos' : 'Não aceitos' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Senha de onboarding
+              </p>
+
+              <p class="mt-1.5 text-sm font-semibold text-neutral-900">
+                {{ affiliate()?.onboard_password_changed ? 'Alterada' : 'Não alterada' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </app-surface>
+
+      <!-- ===================================================== -->
+      <!-- ADDRESS -->
+      <!-- ===================================================== -->
+
+      <app-surface class="xl:col-span-2">
+        <div class="space-y-6">
+          <app-surface-title title="Endereço" description="Endereço cadastrado pelo parceiro." />
+
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div class="sm:col-span-2">
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Logradouro</p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ affiliate()?.street || 'Não informado' }},
+                {{ affiliate()?.number || 'S/N' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Bairro</p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ affiliate()?.neighborhood || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Complemento
+              </p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ affiliate()?.complement || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Cidade</p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ affiliate()?.city || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Estado</p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ affiliate()?.state || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">CEP</p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ affiliate()?.cep || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">País</p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ affiliate()?.country || 'Não informado' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </app-surface>
+
+      <!-- ===================================================== -->
+      <!-- PIX -->
+      <!-- ===================================================== -->
+
+      <app-surface>
+        <div class="space-y-6">
+          <app-surface-title
+            title="Pagamento"
+            description="Dados utilizados para receber comissões."
+          />
+
+          <div class="space-y-5">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Titular</p>
+
+              <p class="mt-1.5 text-sm font-semibold text-neutral-900">
+                {{ affiliate()?.pix_owner_name || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Tipo</p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ formatPixType(affiliate()?.pix_key_type) }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Chave PIX</p>
+
+              <div class="mt-1.5 flex items-center gap-2">
+                <p class="min-w-0 flex-1 truncate text-sm font-medium text-neutral-900">
+                  {{ affiliate()?.pix_key || 'Não informado' }}
+                </p>
+
+                @if (affiliate()?.pix_key) {
+                  <button
+                    type="button"
+                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-neutral-200 text-neutral-500 transition hover:bg-neutral-50 hover:text-neutral-900"
+                    (click)="copyPix()"
+                  >
+                    <ng-icon [name]="copiedPix() ? 'lucideCheck' : 'lucideCopy'" size="16" />
+                  </button>
+                }
+              </div>
+
+              @if (copiedPix()) {
+                <p class="mt-2 text-xs font-medium text-emerald-600">Chave copiada!</p>
+              }
+            </div>
+          </div>
+        </div>
+      </app-surface>
+
+      <!-- ===================================================== -->
+      <!-- PLAN -->
+      <!-- ===================================================== -->
+
+      <app-surface>
+        <div class="space-y-6">
+          <app-surface-title
+            title="Plano e cobrança"
+            description="Informações relacionadas ao acesso."
+          />
+
+          <div class="space-y-5">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Plano atual
+              </p>
+
+              <p class="mt-1.5 text-sm font-semibold text-neutral-900">
+                {{ getPlanName() }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Último pagamento
+              </p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ formatDate(affiliate()?.last_payment_date) }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Próxima cobrança
+              </p>
+
+              <p class="mt-1.5 text-sm font-medium text-neutral-900">
+                {{ formatDate(affiliate()?.next_charge_date) }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </app-surface>
+
+      <!-- ===================================================== -->
+      <!-- AFFILIATE -->
+      <!-- ===================================================== -->
+
+      <app-surface>
+        <div class="space-y-6">
+          <app-surface-title title="Afiliado" description="Informações do programa." />
+
+          <div class="space-y-5">
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Link / slug
+              </p>
+
+              <p class="mt-1.5 break-all text-sm font-semibold text-neutral-900">
+                {{ affiliate()?.link_slug || 'Não informado' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">Cliques</p>
+
+              <p class="mt-1.5 text-sm font-semibold text-neutral-900">
+                {{ affiliate()?.clicks_count ?? 0 }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+                Vendas confirmadas
+              </p>
+
+              <p class="mt-1.5 text-sm font-semibold text-neutral-900">
+                {{ affiliate()?.confirmed_sales_count ?? 0 }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </app-surface>
+
+      <!-- ===================================================== -->
+      <!-- ANALYTICS -->
+      <!-- ===================================================== -->
+
+      <app-surface>
+        <div class="space-y-6">
+          <app-surface-title title="Analytics" description="Configuração de rastreamento." />
+
+          <div>
+            <p class="text-xs font-medium uppercase tracking-wide text-neutral-400">
+              Google Analytics
+            </p>
+
+            <p class="mt-1.5 break-all text-sm font-medium text-neutral-900">
+              {{ affiliate()?.google_analytics_id || 'Não configurado' }}
+            </p>
+          </div>
+        </div>
       </app-surface>
     </div>
   }

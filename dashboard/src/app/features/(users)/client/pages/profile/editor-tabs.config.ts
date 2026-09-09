@@ -33,7 +33,7 @@ export const EDITOR_TABS: EditorTab[] = [
   { key: 'form', label: 'Formulário', component: Form, icon: 'lucideFileText', requiresPro: true },
   {
     key: 'curriculum',
-    label: 'Currículo',
+    label: 'Anexo',
     component: Curriculum,
     icon: 'lucideFileUser',
     requiresPro: true,

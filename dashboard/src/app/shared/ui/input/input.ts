@@ -5,6 +5,8 @@ import { NgxMaskDirective } from 'ngx-mask';
 
 type InputSize = 'sm' | 'xl';
 
+type DecimalMarker = '.' | ',' | ['.', ','];
+
 @Component({
   selector: 'app-input',
   standalone: true,
@@ -14,37 +16,70 @@ type InputSize = 'sm' | 'xl';
 })
 export class UiInput {
   type = input<string>('text');
+
   id = input<string | undefined>();
+
   placeholder = input<string | undefined>();
+
   formField = input<any>();
+
   sizeH = input<InputSize>('sm');
+
   error = input<boolean>(false);
+
   disabled = input<string | boolean | null | undefined>();
 
+  // ============================================================
   // MASK
+  // ============================================================
+
   mask = input<string | undefined>();
+
   maskType = input<'text' | 'number'>('text');
 
-  prefix = input<string | undefined>();
-  suffix = input<string | undefined>();
-  thousandSeparator = input<any>();
-  decimalMarker = input<any>();
+  prefix = input<string>('');
+
+  suffix = input<string>('');
+
+  thousandSeparator = input<string>('');
+
+  decimalMarker = input<DecimalMarker>(',');
+
   separatorLimit = input<string | undefined>();
+
   allowNegativeNumbers = input<boolean>(true);
+
   validation = input<boolean | undefined>();
 
-  isNumberMask = computed(() => this.maskType() === 'number');
-  validationEnabled = computed(() => this.validation() ?? true);
-  hasMask = computed(() => !!this.mask());
+  // ============================================================
+  // STATE
+  // ============================================================
+
+  isNumberMask = computed(() => {
+    return this.maskType() === 'number';
+  });
+
+  validationEnabled = computed(() => {
+    return this.validation() ?? true;
+  });
+
+  hasMask = computed(() => {
+    return !!this.mask();
+  });
 
   showPassword = signal(false);
 
-  isPassword = computed(() => this.type() === 'password');
+  isPassword = computed(() => {
+    return this.type() === 'password';
+  });
 
-  resolvedType = computed(() => (this.isPassword() && this.showPassword() ? 'text' : this.type()));
+  resolvedType = computed(() => {
+    return this.isPassword() && this.showPassword() ? 'text' : this.type();
+  });
 
   isDisabled = computed(() => {
     const attrDisabled = this.disabled();
+
     const fieldDisabled = this.formField()?.disabled?.();
 
     const resolvedAttrDisabled =
@@ -59,7 +94,9 @@ export class UiInput {
   inputClasses = computed(() =>
     [
       'w-full rounded-[.625rem] border pl-[1rem] pr-[3rem]',
+
       this.sizeH() === 'xl' ? 'h-[3.75rem]' : 'h-[2.375rem]',
+
       this.error()
         ? 'bg-error-soft border-error outline-error'
         : this.isDisabled()
@@ -68,11 +105,11 @@ export class UiInput {
     ].join(' '),
   );
 
-  togglePassword() {
-    this.showPassword.update((v) => !v);
+  togglePassword(): void {
+    this.showPassword.update((value) => !value);
   }
 
-  preventFocus(event: MouseEvent) {
+  preventFocus(event: MouseEvent): void {
     event.preventDefault();
   }
 }

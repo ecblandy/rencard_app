@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
 interface CepResponse {
+  erro: any;
   cep: string;
   logradouro: string;
   complemento: string;
@@ -22,8 +23,6 @@ export class CepService {
   getCep(cep: string): Observable<CepResponse> {
     const cleanCep = cep.replace(/\D/g, '');
 
-    console.log('clean cep', cleanCep);
-    console.log(this.http.get<CepResponse>(`${this.baseUrl}/${cleanCep}/json/`));
     return this.http.get<CepResponse>(`${this.baseUrl}/${cleanCep}/json/`);
   }
 }

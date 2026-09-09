@@ -1,56 +1,497 @@
 @if (isInitialLoading()) {
-  <div class="flex items-center justify-center min-h-[50vh]">
+  <div class="flex min-h-[50vh] items-center justify-center">
     <app-loader></app-loader>
   </div>
 } @else {
-  <section>
-    <!-- Header -->
-    <div class="flex items-center justify-between">
+  <section class="space-y-8 pb-8">
+    <!-- ========================================================= -->
+    <!-- HEADER -->
+    <!-- ========================================================= -->
+
+    <header class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
       <app-dashboard-title
         title="Parceiros"
-        description="Gerencie suas parcerias "
+        description="Gerencie seus afiliados, acompanhe resultados e controle suas comissões."
       ></app-dashboard-title>
 
-      <!-- Add partner -->
-      <app-button class="flex items-center gap-[.5rem]" (click)="open()">
-        <ng-icon name="lucidePlus" size="20"></ng-icon>
-        <p>Cadastrar parceiro</p>
+      <app-button class="flex shrink-0 items-center justify-center gap-2" (click)="open()">
+        <ng-icon name="lucidePlus" size="19"></ng-icon>
+
+        <span>Cadastrar parceiro</span>
       </app-button>
-    </div>
+    </header>
 
-    <!-- Filter -->
-    <div class="mb-10">
-      <app-input placeholder="Buscar parceiro" sizeH="xl" [formField]="searchForm.q"></app-input>
-    </div>
+    <!-- ========================================================= -->
+    <!-- RESUMO -->
+    <!-- ========================================================= -->
 
-    <div class="flex flex-wrap gap-x-[.5rem] gap-y-[3rem] w-full mb-6">
-      @for (affiliate of userAffiliate(); track affiliate) {
-        <app-surface classes="block space-y-6 max-w-[21.75rem] w-full bg-white">
-          <div class="flex items-center justify-between">
-            <span class="font-urbanist font-bold text-[1.25rem]">{{ affiliate.full_name }}</span>
-            <p class="bg-black rounded-[.625rem] px-4 py-2 text-white">
-              {{ affiliate.is_active }}
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <!-- TOTAL -->
+
+      <app-surface classes="border border-neutral-100 bg-white shadow-sm">
+        <div class="flex min-h-[112px] items-center justify-between gap-4">
+          <div class="min-w-0">
+            <p class="font-manrope text-sm text-neutral-medium">Total</p>
+
+            <p class="mt-2 font-urbanist text-[1.75rem] font-bold leading-none">
+              {{ totalCount() }}
             </p>
+
+            <p class="mt-2 text-xs text-neutral-medium">parceiros cadastrados</p>
           </div>
 
-          <div class="font-manrope">
-            <span class="text-neutral-medium">Afiliado</span>
-            <p class="font-semibold">{{ affiliate.email }}</p>
-          </div>
-
-          <app-button variant="outline" class="w-full" (click)="viewPhysicalDetails(affiliate.id)"
-            >Ver detalhes</app-button
+          <div
+            class="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-neutral-100 bg-neutral-50"
           >
-        </app-surface>
-      }
-    </div>
-    <app-pagination
-      [config]="paginationConfig()"
-      [pageSizeOptions]="pageSizeOptions"
-      (pageChange)="onPageChange($event)"
-      (pageSizeChange)="onPageSizeChange($event)"
-    />
+            <ng-icon name="lucideUsers" size="21"></ng-icon>
+          </div>
+        </div>
+      </app-surface>
 
-    <app-create-partner [isOpen]="modalOpen()" (close)="close()"></app-create-partner>
+      <!-- ATIVOS -->
+
+      <app-surface classes="border border-neutral-100 bg-white shadow-sm">
+        <div class="flex min-h-[112px] items-center justify-between gap-4">
+          <div class="min-w-0">
+            <p class="font-manrope text-sm text-neutral-medium">Ativos</p>
+
+            <p class="mt-2 font-urbanist text-[1.75rem] font-bold leading-none">
+              {{ activeAffiliatesCount() }}
+            </p>
+
+            <p class="mt-2 text-xs text-neutral-medium">parceiros ativos</p>
+          </div>
+
+          <div
+            class="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-neutral-100 bg-neutral-50"
+          >
+            <ng-icon name="lucideUserCheck" size="21"></ng-icon>
+          </div>
+        </div>
+      </app-surface>
+
+      <!-- VENDAS -->
+
+      <app-surface classes="border border-neutral-100 bg-white shadow-sm">
+        <div class="flex min-h-[112px] items-center justify-between gap-4">
+          <div class="min-w-0">
+            <p class="font-manrope text-sm text-neutral-medium">Vendas</p>
+
+            <p class="mt-2 font-urbanist text-[1.75rem] font-bold leading-none">
+              {{ confirmedSalesCount() }}
+            </p>
+
+            <p class="mt-2 text-xs text-neutral-medium">vendas confirmadas</p>
+          </div>
+
+          <div
+            class="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-neutral-100 bg-neutral-50"
+          >
+            <ng-icon name="lucideShoppingBag" size="21"></ng-icon>
+          </div>
+        </div>
+      </app-surface>
+
+      <!-- COMISSÕES -->
+
+      <app-surface classes="border border-neutral-100 bg-white shadow-sm">
+        <div class="flex min-h-[112px] items-center justify-between gap-4">
+          <div class="min-w-0">
+            <p class="font-manrope text-sm text-neutral-medium">Comissões</p>
+
+            <p class="mt-2 truncate font-urbanist text-[1.75rem] font-bold leading-none">
+              {{ formatCurrency(availableCommissionCents()) }}
+            </p>
+
+            <p class="mt-2 text-xs text-neutral-medium">disponíveis para saque</p>
+          </div>
+
+          <div
+            class="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-neutral-100 bg-neutral-50"
+          >
+            <ng-icon name="lucideWallet" size="21"></ng-icon>
+          </div>
+        </div>
+      </app-surface>
+    </div>
+
+    <!-- ========================================================= -->
+    <!-- BUSCA -->
+    <!-- ========================================================= -->
+
+    <app-surface classes="border border-neutral-100 bg-white shadow-sm">
+      <div class="space-y-4">
+        <div class="flex items-center gap-3">
+          <div
+            class="flex size-9 shrink-0 items-center justify-center rounded-xl border border-neutral-100 bg-neutral-50"
+          >
+            <ng-icon name="lucideUsers" size="17"></ng-icon>
+          </div>
+
+          <div>
+            <p class="font-urbanist text-base font-bold">Encontrar parceiro</p>
+
+            <p class="mt-0.5 text-sm text-neutral-medium">Pesquise por nome ou e-mail.</p>
+          </div>
+        </div>
+
+        <app-input placeholder="Nome ou e-mail" sizeH="xl" [formField]="searchForm.q"></app-input>
+      </div>
+    </app-surface>
+
+    <!-- ========================================================= -->
+    <!-- RESULTADOS -->
+    <!-- ========================================================= -->
+
+    @if (isLoadingAffiliates()) {
+      <div class="mt-8">
+        <app-surface classes="border border-neutral-100 bg-white shadow-sm">
+          <div class="flex min-h-[240px] items-center justify-center">
+            <app-loader></app-loader>
+          </div>
+        </app-surface>
+      </div>
+    } @else if (userAffiliate().length === 0) {
+      <!-- ======================================================= -->
+      <!-- EMPTY STATE -->
+      <!-- ======================================================= -->
+
+      <div class="mt-8">
+        <app-surface classes="border border-neutral-100 bg-white shadow-sm">
+          <div
+            class="flex min-h-[280px] flex-col items-center justify-center px-6 py-12 text-center"
+          >
+            <div
+              class="mb-5 flex size-16 items-center justify-center rounded-2xl border border-neutral-100 bg-neutral-50"
+            >
+              <ng-icon name="lucideUsers" size="27"></ng-icon>
+            </div>
+
+            @if (searchForm.q().value().trim()) {
+              <h3 class="font-urbanist text-lg font-bold">Nenhum resultado encontrado</h3>
+
+              <p class="mt-2 max-w-md text-sm leading-6 text-neutral-medium">
+                Não encontramos parceiros para
+                <span class="font-semibold text-neutral-dark"> "{{ searchForm.q().value() }}" </span
+                >.
+              </p>
+            } @else {
+              <h3 class="font-urbanist text-lg font-bold">Nenhum parceiro cadastrado</h3>
+
+              <p class="mt-2 max-w-md text-sm leading-6 text-neutral-medium">
+                Os parceiros cadastrados aparecerão aqui.
+              </p>
+            }
+          </div>
+        </app-surface>
+      </div>
+    } @else {
+      <!-- ========================================================= -->
+      <!-- DESKTOP -->
+      <!-- ========================================================= -->
+
+      <div class="mt-8 hidden w-full md:block">
+        <app-surface classes="w-full overflow-hidden border border-neutral-100 bg-white shadow-sm">
+          <div class="w-full overflow-x-auto">
+            <table class="w-full border-collapse">
+              <!-- HEADER -->
+
+              <thead>
+                <tr class="border-b border-neutral-100 bg-neutral-50/70">
+                  <th
+                    class="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-[0.08em] text-neutral-medium"
+                  >
+                    Parceiro
+                  </th>
+
+                  <th
+                    class="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-[0.08em] text-neutral-medium"
+                  >
+                    Status
+                  </th>
+
+                  <th
+                    class="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-[0.08em] text-neutral-medium"
+                  >
+                    Desempenho
+                  </th>
+
+                  <th
+                    class="px-6 py-4 text-right text-[11px] font-bold uppercase tracking-[0.08em] text-neutral-medium"
+                  >
+                    Receita
+                  </th>
+
+                  <th
+                    class="px-6 py-4 text-right text-[11px] font-bold uppercase tracking-[0.08em] text-neutral-medium"
+                  >
+                    Comissão
+                  </th>
+
+                  <th
+                    class="px-6 py-4 text-right text-[11px] font-bold uppercase tracking-[0.08em] text-neutral-medium"
+                  >
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+
+              <!-- BODY -->
+
+              <tbody>
+                @for (affiliate of userAffiliate(); track affiliate.id) {
+                  <tr
+                    class="border-b border-neutral-100 transition-colors duration-150 last:border-0 hover:bg-neutral-50/60"
+                  >
+                    <!-- PARCEIRO -->
+
+                    <td class="px-6 py-5">
+                      <div class="flex min-w-[240px] items-center gap-3.5">
+                        @if (affiliate.profile_image) {
+                          <img
+                            [src]="affiliate.profile_image"
+                            [alt]="affiliate.full_name"
+                            class="size-11 shrink-0 rounded-xl border border-neutral-100 object-cover"
+                          />
+                        } @else {
+                          <div
+                            class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-100"
+                          >
+                            <span class="font-urbanist text-sm font-bold">
+                              {{ getInitials(affiliate.full_name) }}
+                            </span>
+                          </div>
+                        }
+
+                        <div class="min-w-0">
+                          <p class="max-w-[220px] truncate font-urbanist font-bold">
+                            {{ affiliate.full_name }}
+                          </p>
+
+                          <p class="mt-1 max-w-[220px] truncate text-sm text-neutral-medium">
+                            {{ affiliate.email }}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- STATUS -->
+
+                    <td class="px-6 py-5">
+                      <div class="flex flex-col gap-1.5">
+                        <div class="flex items-center gap-2">
+                          <span
+                            class="size-2 shrink-0 rounded-full"
+                            [class.bg-green-500]="isAccountActive(affiliate)"
+                            [class.bg-red-500]="!isAccountActive(affiliate)"
+                          ></span>
+
+                          <span class="text-sm font-semibold">
+                            {{ getAccountStatus(affiliate) }}
+                          </span>
+                        </div>
+
+                        <span class="text-xs text-neutral-medium">
+                          Programa
+                          {{ affiliate.affiliate_active ? 'ativo' : 'inativo' }}
+                        </span>
+                      </div>
+                    </td>
+
+                    <!-- DESEMPENHO -->
+
+                    <td class="px-6 py-5">
+                      <div class="flex items-center gap-7">
+                        <div>
+                          <p class="font-urbanist text-sm font-bold">
+                            {{ affiliate.clicks_count }}
+                          </p>
+
+                          <p class="mt-1 text-xs text-neutral-medium">Cliques</p>
+                        </div>
+
+                        <div>
+                          <p class="font-urbanist text-sm font-bold">
+                            {{ affiliate.confirmed_sales_count }}
+                          </p>
+
+                          <p class="mt-1 text-xs text-neutral-medium">Vendas</p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <!-- RECEITA -->
+
+                    <td class="px-6 py-5 text-right">
+                      <p class="whitespace-nowrap font-urbanist text-sm font-bold">
+                        {{ formatCurrency(affiliate.attributed_revenue_cents) }}
+                      </p>
+
+                      <p class="mt-1 text-xs text-neutral-medium">Atribuída</p>
+                    </td>
+
+                    <!-- COMISSÃO -->
+
+                    <td class="px-6 py-5 text-right">
+                      <p class="whitespace-nowrap font-urbanist text-sm font-bold">
+                        {{ formatCurrency(affiliate.available_commission_cents) }}
+                      </p>
+
+                      <p class="mt-1 text-xs text-neutral-medium">Disponível</p>
+                    </td>
+
+                    <!-- AÇÕES -->
+
+                    <td class="px-6 py-5">
+                      <div class="flex justify-end">
+                        <app-button variant="outline" (click)="viewPhysicalDetails(affiliate.id)">
+                          Ver detalhes
+                        </app-button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </app-surface>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- MOBILE -->
+      <!-- ========================================================= -->
+
+      <div class="mt-8 space-y-4 md:hidden">
+        @for (affiliate of userAffiliate(); track affiliate.id) {
+          <app-surface classes="border border-neutral-100 bg-white shadow-sm">
+            <div class="space-y-5">
+              <!-- HEADER -->
+
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex min-w-0 items-center gap-3">
+                  @if (affiliate.profile_image) {
+                    <img
+                      [src]="affiliate.profile_image"
+                      [alt]="affiliate.full_name"
+                      class="size-11 shrink-0 rounded-xl border border-neutral-100 object-cover"
+                    />
+                  } @else {
+                    <div
+                      class="flex size-11 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-neutral-100"
+                    >
+                      <span class="font-urbanist text-sm font-bold">
+                        {{ getInitials(affiliate.full_name) }}
+                      </span>
+                    </div>
+                  }
+
+                  <div class="min-w-0">
+                    <p class="truncate font-urbanist font-bold">
+                      {{ affiliate.full_name }}
+                    </p>
+
+                    <p class="mt-1 truncate text-sm text-neutral-medium">
+                      {{ affiliate.email }}
+                    </p>
+                  </div>
+                </div>
+
+                <span
+                  class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
+                  [class.bg-green-100]="isAccountActive(affiliate)"
+                  [class.text-green-700]="isAccountActive(affiliate)"
+                  [class.bg-red-100]="!isAccountActive(affiliate)"
+                  [class.text-red-700]="!isAccountActive(affiliate)"
+                >
+                  {{ getAccountStatus(affiliate) }}
+                </span>
+              </div>
+
+              <!-- METRICS -->
+
+              <div class="grid grid-cols-2 gap-3">
+                <div class="rounded-xl border border-neutral-100 bg-neutral-50 p-3.5">
+                  <p class="text-xs text-neutral-medium">Cliques</p>
+
+                  <p class="mt-1 font-urbanist text-lg font-bold">
+                    {{ affiliate.clicks_count }}
+                  </p>
+                </div>
+
+                <div class="rounded-xl border border-neutral-100 bg-neutral-50 p-3.5">
+                  <p class="text-xs text-neutral-medium">Vendas</p>
+
+                  <p class="mt-1 font-urbanist text-lg font-bold">
+                    {{ affiliate.confirmed_sales_count }}
+                  </p>
+                </div>
+
+                <div class="rounded-xl border border-neutral-100 bg-neutral-50 p-3.5">
+                  <p class="text-xs text-neutral-medium">Receita</p>
+
+                  <p class="mt-1 truncate font-urbanist text-base font-bold">
+                    {{ formatCurrency(affiliate.attributed_revenue_cents) }}
+                  </p>
+                </div>
+
+                <div class="rounded-xl border border-neutral-100 bg-neutral-50 p-3.5">
+                  <p class="text-xs text-neutral-medium">Comissão</p>
+
+                  <p class="mt-1 truncate font-urbanist text-base font-bold">
+                    {{ formatCurrency(affiliate.available_commission_cents) }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- PROGRAMA -->
+
+              <div class="flex items-center justify-between border-t border-neutral-100 pt-4">
+                <span class="text-sm text-neutral-medium"> Programa de afiliados </span>
+
+                <span class="text-sm font-semibold">
+                  {{ affiliate.affiliate_active ? 'Ativo' : 'Inativo' }}
+                </span>
+              </div>
+
+              <!-- AÇÃO -->
+
+              <app-button
+                variant="outline"
+                class="w-full"
+                (click)="viewPhysicalDetails(affiliate.id)"
+              >
+                Ver detalhes
+              </app-button>
+            </div>
+          </app-surface>
+        }
+      </div>
+    }
+
+    <!-- ========================================================= -->
+    <!-- PAGINAÇÃO -->
+    <!-- ========================================================= -->
+
+    @if (userAffiliate().length > 0) {
+      <div class="mt-8 w-full">
+        <app-pagination
+          class="block w-full"
+          [config]="paginationConfig()"
+          [pageSizeOptions]="pageSizeOptions"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
+        />
+      </div>
+    }
+
+    <!-- ========================================================= -->
+    <!-- MODAL -->
+    <!-- ========================================================= -->
+
+    <app-create-partner
+      [isOpen]="modalOpen()"
+      (close)="close()"
+      (created)="onAffiliateCreated()"
+    ></app-create-partner>
   </section>
 }

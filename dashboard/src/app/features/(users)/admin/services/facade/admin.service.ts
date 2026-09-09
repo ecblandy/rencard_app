@@ -1,11 +1,23 @@
 import { inject, Injectable } from '@angular/core';
-import { ApiAdmin } from '../api/api-admin';
+
 import { tap } from 'rxjs';
+
+import { ApiAdmin } from '../api/api-admin';
+
 import { UserFilters } from '../../types/user-filter';
-import { Coupon, CouponFilters } from '../../types/coupons-filter';
+
+import {
+  CouponCreatePayload,
+  CouponFilters,
+  CouponUpdatePayload,
+} from '../../types/coupons-filter';
+
+import { AffiliateCreatePayload, AffiliateFilters } from '../../types/affiliate-model';
+
 import { PhysicalFilters } from '../../types/physical-filter';
-import { AffiliateFilters } from '../../types/affiliate-model';
+
 import { PhysicalCard } from '../../types/physical-card';
+
 import { DashboardFilters } from '../../types/dashboard-model';
 
 @Injectable({
@@ -14,63 +26,191 @@ import { DashboardFilters } from '../../types/dashboard-model';
 export class AdminService {
   private readonly api = inject(ApiAdmin);
 
-  fetchUsers(params: UserFilters & { page: number; page_size: number }) {
-    return this.api.listUsers(params).pipe(tap((response) => console.log(response)));
+  // ============================================================
+  // CLIENTES
+  // ============================================================
+
+  fetchUsers(
+    params: UserFilters & {
+      page: number;
+      page_size: number;
+    },
+  ) {
+    return this.api.listUsers(params).pipe(
+      tap((response) => {
+        console.log('👤 Clientes:', response);
+      }),
+    );
   }
 
-  fetchDashboardDetails(params: DashboardFilters) {
-    return this.api.dashboardDetails(params).pipe(tap((response) => console.log(response)));
-  }
+  // ============================================================
+  // RESUMO
+  // ============================================================
 
   fetchSubscriptionSummary() {
-    return this.api.subscriptionSummary();
+    return this.api.subscriptionSummary().pipe(
+      tap((response) => {
+        console.log('📊 Resumo:', response);
+      }),
+    );
   }
 
-  fetchCoupons(params: CouponFilters & { page: number; page_size: number }) {
-    return this.api.listCoupons(params).pipe(tap((info) => console.log(info)));
+  // ============================================================
+  // DASHBOARD
+  // ============================================================
+
+  fetchDashboardDetails(params: DashboardFilters) {
+    return this.api.dashboardDetails(params).pipe(
+      tap((response) => {
+        console.log('📊 Dashboard:', response);
+      }),
+    );
   }
 
-  registerCoupon(coupon: Partial<Coupon>) {
-    return this.api.createCoupon(coupon).pipe(tap((info) => console.log(info)));
+  // ============================================================
+  // CUPONS
+  // ============================================================
+
+  fetchCoupons(
+    params: CouponFilters & {
+      page: number;
+      page_size: number;
+    },
+  ) {
+    return this.api.listCoupons(params).pipe(
+      tap((response) => {
+        console.log('🎟️ Cupons:', response);
+      }),
+    );
+  }
+
+  registerCoupon(payload: CouponCreatePayload) {
+    return this.api.createCoupon(payload).pipe(
+      tap((response) => {
+        console.log('✅ Cupom cadastrado:', response);
+      }),
+    );
   }
 
   fetchCouponId(couponId: string | number) {
-    return this.api.couponId(couponId).pipe(tap((coupon) => console.log(coupon)));
+    return this.api.couponId(couponId).pipe(
+      tap((response) => {
+        console.log('🎟️ Cupom:', response);
+      }),
+    );
   }
 
-  updateCoupon(coupon: Partial<Coupon>) {
-    return this.api.updateCoupon(coupon).pipe(tap((info) => console.log(info)));
+  updateCoupon(couponId: string | number, payload: CouponUpdatePayload) {
+    return this.api.updateCoupon(couponId, payload).pipe(
+      tap((response) => {
+        console.log('✅ Cupom atualizado:', response);
+      }),
+    );
   }
 
-  fetchAffiliates(params: AffiliateFilters & { page: number; page_size: number }) {
-    return this.api
-      .listAffiliatesWithParams(params)
-      .pipe(tap((affiliates) => console.log(affiliates)));
+  deleteCoupon(couponId: string | number) {
+    return this.api.deleteCoupon(couponId).pipe(
+      tap(() => {
+        console.log('🗑️ Cupom excluído:', couponId);
+      }),
+    );
   }
 
-  fetchAllAffiliates() {
-    return this.api.listAllAffiliates().pipe(tap((affiliates) => console.log(affiliates)));
+  // ============================================================
+  // AFILIADOS
+  // ============================================================
+
+  fetchAffiliates(
+    params: AffiliateFilters & {
+      page: number;
+      page_size: number;
+    },
+  ) {
+    return this.api.listAffiliatesWithParams(params).pipe(
+      tap((response) => {
+        console.log('🤝 Afiliados:', response);
+      }),
+    );
   }
 
   fetchAffiliateId(id: number) {
-    return this.api.affiliateId(id).pipe(tap((info) => console.log(info)));
+    return this.api.affiliateId(id).pipe(
+      tap((response) => {
+        console.log('🤝 Afiliado:', response);
+      }),
+    );
   }
+
+  registerAffiliate(payload: AffiliateCreatePayload) {
+    return this.api.createAffiliate(payload).pipe(
+      tap((response) => {
+        console.log('✅ Afiliado cadastrado:', response);
+      }),
+    );
+  }
+
+  // ============================================================
+  // FÍSICO
+  // ============================================================
 
   fetchPhysicalSummary() {
-    return this.api.physicalSummary().pipe(tap((info) => console.log(info)));
+    return this.api.physicalSummary().pipe(
+      tap((response) => {
+        console.log('📦 Resumo físico:', response);
+      }),
+    );
   }
 
-  fetchPhysicalCards(params: PhysicalFilters & { page: number; page_size: number }) {
-    return this.api.physicalCards(params).pipe(tap((info) => console.log(info)));
-  }
-
-  updatePhysycalCards(payload: Partial<PhysicalCard>) {
-    return this.api
-      .updatePhysicalCards(payload)
-      .pipe(tap((info) => console.log('Dados atualizados', info)));
+  fetchPhysicalCards(
+    params: PhysicalFilters & {
+      page: number;
+      page_size: number;
+    },
+  ) {
+    return this.api.physicalCards(params).pipe(
+      tap((response) => {
+        console.log('💳 Cartões físicos:', response);
+      }),
+    );
   }
 
   fetchPhysicalCardId(physicalId: string) {
-    return this.api.physicalId(physicalId).pipe(tap((info) => console.log(info)));
+    return this.api.physicalId(physicalId).pipe(
+      tap((response) => {
+        console.log('💳 Cartão físico:', response);
+      }),
+    );
+  }
+
+  updatePhysycalCards(payload: Pick<Partial<PhysicalCard>, 'id' | 'status' | 'shipping_code'>) {
+    return this.api.updatePhysicalCards(payload).pipe(
+      tap((response) => {
+        console.log('✅ Dados do cartão atualizados:', response);
+      }),
+    );
+  }
+
+  // ============================================================
+  // SCANS
+  // ============================================================
+
+  fetchScans(params: { page: number; page_size: number }) {
+    return this.api.listScans(params).pipe(
+      tap((response) => {
+        console.log('📱 Scans:', response);
+      }),
+    );
+  }
+
+  // ============================================================
+  // ASSIGNMENTS
+  // ============================================================
+
+  fetchAssignments(params: { page: number; page_size: number }) {
+    return this.api.listAssignments(params).pipe(
+      tap((response) => {
+        console.log('🔗 Assignments:', response);
+      }),
+    );
   }
 }

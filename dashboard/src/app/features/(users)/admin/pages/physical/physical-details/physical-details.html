@@ -1,97 +1,769 @@
-<section>
+<section class="pb-12">
   @if (isInitialLoading()) {
-    <div class="flex items-center justify-center min-h-[50vh]">
+    <div class="flex min-h-[60vh] items-center justify-center">
       <app-loader></app-loader>
     </div>
   } @else {
-    <app-dashboard-title title="Gerenciar Cartão Físico"></app-dashboard-title>
+    <div class="space-y-8">
+      <!-- ========================================================= -->
+      <!-- HEADER -->
+      <!-- ========================================================= -->
 
-    <h2 class="font-urbanist font-semibold text-[1.25rem] mb-6">Status Atual</h2>
+      <header class="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div class="min-w-0">
+          <app-dashboard-title title="Gerenciar Cartão Físico"></app-dashboard-title>
 
-    <div class="bg-[#dfdfdf] rounded-[.625rem] px-6 py-4 space-y-6">
-      <!-- User -->
-      <div class="flex justify-between items-center font-manrope">
-        <span class="text-neutral-strong">Usuário</span>
-        <p class="font-semibold">{{ physicalState().user_name }}</p>
-      </div>
+          <div class="mt-3 flex flex-wrap items-center gap-3">
+            @if (physicalState().order_code) {
+              <span class="font-manrope text-sm text-neutral-medium">
+                {{ physicalState().order_code }}
+              </span>
+            }
 
-      <!-- Status -->
-      <div class="flex justify-between items-center font-manrope">
-        <span class="text-neutral-strong">Status</span>
-        <p class="font-semibold">{{ getStatusLabel(physicalState().status || 'N/A') }}</p>
-      </div>
+            @if (physicalState().status) {
+              <span
+                class="inline-flex items-center gap-2 rounded-full border border-neutral-soft bg-white px-3 py-1.5 font-manrope text-xs font-semibold text-neutral-800 shadow-sm"
+              >
+                <span class="h-2 w-2 rounded-full bg-primary"></span>
 
-      <!-- Código de rastreio -->
-      <div class="flex justify-between items-center font-manrope">
-        <span class="text-neutral-strong">Código de Rastreio</span>
-        <p class="font-semibold">{{ physicalState().shipping_code || 'N/A' }}</p>
-      </div>
-    </div>
-
-    <hr class="mt-6 mb-8 text-neutral-extra-soft" />
-
-    <h2 class="font-urbanist font-semibold text-[1.25rem] mb-6">Atualizar Status</h2>
-
-    <form class="space-y-6" (submit)="onSubmit($event)">
-      <div>
-        <app-label>Novo status</app-label>
-        <div class="relative w-full">
-          <select
-            [formField]="physicalForm.status"
-            class="w-full h-[2.375rem] appearance-none bg-white border border-neutral-soft px-4 py-1 pr-10 rounded-lg text-sm text-neutral-800 font-manrope font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary hover:border-neutral-medium transition-all cursor-pointer"
-          >
-            <option value="">Todos os status</option>
-            <option value="in_production">Em produção</option>
-            <option value="delivered">Entregue</option>
-            <option value="shipped">Enviado</option>
-          </select>
-
-          <!-- Arrow -->
-          <span
-            class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600"
-          >
-            <ng-icon name="lucideChevronDown" size="18"></ng-icon>
-          </span>
+                {{ getStatusLabel(physicalState().status || '') }}
+              </span>
+            }
+          </div>
         </div>
-      </div>
 
-      <div class="">
-        <app-label>Código de rastreio</app-label>
-        <app-input
-          placeholder="Código"
-          sizeH="sm"
-          [formField]="physicalForm.shipping_code"
-        ></app-input>
-      </div>
-
-      <app-button type="submit" class="w-full">Atualizar dados</app-button>
-    </form>
-
-    <hr class="mt-6 mb-8 text-neutral-extra-soft" />
-
-    <div>
-      <h2 class="font-urbanist font-semibold text-[1.25rem] mb-6">Endereço de Entrega</h2>
-
-      <div>
-        <p class="font-manrope font-semibold">{{ physicalState().shipping_address }}</p>
-      </div>
-    </div>
-
-    <hr class="mt-6 mb-8 text-neutral-extra-soft" />
-
-    <div>
-      <h2 class="font-urbanist font-semibold text-[1.25rem] mb-6">Histórico do Cartão</h2>
-
-      <ul class="space-y-6">
-        @for (history of reversedHistory(); track history) {
-          <li class="flex items-center gap-x-6 font-manrope">
-            <span class="text-neutral-medium">
-              {{ history.created_at | localDate: 'long' }}
+        @if (physicalState().sku) {
+          <div
+            class="flex w-fit items-center gap-3 rounded-xl border border-neutral-soft bg-white px-4 py-3 shadow-sm"
+          >
+            <span
+              class="font-manrope text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-medium"
+            >
+              SKU
             </span>
-            <p class="font-semibold">{{ history.description }}</p>
-          </li>
+
+            <span class="font-manrope text-sm font-semibold text-neutral-900">
+              {{ physicalState().sku }}
+            </span>
+          </div>
         }
-      </ul>
+      </header>
+
+      <!-- ========================================================= -->
+      <!-- HERO -->
+      <!-- ========================================================= -->
+
+      <section
+        class="overflow-hidden rounded-2xl border border-neutral-soft bg-white shadow-[0_10px_40px_rgba(0,0,0,0.05)]"
+      >
+        <div class="grid lg:grid-cols-[19rem_minmax(0,1fr)]">
+          <div
+            class="relative flex min-h-[24rem] flex-col items-center justify-center overflow-hidden border-b border-neutral-soft bg-neutral-50 p-8 lg:border-b-0 lg:border-r"
+          >
+            <div
+              class="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/5 blur-3xl"
+            ></div>
+
+            <div
+              class="pointer-events-none absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-neutral-200/40 blur-3xl"
+            ></div>
+
+            <div
+              class="relative flex h-48 w-48 items-center justify-center rounded-2xl border border-neutral-100 bg-white p-4 shadow-[0_10px_35px_rgba(0,0,0,0.07)]"
+            >
+              @if (physicalState().qr_image) {
+                <img
+                  [src]="physicalState().qr_image"
+                  alt="QR Code do cartão"
+                  class="h-full w-full object-contain"
+                />
+              } @else {
+                <div class="flex flex-col items-center justify-center gap-2 px-5 text-center">
+                  <span class="font-manrope text-sm font-semibold text-neutral-700">
+                    QR Code indisponível
+                  </span>
+
+                  <span class="font-manrope text-xs text-neutral-medium">
+                    Nenhuma imagem foi registrada.
+                  </span>
+                </div>
+              }
+            </div>
+
+            <div class="relative mt-5 text-center">
+              <p
+                class="font-manrope text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-medium"
+              >
+                QR Code do cartão
+              </p>
+
+              @if (physicalState().qr_token) {
+                <p
+                  class="mt-2 max-w-[17rem] break-all font-mono text-[11px] leading-5 text-neutral-500"
+                >
+                  {{ physicalState().qr_token }}
+                </p>
+              }
+            </div>
+
+            @if (physicalState().qr_image) {
+              <button
+                type="button"
+                (click)="downloadQrCode()"
+                class="relative mt-5 inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 font-manrope text-sm font-semibold text-neutral-800 shadow-sm transition-all duration-200 hover:-translate-y-px hover:border-neutral-300 hover:shadow-md active:translate-y-0"
+              >
+                <ng-icon name="lucideDownload" size="17"></ng-icon>
+
+                Baixar QR Code
+              </button>
+            }
+          </div>
+
+          <div class="p-6 lg:p-9">
+            <div
+              class="flex flex-col gap-5 border-b border-neutral-soft pb-7 sm:flex-row sm:items-start sm:justify-between"
+            >
+              <div class="min-w-0">
+                <p
+                  class="font-manrope text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-medium"
+                >
+                  Cartão físico
+                </p>
+
+                <h2
+                  class="mt-2 font-urbanist text-2xl font-semibold tracking-tight text-neutral-950"
+                >
+                  {{ physicalState().card_type || 'Cartão físico' }}
+                </h2>
+
+                <p class="mt-1.5 font-manrope text-sm text-neutral-medium">
+                  {{ physicalState().plan_name || 'Plano não informado' }}
+                </p>
+              </div>
+
+              @if (physicalState().status) {
+                <div
+                  class="flex w-fit shrink-0 items-center gap-2 rounded-xl border border-neutral-soft bg-neutral-50 px-4 py-3"
+                >
+                  <span class="h-2.5 w-2.5 rounded-full bg-primary"></span>
+
+                  <div>
+                    <p
+                      class="font-manrope text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-medium"
+                    >
+                      Status atual
+                    </p>
+
+                    <p class="mt-0.5 font-manrope text-sm font-bold text-neutral-900">
+                      {{ getStatusLabel(physicalState().status || '') }}
+                    </p>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="mt-7 grid gap-x-8 gap-y-7 sm:grid-cols-2">
+              <div>
+                <p class="font-manrope text-xs font-medium text-neutral-medium">Usuário</p>
+
+                <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+                  {{ physicalState().user_name || 'N/A' }}
+                </p>
+              </div>
+
+              <div>
+                <p class="font-manrope text-xs font-medium text-neutral-medium">E-mail</p>
+
+                <p class="mt-1.5 break-all font-manrope text-sm font-semibold text-neutral-900">
+                  {{ physicalState().user_email || 'N/A' }}
+                </p>
+              </div>
+
+              <div>
+                <p class="font-manrope text-xs font-medium text-neutral-medium">Pedido</p>
+
+                <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+                  {{ physicalState().order_code || 'N/A' }}
+                </p>
+              </div>
+
+              <div>
+                <p class="font-manrope text-xs font-medium text-neutral-medium">Data do pedido</p>
+
+                <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+                  @if (physicalState().order_date) {
+                    {{ physicalState().order_date | localDate: 'long' }}
+                  } @else {
+                    N/A
+                  }
+                </p>
+              </div>
+
+              <div>
+                <p class="font-manrope text-xs font-medium text-neutral-medium">SKU</p>
+
+                <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+                  {{ physicalState().sku || 'N/A' }}
+                </p>
+              </div>
+
+              <div>
+                <p class="font-manrope text-xs font-medium text-neutral-medium">
+                  Código de rastreio
+                </p>
+
+                <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+                  {{ physicalState().shipping_code || 'Não informado' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- DELIVERY STATUS -->
+      <!-- ========================================================= -->
+
+      <section>
+        <div class="mb-5">
+          <p
+            class="font-manrope text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-medium"
+          >
+            Acompanhamento
+          </p>
+
+          <h2 class="mt-1 font-urbanist text-xl font-semibold text-neutral-950">
+            Status da entrega
+          </h2>
+        </div>
+
+        <div class="rounded-2xl border border-neutral-soft bg-white p-6 shadow-sm lg:p-7">
+          <div class="grid gap-5 sm:grid-cols-3">
+            <div class="relative rounded-xl border border-neutral-soft bg-neutral-50 p-5">
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-neutral-100"
+                >
+                  <span class="h-2.5 w-2.5 rounded-full bg-neutral-400"></span>
+                </div>
+
+                <div>
+                  <p
+                    class="font-manrope text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-medium"
+                  >
+                    Etapa 01
+                  </p>
+
+                  <p class="mt-0.5 font-manrope text-sm font-semibold text-neutral-900">
+                    Em produção
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative rounded-xl border border-neutral-soft bg-neutral-50 p-5">
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-neutral-100"
+                >
+                  <span class="h-2.5 w-2.5 rounded-full bg-neutral-400"></span>
+                </div>
+
+                <div>
+                  <p
+                    class="font-manrope text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-medium"
+                  >
+                    Etapa 02
+                  </p>
+
+                  <p class="mt-0.5 font-manrope text-sm font-semibold text-neutral-900">Enviado</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="relative rounded-xl border border-neutral-soft bg-neutral-50 p-5">
+              <div class="flex items-center gap-3">
+                <div
+                  class="flex h-9 w-9 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-neutral-100"
+                >
+                  <span class="h-2.5 w-2.5 rounded-full bg-neutral-400"></span>
+                </div>
+
+                <div>
+                  <p
+                    class="font-manrope text-[10px] font-bold uppercase tracking-[0.1em] text-neutral-medium"
+                  >
+                    Etapa 03
+                  </p>
+
+                  <p class="mt-0.5 font-manrope text-sm font-semibold text-neutral-900">Entregue</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- OPERATION -->
+      <!-- ========================================================= -->
+
+      <section>
+        <div class="mb-5">
+          <p
+            class="font-manrope text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-medium"
+          >
+            Operação
+          </p>
+
+          <h2 class="mt-1 font-urbanist text-xl font-semibold text-neutral-950">
+            Atualizar entrega
+          </h2>
+        </div>
+
+        <div class="rounded-2xl border border-neutral-soft bg-white p-6 shadow-sm lg:p-7">
+          <form class="space-y-6" (submit)="onSubmit($event)" novalidate>
+            <!-- ===================================================== -->
+            <!-- FIELDS -->
+            <!-- ===================================================== -->
+
+            <div class="grid gap-6 md:grid-cols-2">
+              <!-- STATUS -->
+
+              <div class="min-w-0">
+                <app-label>Novo status</app-label>
+
+                <div class="relative mt-1.5">
+                  <select
+                    [formField]="physicalForm.status"
+                    class="block h-[2.5rem] w-full appearance-none rounded-[.625rem] border border-neutral-200 bg-white px-4 pr-10 font-manrope text-sm font-medium text-neutral-900 outline-none transition-all hover:border-neutral-medium focus:border-primary focus:ring-4 focus:ring-primary/10"
+                    [class.border-red-400]="
+                      physicalForm.status().touched() && physicalForm.status().invalid()
+                    "
+                  >
+                    <option value="">Selecione um status</option>
+                    <option value="in_production">Em produção</option>
+                    <option value="shipped">Enviado</option>
+                    <option value="delivered">Entregue</option>
+                  </select>
+
+                  <span
+                    class="pointer-events-none absolute right-3 top-1/2 flex -translate-y-1/2 items-center text-neutral-500"
+                  >
+                    <ng-icon name="lucideChevronDown" size="18"></ng-icon>
+                  </span>
+                </div>
+
+                @if (physicalForm.status().touched() && physicalForm.status().invalid()) {
+                  <div class="mt-2 flex items-center gap-1.5">
+                    <ng-icon
+                      name="lucideTriangleAlert"
+                      size="14"
+                      class="shrink-0 text-red-500"
+                    ></ng-icon>
+
+                    <p class="font-manrope text-xs font-medium text-red-500">
+                      {{
+                        physicalForm.status().errors()[0]?.message || 'Selecione um novo status.'
+                      }}
+                    </p>
+                  </div>
+                }
+              </div>
+
+              <!-- TRACKING CODE -->
+
+              <div class="min-w-0">
+                <app-label>Código de rastreio</app-label>
+
+                <div class="mt-1.5">
+                  <app-input
+                    class="block w-full"
+                    placeholder="Ex.: BR123456789"
+                    sizeH="sm"
+                    [formField]="physicalForm.shipping_code"
+                  ></app-input>
+                </div>
+
+                @if (
+                  physicalForm.shipping_code().touched() && physicalForm.shipping_code().invalid()
+                ) {
+                  <div class="mt-2 flex items-center gap-1.5">
+                    <ng-icon
+                      name="lucideTriangleAlert"
+                      size="14"
+                      class="shrink-0 text-red-500"
+                    ></ng-icon>
+
+                    <p class="font-manrope text-xs font-medium text-red-500">
+                      {{
+                        physicalForm.shipping_code().errors()[0]?.message ||
+                          'Informe um código de rastreio válido.'
+                      }}
+                    </p>
+                  </div>
+                } @else {
+                  <p class="mt-2 font-manrope text-xs leading-4 text-neutral-medium">
+                    Obrigatório para os status Enviado e Entregue.
+                  </p>
+                }
+              </div>
+            </div>
+
+            <!-- ===================================================== -->
+            <!-- ACTION -->
+            <!-- ===================================================== -->
+
+            <div
+              class="flex flex-col gap-4 border-t border-neutral-soft pt-5 sm:flex-row sm:items-center sm:justify-between"
+            >
+              <p class="font-manrope text-xs leading-5 text-neutral-medium">
+                Atualize o status e, quando necessário, informe o código de rastreio da entrega.
+              </p>
+
+              <div class="w-full sm:w-auto">
+                <app-button
+                  type="submit"
+                  sizeH="sm"
+                  class="block w-full sm:min-w-[11rem]"
+                  [disabled]="isUpdating()"
+                >
+                  <span class="flex w-full items-center justify-center whitespace-nowrap">
+                    {{ isUpdating() ? 'Atualizando...' : 'Salvar alterações' }}
+                  </span>
+                </app-button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- CLIENT + DELIVERY -->
+      <!-- ========================================================= -->
+
+      <section>
+        <div class="mb-5">
+          <p
+            class="font-manrope text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-medium"
+          >
+            Informações
+          </p>
+
+          <h2 class="mt-1 font-urbanist text-xl font-semibold text-neutral-950">
+            Cliente e logística
+          </h2>
+        </div>
+
+        <div class="grid gap-5 lg:grid-cols-2">
+          <!-- CLIENT -->
+
+          <div class="rounded-2xl border border-neutral-soft bg-white p-6 shadow-sm">
+            <div class="flex items-start gap-4">
+              @if (physicalState().profile_image) {
+                <img
+                  [src]="physicalState().profile_image"
+                  alt="Foto do usuário"
+                  class="h-12 w-12 shrink-0 rounded-xl object-cover"
+                />
+              } @else {
+                <div
+                  class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-neutral-100 font-urbanist text-lg font-semibold text-neutral-600"
+                >
+                  {{ (physicalState().user_name || 'U').charAt(0).toUpperCase() }}
+                </div>
+              }
+
+              <div class="min-w-0">
+                <p
+                  class="font-manrope text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-medium"
+                >
+                  Cliente
+                </p>
+
+                <h3 class="mt-1 font-urbanist text-lg font-semibold text-neutral-950">
+                  {{ physicalState().user_name || 'N/A' }}
+                </h3>
+
+                <p class="mt-1 break-all font-manrope text-sm text-neutral-medium">
+                  {{ physicalState().user_email || 'N/A' }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- DELIVERY ADDRESS -->
+
+          <div class="rounded-2xl border border-neutral-soft bg-white p-6 shadow-sm">
+            <div class="flex items-start gap-4">
+              <div
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700"
+              >
+                <ng-icon name="lucideMapPin" size="19"></ng-icon>
+              </div>
+
+              <div class="min-w-0">
+                <p
+                  class="font-manrope text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-medium"
+                >
+                  Endereço de entrega
+                </p>
+
+                <p class="mt-2 font-manrope text-sm font-semibold leading-6 text-neutral-900">
+                  {{ physicalState().shipping_address || 'N/A' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- SHIPPING -->
+      <!-- ========================================================= -->
+
+      <section>
+        <div class="grid gap-5 lg:grid-cols-2">
+          <!-- TRACKING -->
+
+          <div class="rounded-2xl border border-neutral-soft bg-white p-6 shadow-sm">
+            <div class="flex items-start gap-4">
+              <div
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700"
+              >
+                <ng-icon name="lucidePackage" size="19"></ng-icon>
+              </div>
+
+              <div class="min-w-0">
+                <p
+                  class="font-manrope text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-medium"
+                >
+                  Rastreamento
+                </p>
+
+                <p class="mt-2 font-manrope text-sm font-semibold text-neutral-900">
+                  {{ physicalState().shipping_code || 'Ainda não informado' }}
+                </p>
+
+                <p class="mt-1.5 font-manrope text-xs leading-5 text-neutral-medium">
+                  @if (physicalState().delivery_preview_date) {
+                    Previsão de entrega:
+                    {{ physicalState().delivery_preview_date | localDate: 'long' }}
+                  } @else {
+                    Nenhuma previsão de entrega registrada.
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- PRODUCT -->
+
+          <div class="rounded-2xl border border-neutral-soft bg-white p-6 shadow-sm">
+            <div class="flex items-start gap-4">
+              <div
+                class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-700"
+              >
+                <ng-icon name="lucideCreditCard" size="19"></ng-icon>
+              </div>
+
+              <div class="min-w-0">
+                <p
+                  class="font-manrope text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-medium"
+                >
+                  Produto
+                </p>
+
+                <p class="mt-2 font-manrope text-sm font-semibold text-neutral-900">
+                  {{ physicalState().card_type || 'N/A' }}
+                </p>
+
+                <p class="mt-1 font-manrope text-xs text-neutral-medium">
+                  {{ physicalState().plan_name || 'Plano não informado' }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- ORDER DETAILS -->
+      <!-- ========================================================= -->
+
+      <section>
+        <div class="mb-5">
+          <p
+            class="font-manrope text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-medium"
+          >
+            Detalhes
+          </p>
+
+          <h2 class="mt-1 font-urbanist text-xl font-semibold text-neutral-950">
+            Informações do pedido
+          </h2>
+        </div>
+
+        <div
+          class="grid gap-px overflow-hidden rounded-2xl border border-neutral-soft bg-neutral-soft shadow-sm sm:grid-cols-2 lg:grid-cols-4"
+        >
+          <div class="bg-white p-5">
+            <p class="font-manrope text-xs text-neutral-medium">ID do pedido</p>
+
+            <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+              {{ physicalState().order ?? 'N/A' }}
+            </p>
+          </div>
+
+          <div class="bg-white p-5">
+            <p class="font-manrope text-xs text-neutral-medium">ID do produto</p>
+
+            <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+              {{ physicalState().product ?? 'N/A' }}
+            </p>
+          </div>
+
+          <div class="bg-white p-5">
+            <p class="font-manrope text-xs text-neutral-medium">ID do usuário</p>
+
+            <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+              {{ physicalState().user ?? 'N/A' }}
+            </p>
+          </div>
+
+          <div class="bg-white p-5">
+            <p class="font-manrope text-xs text-neutral-medium">SKU</p>
+
+            <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+              {{ physicalState().sku || 'N/A' }}
+            </p>
+          </div>
+
+          <div class="bg-white p-5 sm:col-span-2">
+            <p class="font-manrope text-xs text-neutral-medium">Criado em</p>
+
+            <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+              @if (physicalState().created_at) {
+                {{ physicalState().created_at | localDate: 'long' }}
+              } @else {
+                N/A
+              }
+            </p>
+          </div>
+
+          <div class="bg-white p-5 sm:col-span-2">
+            <p class="font-manrope text-xs text-neutral-medium">Última atualização</p>
+
+            <p class="mt-1.5 font-manrope text-sm font-semibold text-neutral-900">
+              @if (physicalState().updated_at) {
+                {{ physicalState().updated_at | localDate: 'long' }}
+              } @else {
+                N/A
+              }
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- HISTORY -->
+      <!-- ========================================================= -->
+
+      <section>
+        <div class="mb-5">
+          <p
+            class="font-manrope text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-medium"
+          >
+            Atividade
+          </p>
+
+          <h2 class="mt-1 font-urbanist text-xl font-semibold text-neutral-950">
+            Histórico do cartão
+          </h2>
+        </div>
+
+        <div class="rounded-2xl border border-neutral-soft bg-white p-6 shadow-sm lg:p-7">
+          @if (reversedHistory().length > 0) {
+            <div class="relative">
+              <div class="absolute bottom-0 left-[7px] top-0 w-px bg-neutral-200"></div>
+
+              <div class="space-y-8">
+                @for (history of reversedHistory(); track history.id) {
+                  <div class="relative flex gap-5">
+                    <div
+                      class="relative z-10 mt-1 h-4 w-4 shrink-0 rounded-full border-4 border-white bg-neutral-900 shadow-sm"
+                    ></div>
+
+                    <div class="min-w-0 flex-1">
+                      <div
+                        class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                      >
+                        <p class="font-manrope text-sm font-semibold text-neutral-900">
+                          {{ history.description }}
+                        </p>
+
+                        <span class="shrink-0 font-manrope text-xs text-neutral-medium">
+                          {{ history.created_at | localDate: 'long' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+              <div
+                class="flex h-14 w-14 items-center justify-center rounded-full bg-neutral-100 text-neutral-500"
+              >
+                <ng-icon name="lucideHistory" size="22"></ng-icon>
+              </div>
+
+              <p class="mt-4 font-manrope text-sm font-semibold text-neutral-800">
+                Nenhum histórico registrado
+              </p>
+
+              <p class="mt-1 max-w-sm font-manrope text-xs leading-5 text-neutral-medium">
+                As alterações realizadas neste cartão aparecerão automaticamente nesta linha do
+                tempo.
+              </p>
+            </div>
+          }
+        </div>
+      </section>
+
+      <!-- ========================================================= -->
+      <!-- SYSTEM INFORMATION -->
+      <!-- ========================================================= -->
+
+      <section class="rounded-2xl border border-neutral-soft bg-neutral-50 px-6 py-5">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p
+              class="font-manrope text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-medium"
+            >
+              Identificação
+            </p>
+
+            <p class="mt-1 font-mono text-xs text-neutral-500">
+              {{ physicalState().id || 'N/A' }}
+            </p>
+          </div>
+
+          <div class="text-left sm:text-right">
+            <p
+              class="font-manrope text-[10px] font-bold uppercase tracking-[0.14em] text-neutral-medium"
+            >
+              QR Token
+            </p>
+
+            <p class="mt-1 max-w-[20rem] break-all font-mono text-xs text-neutral-500 sm:ml-auto">
+              {{ physicalState().qr_token || 'N/A' }}
+            </p>
+          </div>
+        </div>
+      </section>
     </div>
   }
 </section>
