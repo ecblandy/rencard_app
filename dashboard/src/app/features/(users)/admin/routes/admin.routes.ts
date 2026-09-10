@@ -1,66 +1,80 @@
 import { Routes } from '@angular/router';
 
 export const adminRoutes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  {
+    path: '',
+    redirectTo: 'dashboard',
+    pathMatch: 'full',
+  },
+
   {
     path: 'dashboard',
-    loadComponent: () => import('../pages/dashboard/dashboard').then((m) => m.Dashboard),
     title: 'Dashboard – Rencard',
+    loadComponent: () => import('../pages/dashboard/dashboard').then((m) => m.Dashboard),
   },
 
   {
     path: 'users-and-subscriptions',
+    title: 'Usuários e Assinaturas – Rencard',
     loadComponent: () =>
       import('../pages/users-and-subscription/users-and-subscription').then(
         (m) => m.UsersAndSubscription,
       ),
-    title: 'Usuários e Assinaturas – Rencard',
   },
+
   {
     path: 'integrations',
-    loadComponent: () => import('../pages/integrations/integrations').then((m) => m.Integrations),
     title: 'Integrações – Rencard',
+    loadComponent: () => import('../pages/integrations/integrations').then((m) => m.Integrations),
   },
+
   {
     path: 'settings',
-    loadComponent: () => import('../pages/settings/settings').then((m) => m.Settings),
     title: 'Configurações – Rencard',
+    loadComponent: () => import('../pages/settings/settings').then((m) => m.Settings),
   },
+
   {
     path: 'coupons',
-    loadComponent: () => import('../pages/coupons/coupons').then((m) => m.Coupons),
     title: 'Cupons – Rencard',
+    loadComponent: () => import('../pages/coupons/coupons').then((m) => m.Coupons),
   },
+
   {
     path: 'coupons/:id',
+    title: 'Detalhes do Cupom – Rencard',
     loadComponent: () =>
       import('../pages/coupons/coupon-details/coupon-details').then((m) => m.CouponDetails),
-    title: 'Detalhes do Cupom – Rencard',
   },
 
   {
     path: 'partners',
-    loadComponent: () => import('../pages/partners/partners').then((m) => m.Partners),
     title: 'Parceiros – Rencard',
+    loadComponent: () => import('../pages/partners/partners').then((m) => m.Partners),
   },
 
   {
     path: 'partners/:id',
+    title: 'Detalhes do Parceiro – Rencard',
     loadComponent: () =>
       import('../pages/partners/partners-details/partner-details').then((m) => m.PartnerDetails),
-    title: 'Detalhes do Parceiro – Rencard',
   },
 
   {
     path: 'physical',
-    loadComponent: () => import('../pages/physical/physical').then((m) => m.Physical),
     title: 'Cartões Físicos – Rencard',
+    loadComponent: () => import('../pages/physical/physical').then((m) => m.Physical),
   },
+
   {
     path: 'physical/:id',
+    title: 'Detalhes do Cartão – Rencard',
     loadComponent: () =>
       import('../pages/physical/physical-details/physical-details').then((m) => m.PhysicalDetails),
-    title: 'Detalhes do Cartão – Rencard',
   },
-  { path: '**', redirectTo: 'dashboard' },
+
+  {
+    path: '**',
+    redirectTo: 'dashboard',
+  },
 ];

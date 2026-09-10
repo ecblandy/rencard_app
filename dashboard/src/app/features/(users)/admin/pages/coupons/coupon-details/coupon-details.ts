@@ -12,10 +12,11 @@ import { Surface } from '../../../../../../shared/components/surface/surface';
 import { SurfaceTitle } from '../../../../components/surface-title/surface-title';
 import { LocalDatePipe } from '../../../../../../shared/pipes/local-date.pipe.ts-pipe';
 import { UpdateCoupon } from '../../../components/update-coupon/update-coupon';
+import { Modal } from '../../../../../../shared/ui/modal/modal';
 
 @Component({
   selector: 'app-coupon-details',
-  imports: [UiButton, NgIcon, Loader, Surface, SurfaceTitle, LocalDatePipe, UpdateCoupon],
+  imports: [UiButton, NgIcon, Loader, Surface, SurfaceTitle, LocalDatePipe, UpdateCoupon, Modal],
   templateUrl: './coupon-details.html',
   styleUrl: './coupon-details.css',
 })
@@ -48,6 +49,13 @@ export class CouponDetails {
 
   isLoadingCoupon = signal(false);
   modalOpen = signal(false);
+
+  // ============================================================
+  // MODAL DE EXCLUSÃO
+  // ============================================================
+
+  deleteModalOpen = signal(false);
+  isDeleting = signal(false);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -207,11 +215,66 @@ export class CouponDetails {
     }).format(price / 100);
   }
 
+  // ============================================================
+  // MODAL DE EDIÇÃO
+  // ============================================================
+
   open(): void {
     this.modalOpen.set(true);
   }
 
   close(): void {
     this.modalOpen.set(false);
+  }
+
+  /**
+   * Disparado quando o UpdateCoupon salva com sucesso.
+   * Recarrega o cupom para refletir os dados atualizados na tela.
+   */
+  onCouponUpdated(): void {
+    this.loadCoupon(this.couponState().id);
+  }
+
+  // ============================================================
+  // EXCLUSÃO DE CUPOM
+  // ============================================================
+
+  openDeleteModal(): void {
+    this.deleteModalOpen.set(true);
+  }
+
+  closeDeleteModal(): void {
+    if (this.isDeleting()) {
+      return;
+    }
+
+    this.deleteModalOpen.set(false);
+  }
+
+  confirmDelete(): void {
+    const currentCoupon = this.couponState();
+
+    this.isDeleting.set(true);
+
+    this.adminServices.deleteCoupon(currentCoupon.id).subscribe({
+      next: () => {
+        toast.success('Cupom excluído', {
+          description: 'O cupom foi removido com sucesso.',
+        });
+
+        this.router.navigate(['/admin/coupons']);
+      },
+
+      error: (err) => {
+        console.error('Erro ao excluir cupom:', err);
+
+        this.isDeleting.set(false);
+        this.deleteModalOpen.set(false);
+
+        toast.error('Erro ao excluir cupom', {
+          description: 'Não foi possível excluir o cupom. Tente novamente.',
+        });
+      },
+    });
   }
 }

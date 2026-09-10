@@ -1,5 +1,4 @@
 import { inject, Injectable } from '@angular/core';
-
 import { tap } from 'rxjs';
 
 import { ApiAdmin } from '../api/api-admin';
@@ -15,7 +14,6 @@ import {
 import { AffiliateCreatePayload, AffiliateFilters } from '../../types/affiliate-model';
 
 import { PhysicalFilters } from '../../types/physical-filter';
-
 import { PhysicalCard } from '../../types/physical-card';
 
 import { DashboardFilters } from '../../types/dashboard-model';

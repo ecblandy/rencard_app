@@ -58,6 +58,7 @@ import {
   lucideMailOpen,
   lucideInfo,
   lucideMessageSquare,
+  lucideSend,
   lucideTruck,
 
   // ==========================================
@@ -213,6 +214,7 @@ export const appConfig: ApplicationConfig = {
       lucideMailOpen,
       lucideInfo,
       lucideMessageSquare,
+      lucideSend,
       lucideTruck,
 
       // ==========================================

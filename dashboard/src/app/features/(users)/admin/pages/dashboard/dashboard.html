@@ -1,3 +1,5 @@
+<!-- dashboard.html -->
+
 <section>
   <app-dashboard-title
     title="Bem-vindo ao seu painel"
@@ -10,7 +12,7 @@
 
     <!-- Metrics -->
     <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-[1.3125rem]">
-      @for (metric of metricsSignal(); track metric) {
+      @for (metric of metrics(); track metric.label) {
         <app-surface classes="flex bg-white flex-col gap-[.5rem] border border-neutral-soft">
           <div
             class="flex w-[2.5rem] h-[2.5rem] rounded-[.5rem] items-center justify-center bg-neutral-extra-soft"
@@ -18,13 +20,19 @@
             <ng-icon [name]="metric.icon"></ng-icon>
           </div>
 
-          <span class="font-manrope font-semibold text-neutral-soft">{{ metric.label }}</span>
+          <span class="font-manrope font-semibold text-neutral-soft">
+            {{ metric.label }}
+          </span>
 
-          <strong class="font-urbanist font-bold text-[2.5rem]">{{
-            metric.isPrice ? formatPrice(metric.value) : metric.value
-          }}</strong>
+          <strong class="font-urbanist font-bold text-[2.5rem]">
+            {{ metric.isPrice ? formatPrice(metric.value) : metric.value }}
+          </strong>
 
-          <p class="font-manrope text-neutral-soft">{{ metric.description }}</p>
+          @if (metric.description) {
+            <p class="font-manrope text-neutral-soft">
+              {{ metric.description }}
+            </p>
+          }
         </app-surface>
       }
     </div>
@@ -39,7 +47,8 @@
         <app-surface-title
           title="Evolução anual de assinaturas e novos usuários"
         ></app-surface-title>
-        <app-multi-axis-chart [data]="dashboardData()"></app-multi-axis-chart>
+
+        <app-multi-axis-chart [data]="dashboardData() ?? {}"></app-multi-axis-chart>
       </app-surface>
     </div>
 
@@ -62,7 +71,7 @@
 
       <!-- Metric Cards -->
       <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-[1.3125rem]">
-        @for (metric of couponsMetric(); track metric) {
+        @for (metric of couponMetrics(); track metric.label) {
           <app-surface classes="flex flex-col gap-[.5rem] border border-neutral-soft">
             <div
               class="flex w-[2.5rem] h-[2.5rem] rounded-[.5rem] items-center justify-center bg-neutral-extra-soft"
@@ -70,13 +79,19 @@
               <ng-icon [name]="metric.icon"></ng-icon>
             </div>
 
-            <span class="font-manrope font-semibold text-neutral-soft">{{ metric.label }}</span>
+            <span class="font-manrope font-semibold text-neutral-soft">
+              {{ metric.label }}
+            </span>
 
-            <strong class="font-urbanist font-bold text-[2.5rem]">{{
-              metric.isPrice ? formatPrice(metric.value) : metric.value
-            }}</strong>
+            <strong class="font-urbanist font-bold text-[2.5rem]">
+              {{ metric.isPrice ? formatPrice(metric.value) : metric.value }}
+            </strong>
 
-            <p class="font-manrope text-neutral-soft">{{ metric.description }}</p>
+            @if (metric.description) {
+              <p class="font-manrope text-neutral-soft">
+                {{ metric.description }}
+              </p>
+            }
           </app-surface>
         }
       </div>
@@ -87,14 +102,13 @@
           Cupons recentes
         </h3>
 
-        <!-- Recent Coupons List -->
         <div class="flex flex-col gap-y-7">
           @if (recentCoupons().length === 0) {
             <p class="font-manrope text-neutral-soft text-center">
               Nenhum cupom recente encontrado.
             </p>
           } @else {
-            @for (coupon of recentCoupons(); track coupon) {
+            @for (coupon of recentCoupons(); track coupon.code) {
               <app-surface
                 classes="bg-white flex justify-between items-center border border-neutral-soft"
               >
@@ -104,19 +118,26 @@
                   >
                     <ng-icon name="bootstrapTicketPerforated"></ng-icon>
                   </div>
+
                   <div>
-                    <strong class="font-urbanist text-[20px]">{{ coupon.code }}</strong>
-                    <p class="font-manrope text-neutral-soft">{{ coupon.influencer }}</p>
+                    <strong class="font-urbanist text-[20px]">
+                      {{ coupon.code }}
+                    </strong>
+
+                    <p class="font-manrope text-neutral-soft">
+                      {{ coupon.influencer || 'Sem influenciador' }}
+                    </p>
                   </div>
                 </div>
 
                 <div class="flex flex-col gap-2">
                   <span class="font-manrope font-semibold text-neutral-soft">
-                    {{ coupon.uses }}</span
-                  >
-                  <span class="font-semibold font-urbanist text-[20px]">{{
-                    formatPrice(coupon.revenueGenerated)
-                  }}</span>
+                    {{ coupon.uses }}
+                  </span>
+
+                  <span class="font-semibold font-urbanist text-[20px]">
+                    {{ formatPrice(coupon.revenueGenerated) }}
+                  </span>
                 </div>
               </app-surface>
             }

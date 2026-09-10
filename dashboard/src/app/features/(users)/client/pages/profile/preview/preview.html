@@ -9,7 +9,7 @@
   [bgColor]="appearance.settings().background_color"
 >
   <!-- ===================================================== -->
-  <!-- PROFILE IMAGE -->
+  <!-- PROFILE -->
   <!-- ===================================================== -->
 
   <img
@@ -18,20 +18,12 @@
     class="rounded-[.625rem] object-cover w-[6.375rem] h-[6.375rem]"
   />
 
-  <!-- ===================================================== -->
-  <!-- NAME -->
-  <!-- ===================================================== -->
-
   <h2
     class="font-urbanist font-bold text-[.9375rem] mt-[1.125rem]"
     [style.color]="appearance.settings().text_primary"
   >
     {{ profile().display_name || profile().owner_name || 'Nome não definido' }}
   </h2>
-
-  <!-- ===================================================== -->
-  <!-- SUBTITLE -->
-  <!-- ===================================================== -->
 
   <h3
     class="font-manrope text-[.75rem] w-full text-center break-words"
@@ -45,17 +37,26 @@
   <!-- ===================================================== -->
 
   @if (profile().resume?.enabled && profile().resume?.file) {
-    <div
-      class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border-2 rounded-[.875rem] mt-[1.875rem] cursor-pointer transition-all duration-200 font-manrope font-semibold text-[.875rem] hover:scale-105 shadow-sm hover:shadow-md mb-[1.75rem]"
-      [style.background-color]="appearance.settings().button_bg_primary"
-      [style.border-color]="appearance.settings().button_bg_primary"
-      [style.color]="appearance.settings().button_text_primary"
-      (click)="downloadResume()"
-    >
-      <ng-icon name="lucideDownload" size="16"></ng-icon>
+    <section class="w-full mt-[1.875rem]">
+      <h3
+        class="font-urbanist font-semibold text-[1rem] mb-[1rem]"
+        [style.color]="appearance.settings().text_primary"
+      >
+        Anexo
+      </h3>
 
-      <p>Baixar anexo</p>
-    </div>
+      <div
+        class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border-2 rounded-[.875rem] cursor-pointer transition-all duration-200 font-manrope font-semibold text-[.875rem] hover:scale-105 shadow-sm hover:shadow-md"
+        [style.background-color]="appearance.settings().button_bg_primary"
+        [style.border-color]="appearance.settings().button_bg_primary"
+        [style.color]="appearance.settings().button_text_primary"
+        (click)="downloadResume()"
+      >
+        <ng-icon name="lucideDownload" size="16"></ng-icon>
+
+        <p>Baixar anexo</p>
+      </div>
+    </section>
   }
 
   <!-- ===================================================== -->
@@ -63,32 +64,41 @@
   <!-- ===================================================== -->
 
   @if (profile().music?.enabled && profile().music?.value) {
-    @if (isSpotifyUserProfile(profile().music!.value)) {
-      <div
-        class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] rounded-[.875rem] cursor-pointer transition-all duration-200 hover:scale-105 my-[1.875rem]"
-        [style.background-color]="appearance.settings().button_bg_secondary"
-        [style.color]="appearance.settings().button_text_secondary"
-        (click)="openSpotify()"
+    <section class="w-full mt-[1.875rem]">
+      <h3
+        class="font-urbanist font-semibold text-[1rem] mb-[1rem]"
+        [style.color]="appearance.settings().text_primary"
       >
-        <ng-icon name="simpleSpotify" size="18"></ng-icon>
+        Música
+      </h3>
 
-        <p class="font-urbanist font-medium">Minha conta</p>
-      </div>
-    } @else {
-      <iframe
-        data-testid="embed-iframe"
-        style="border-radius: 12px"
-        [src]="spotifyEmbedUrl()"
-        width="100%"
-        height="152"
-        frameBorder="0"
-        scrolling="no"
-        allowfullscreen
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy"
-        class="my-[1.875rem] block max-w-full"
-      ></iframe>
-    }
+      @if (isSpotifyUserProfile(profile().music!.value)) {
+        <div
+          class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] rounded-[.875rem] cursor-pointer transition-all duration-200 hover:scale-105"
+          [style.background-color]="appearance.settings().button_bg_secondary"
+          [style.color]="appearance.settings().button_text_secondary"
+          (click)="openSpotify()"
+        >
+          <ng-icon name="simpleSpotify" size="18"></ng-icon>
+
+          <p class="font-urbanist font-medium">Minha conta</p>
+        </div>
+      } @else {
+        <iframe
+          data-testid="embed-iframe"
+          style="border-radius: 12px"
+          [src]="spotifyEmbedUrl()"
+          width="100%"
+          height="152"
+          frameBorder="0"
+          scrolling="no"
+          allowfullscreen
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+          class="block max-w-full"
+        ></iframe>
+      }
+    </section>
   }
 
   <!-- ===================================================== -->
@@ -96,12 +106,12 @@
   <!-- ===================================================== -->
 
   @if (profile().portfolio_images.enabled && profile().portfolio_images.images.length > 0) {
-    <div class="w-full mt-[1.875rem]">
+    <section class="w-full mt-[1.875rem]">
       <h3
         class="font-urbanist font-semibold text-[1rem] mb-[1rem]"
         [style.color]="appearance.settings().text_primary"
       >
-        Portfolio
+        Portfólio
       </h3>
 
       <ul class="grid grid-cols-3 gap-[.75rem] w-full">
@@ -109,7 +119,7 @@
           <li class="aspect-square rounded-[.625rem] overflow-hidden bg-neutral-200">
             <img
               [src]="image.image"
-              [alt]="image.caption || 'Portfolio'"
+              [alt]="image.caption || 'Portfólio'"
               (load)="onImageLoad(image.id)"
               class="w-full h-full object-cover transition-opacity duration-300"
               [class.opacity-0]="!isImageLoaded(image.id)"
@@ -118,7 +128,7 @@
           </li>
         }
       </ul>
-    </div>
+    </section>
   }
 
   <!-- ===================================================== -->
@@ -126,7 +136,7 @@
   <!-- ===================================================== -->
 
   @if (profile().portfolio_videos.enabled && profile().portfolio_videos.videos.length > 0) {
-    <div class="w-full mt-[1.875rem]">
+    <section class="w-full mt-[1.875rem]">
       <h3
         class="font-urbanist font-semibold text-[1rem] mb-[1rem]"
         [style.color]="appearance.settings().text_primary"
@@ -178,72 +188,204 @@
           </li>
         }
       </ul>
-    </div>
+    </section>
   }
 
   <!-- ===================================================== -->
   <!-- SOCIALS -->
   <!-- ===================================================== -->
 
-  <ul class="flex flex-col w-full space-y-[1.125rem] my-[1.875rem]">
-    @for (socials of getFilteredSocials(); track socials.value) {
-      @if (socials.enabled) {
-        <li
-          class="flex items-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] rounded-[.875rem] cursor-pointer transition-all duration-200 hover:scale-105"
-          [style.background-color]="appearance.settings().button_bg_secondary"
-          [style.color]="appearance.settings().button_text_secondary"
-          (click)="openSocial(socials.value)"
-        >
-          <ng-icon [name]="socials.icon"></ng-icon>
+  @if (getFilteredSocials().length > 0) {
+    <section class="w-full mt-[1.875rem]">
+      <h3
+        class="font-urbanist font-semibold text-[1rem] mb-[1rem]"
+        [style.color]="appearance.settings().text_primary"
+      >
+        Redes sociais
+      </h3>
 
-          <p class="font-urbanist font-medium">
-            {{ getSocialUsername(socials.value) }}
-          </p>
-        </li>
-      }
-    }
-  </ul>
+      <ul class="flex flex-col w-full space-y-[1.125rem]">
+        @for (socials of getFilteredSocials(); track socials.value) {
+          @if (socials.enabled) {
+            <li
+              class="flex items-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] rounded-[.875rem] cursor-pointer transition-all duration-200 hover:scale-105"
+              [style.background-color]="appearance.settings().button_bg_secondary"
+              [style.color]="appearance.settings().button_text_secondary"
+              (click)="openSocial(socials.value)"
+            >
+              <ng-icon [name]="socials.icon"></ng-icon>
+
+              <p class="font-urbanist font-medium">
+                {{ getSocialUsername(socials.value) }}
+              </p>
+            </li>
+          }
+        }
+      </ul>
+    </section>
+  }
+
+  <!-- ===================================================== -->
+  <!-- FORMULÁRIO DE CONTATO -->
+  <!-- ===================================================== -->
+
+  @if (profile().contact_enabled) {
+    <section
+      class="w-full mt-[1.875rem]"
+      [style.--contact-primary]="appearance.settings().text_primary"
+      [style.--contact-secondary]="appearance.settings().text_secondary"
+    >
+      <h3
+        class="font-urbanist font-semibold text-[1rem] mb-[1rem]"
+        [style.color]="appearance.settings().text_primary"
+      >
+        Entre em contato
+      </h3>
+
+      <div class="flex flex-col gap-[.75rem] w-full">
+        <!-- ================================================= -->
+        <!-- NOME COMPLETO -->
+        <!-- ================================================= -->
+
+        <input
+          type="text"
+          placeholder="Nome completo"
+          readonly
+          class="contact-input w-full h-[2.75rem] px-[.875rem] rounded-[.75rem] border bg-transparent outline-none font-manrope text-[.875rem] transition-all duration-200 cursor-default"
+          [style.color]="appearance.settings().text_primary"
+          [style.border-color]="appearance.settings().text_secondary"
+        />
+
+        <!-- ================================================= -->
+        <!-- E-MAIL -->
+        <!-- ================================================= -->
+
+        <input
+          type="email"
+          placeholder="E-mail"
+          readonly
+          class="contact-input w-full h-[2.75rem] px-[.875rem] rounded-[.75rem] border bg-transparent outline-none font-manrope text-[.875rem] transition-all duration-200 cursor-default"
+          [style.color]="appearance.settings().text_primary"
+          [style.border-color]="appearance.settings().text_secondary"
+        />
+
+        <!-- ================================================= -->
+        <!-- TELEFONE -->
+        <!-- ================================================= -->
+
+        <input
+          type="tel"
+          placeholder="Telefone"
+          readonly
+          class="contact-input w-full h-[2.75rem] px-[.875rem] rounded-[.75rem] border bg-transparent outline-none font-manrope text-[.875rem] transition-all duration-200 cursor-default"
+          [style.color]="appearance.settings().text_primary"
+          [style.border-color]="appearance.settings().text_secondary"
+        />
+
+        <!-- ================================================= -->
+        <!-- MENSAGEM -->
+        <!-- ================================================= -->
+
+        <textarea
+          placeholder="Mensagem"
+          rows="4"
+          readonly
+          class="contact-input w-full min-h-[7rem] px-[.875rem] py-[.75rem] rounded-[.75rem] border bg-transparent outline-none resize-none font-manrope text-[.875rem] transition-all duration-200 cursor-default"
+          [style.color]="appearance.settings().text_primary"
+          [style.border-color]="appearance.settings().text_secondary"
+        ></textarea>
+
+        <!-- ================================================= -->
+        <!-- LOCALIZAÇÃO -->
+        <!-- ================================================= -->
+
+        <input
+          type="text"
+          placeholder="Localização"
+          readonly
+          class="contact-input w-full h-[2.75rem] px-[.875rem] rounded-[.75rem] border bg-transparent outline-none font-manrope text-[.875rem] transition-all duration-200 cursor-default"
+          [style.color]="appearance.settings().text_primary"
+          [style.border-color]="appearance.settings().text_secondary"
+        />
+
+        <!-- ================================================= -->
+        <!-- BOTÃO ENVIAR -->
+        <!-- ================================================= -->
+
+        <button
+          type="button"
+          class="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold transition-opacity hover:opacity-90 cursor-pointer"
+          [style.background-color]="appearance.settings().button_bg_primary"
+          [style.color]="appearance.settings().button_text_primary"
+        >
+          <ng-icon name="lucideSend" size="18"></ng-icon>
+
+          Enviar mensagem
+        </button>
+      </div>
+    </section>
+  }
 
   <!-- ===================================================== -->
   <!-- EMAIL -->
   <!-- ===================================================== -->
 
   @if (getEmailSocial(); as emailSocial) {
-    <div
-      class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border-2 rounded-[.875rem] cursor-pointer transition-all duration-200 font-manrope font-semibold text-[.875rem] hover:scale-105 shadow-sm hover:shadow-md mb-[1.75rem]"
-      [style.background-color]="appearance.settings().button_bg_primary"
-      [style.border-color]="appearance.settings().button_bg_primary"
-      [style.color]="appearance.settings().button_text_primary"
-      (click)="openEmailSocial(emailSocial.value)"
-    >
-      <ng-icon [name]="emailSocial.icon" size="18"></ng-icon>
+    <section class="w-full mt-[1.875rem]">
+      <h3
+        class="font-urbanist font-semibold text-[1rem] mb-[1rem]"
+        [style.color]="appearance.settings().text_primary"
+      >
+        E-mail
+      </h3>
 
-      <p>Enviar email</p>
-    </div>
+      <div
+        class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] border-2 rounded-[.875rem] cursor-pointer transition-all duration-200 font-manrope font-semibold text-[.875rem] hover:scale-105 shadow-sm hover:shadow-md"
+        [style.background-color]="appearance.settings().button_bg_primary"
+        [style.border-color]="appearance.settings().button_bg_primary"
+        [style.color]="appearance.settings().button_text_primary"
+        (click)="openEmailSocial(emailSocial.value)"
+      >
+        <ng-icon name="lucideMailOpen" size="18"></ng-icon>
+
+        <p>Enviar email</p>
+      </div>
+    </section>
   }
 
   <!-- ===================================================== -->
   <!-- BUTTONS -->
   <!-- ===================================================== -->
 
-  <ul class="w-full space-y-[1rem]">
-    @for (button of profile().buttons; track button.id) {
-      @if (button.enabled) {
-        <li
-          class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] rounded-[.875rem] cursor-pointer transition-all duration-200 hover:scale-105"
-          [style.background-color]="appearance.settings().button_bg_primary"
-          [style.color]="appearance.settings().button_text_primary"
-          (click)="handleButton(button)"
-        >
-          <ng-icon [name]="getButtonIcon(button.type)" size="16"></ng-icon>
+  @if (profile().buttons.some(button => button.enabled)) {
+    <section class="w-full mt-[1.875rem]">
+      <h3
+        class="font-urbanist font-semibold text-[1rem] mb-[1rem]"
+        [style.color]="appearance.settings().text_primary"
+      >
+        Links
+      </h3>
 
-          <p class="font-manrope font-semibold text-[.875rem]">
-            {{ getButtonLabel(button.type) }}
-          </p>
-        </li>
-      }
-    }
-  </ul>
+      <ul class="w-full space-y-[1rem]">
+        @for (button of profile().buttons; track button.id) {
+          @if (button.enabled) {
+            <li
+              class="flex items-center justify-center gap-x-[.75rem] w-full h-[2.375rem] px-[.75rem] rounded-[.875rem] cursor-pointer transition-all duration-200 hover:scale-105"
+              [style.background-color]="appearance.settings().button_bg_primary"
+              [style.color]="appearance.settings().button_text_primary"
+              (click)="handleButton(button)"
+            >
+              <ng-icon [name]="getButtonIcon(button.type)" size="16"></ng-icon>
+
+              <p class="font-manrope font-semibold text-[.875rem]">
+                {{ getButtonLabel(button.type) }}
+              </p>
+            </li>
+          }
+        }
+      </ul>
+    </section>
+  }
 
   <!-- ===================================================== -->
   <!-- FOOTER -->
@@ -254,6 +396,7 @@
     [style.color]="appearance.settings().text_secondary"
   >
     Feito com
+
     <a
       class="font-bold hover:underline"
       [style.color]="appearance.settings().text_primary"

@@ -1,0 +1,12 @@
+.contact-input::placeholder {
+  color: var(--contact-secondary);
+  opacity: 1;
+}
+
+.contact-input:focus {
+  border-color: var(--contact-primary);
+}
+
+.contact-input:focus::placeholder {
+  opacity: 0.7;
+}

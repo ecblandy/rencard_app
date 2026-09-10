@@ -1,5 +1,9 @@
+// dashboard-model.ts
+
+export type DashboardPeriod = 'today' | '7d' | '30d';
+
 export interface DashboardFilters {
-  period: string;
+  period: DashboardPeriod;
 }
 
 export interface DashboardMetrics {

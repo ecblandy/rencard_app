@@ -33,21 +33,13 @@ import {
 
 interface UpdateCouponFormModel {
   code: string;
-
   discount_type: CouponDiscountType | '';
-
   discount_value: number | null;
-
   starts_at: string;
-
   ends_at: string;
-
   applicable_to: CouponApplicableTo | '';
-
   commission_type: CouponCommissionType;
-
   commission_value: number | null;
-
   affiliate: string;
 }
 
@@ -61,13 +53,10 @@ export class UpdateCoupon {
   private readonly adminServices = inject(AdminService);
 
   isOpen = input(false);
-
   couponId = input<string | number | null>(null);
-
   coupon = input<Coupon | null>(null);
 
   close = output<void>();
-
   couponUpdated = output<void>();
 
   affiliatesData = signal<Affiliate[]>([]);
@@ -119,7 +108,6 @@ export class UpdateCoupon {
 
     validate(schemaPath.discount_value, ({ value, valueOf }) => {
       const type = valueOf(schemaPath.discount_type);
-
       const rawValue = value();
 
       if (!type) {
@@ -167,7 +155,6 @@ export class UpdateCoupon {
 
     validate(schemaPath.commission_type, ({ value, valueOf }) => {
       const type = value();
-
       const affiliate = valueOf(schemaPath.affiliate);
 
       const hasAffiliate = typeof affiliate === 'string' && affiliate.trim() !== '';
@@ -184,9 +171,7 @@ export class UpdateCoupon {
 
     validate(schemaPath.commission_value, ({ value, valueOf }) => {
       const type = valueOf(schemaPath.commission_type);
-
       const affiliate = valueOf(schemaPath.affiliate);
-
       const rawValue = value();
 
       const hasAffiliate = typeof affiliate === 'string' && affiliate.trim() !== '';
@@ -266,17 +251,29 @@ export class UpdateCoupon {
 
     validate(schemaPath.ends_at, ({ value, valueOf }) => {
       const startsAt = valueOf(schemaPath.starts_at);
-
       const endsAt = value();
 
       if (!startsAt || !endsAt) {
         return undefined;
       }
 
-      if (new Date(endsAt) <= new Date(startsAt)) {
+      /*
+       * A data de término pode ser igual à data de início.
+       *
+       * VÁLIDO:
+       * 11/09 -> 11/09
+       *
+       * VÁLIDO:
+       * 11/09 -> 12/09
+       *
+       * INVÁLIDO:
+       * 12/09 -> 11/09
+       */
+
+      if (endsAt < startsAt) {
         return {
           kind: 'date-invalid',
-          message: 'A data de término deve ser posterior à data de início.',
+          message: 'A data de término não pode ser anterior à data de início.',
         };
       }
 
@@ -371,8 +368,6 @@ export class UpdateCoupon {
       })
       .subscribe({
         next: (response) => {
-          console.log('🤝 Afiliados:', response);
-
           this.affiliatesData.set(response.results);
         },
 
@@ -385,6 +380,63 @@ export class UpdateCoupon {
   }
 
   // ============================================================
+  // NORMALIZAR APLICÁVEL A
+  // ============================================================
+
+  private normalizeApplicableTo(
+    value: CouponApplicableTo | string | null | undefined,
+  ): CouponApplicableTo | '' {
+    if (!value) {
+      return '';
+    }
+
+    /*
+     * A API pode retornar o valor interno:
+     *
+     * subscription
+     * physical
+     * card
+     * tag
+     * both
+     *
+     * ou pode retornar o label:
+     *
+     * Assinatura
+     * Onboarding completo
+     * Somente cartão
+     * Somente tag
+     * Assinatura e onboarding
+     *
+     * O formulário precisa sempre trabalhar com o valor interno.
+     */
+
+    switch (String(value).trim().toLowerCase()) {
+      case 'subscription':
+      case 'assinatura':
+        return 'subscription';
+
+      case 'physical':
+      case 'onboarding completo':
+        return 'physical';
+
+      case 'card':
+      case 'somente cartão':
+        return 'card';
+
+      case 'tag':
+      case 'somente tag':
+        return 'tag';
+
+      case 'both':
+      case 'assinatura e onboarding':
+        return 'both';
+
+      default:
+        return '';
+    }
+  }
+
+  // ============================================================
   // PREENCHER FORMULÁRIO
   // ============================================================
 
@@ -393,6 +445,8 @@ export class UpdateCoupon {
       coupon.affiliate !== null && coupon.affiliate !== undefined ? String(coupon.affiliate) : '';
 
     const commissionType = coupon.commission_type ?? 'none';
+
+    const applicableTo = this.normalizeApplicableTo(coupon.applicable_to);
 
     this.couponState.set({
       code: coupon.code ?? '',
@@ -405,7 +459,7 @@ export class UpdateCoupon {
 
       ends_at: this.formatDateForInput(coupon.ends_at),
 
-      applicable_to: coupon.applicable_to ?? '',
+      applicable_to: applicableTo,
 
       commission_type: commissionType,
 
@@ -431,6 +485,20 @@ export class UpdateCoupon {
     if (!value) {
       return '';
     }
+
+    /*
+     * A API já pode enviar:
+     *
+     * 2026-09-11
+     *
+     * ou:
+     *
+     * 2026-09-11T00:00:00-03:00
+     *
+     * O input type="date" precisa somente de:
+     *
+     * YYYY-MM-DD
+     */
 
     if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
       return value;

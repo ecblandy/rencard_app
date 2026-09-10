@@ -35,6 +35,10 @@
             {{ couponState().status === 'active' ? 'Pausar' : 'Ativar' }}
           </app-button>
         }
+
+        <app-button type="button" variant="outline" (click)="openDeleteModal()">
+          Excluir
+        </app-button>
       </div>
     </div>
 
@@ -201,5 +205,45 @@
   }
 
   <!-- Modal de atualização -->
-  <app-update-coupon [isOpen]="modalOpen()" (close)="close()"></app-update-coupon>
+  <app-update-coupon
+    [isOpen]="modalOpen()"
+    [couponId]="couponState().id"
+    [coupon]="couponState()"
+    (close)="close()"
+    (couponUpdated)="onCouponUpdated()"
+  ></app-update-coupon>
+
+  <!-- Modal de confirmação de exclusão -->
+  <app-modal [isOpen]="deleteModalOpen()" (close)="closeDeleteModal()">
+    <div class="bg-white rounded-[.625rem] w-100 max-w-[calc(100vw-2rem)] p-6 max-sm:p-4">
+      <h2 class="font-urbanist text-xl font-bold">Excluir cupom</h2>
+
+      <p class="mt-2 font-manrope text-sm text-neutral-medium">
+        Tem certeza que deseja excluir o cupom
+        <span class="font-semibold text-black">{{ couponState().code }}</span
+        >? Essa ação é permanente e não pode ser desfeita.
+      </p>
+
+      <div class="mt-6 flex items-center gap-4 max-sm:flex-col">
+        <app-button
+          type="button"
+          variant="outline"
+          class="flex-1 w-full"
+          [disabled]="isDeleting()"
+          (click)="closeDeleteModal()"
+        >
+          Cancelar
+        </app-button>
+
+        <app-button
+          type="button"
+          class="flex-1 w-full"
+          [disabled]="isDeleting()"
+          (click)="confirmDelete()"
+        >
+          {{ isDeleting() ? 'Excluindo...' : 'Excluir' }}
+        </app-button>
+      </div>
+    </div>
+  </app-modal>
 </section>

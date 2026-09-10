@@ -1,9 +1,25 @@
-import { FileText, MessageCircle, Globe, UserRound } from "lucide-react";
+import {
+  FileText,
+  MessageCircle,
+  Globe,
+  UserRound,
+  MailOpen,
+  Instagram,
+  Linkedin,
+  Facebook,
+  Youtube,
+  Twitter,
+  Github,
+  ExternalLink,
+} from "lucide-react";
+
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
+import type { CSSProperties } from "react";
 
 import SpotifyEmbed from "./components/spotify-embed";
+import ContactForm from "./components/contact-form";
 
 type Props = {
   params: Promise<{ user: string }>;
@@ -65,12 +81,15 @@ export interface PortfolioImage {
   id: number;
   image: string;
   title?: string;
+  caption?: string;
+  created_at?: string;
 }
 
 export interface PortfolioVideo {
   id: number;
-  url: string;
-  title?: string;
+  profile: number;
+  youtube_url: string;
+  created_at: string;
 }
 
 export interface Music {
@@ -80,6 +99,10 @@ export interface Music {
   type: "spotify";
   value: string;
 }
+
+/* ========================================================= */
+/* SOCIAL LABEL */
+/* ========================================================= */
 
 function getSocialLabel(url: string) {
   try {
@@ -97,8 +120,42 @@ function getSocialLabel(url: string) {
   }
 }
 
+/* ========================================================= */
+/* SOCIAL ICON */
+/* ========================================================= */
+
+function getSocialIcon(type: string) {
+  switch (type.toLowerCase()) {
+    case "instagram":
+      return Instagram;
+
+    case "linkedin":
+      return Linkedin;
+
+    case "facebook":
+      return Facebook;
+
+    case "youtube":
+      return Youtube;
+
+    case "twitter":
+    case "x":
+      return Twitter;
+
+    case "github":
+      return Github;
+
+    default:
+      return Globe;
+  }
+}
+
+/* ========================================================= */
+/* BUTTON DATA */
+/* ========================================================= */
+
 function getButtonData(button: ProfileButton) {
-  switch (button.type) {
+  switch (button.type.toLowerCase()) {
     case "whatsapp":
       return {
         icon: MessageCircle,
@@ -115,28 +172,133 @@ function getButtonData(button: ProfileButton) {
 
     default:
       return {
-        icon: Globe,
+        icon: ExternalLink,
         label: button.type,
         href: button.value,
       };
   }
 }
 
+/* ========================================================= */
+/* SPOTIFY */
+/* ========================================================= */
+
 function getSpotifyEmbedUrl(url: string) {
   try {
     const parsedUrl = new URL(url);
 
-    const match = parsedUrl.pathname.match(/\/track\/([^/]+)/);
+    const hostname = parsedUrl.hostname.toLowerCase();
+
+    if (hostname !== "open.spotify.com") {
+      return null;
+    }
+
+    const pathname = parsedUrl.pathname;
+
+    const match = pathname.match(
+      /^\/(?:intl-[a-z]{2}\/)?(track|album|playlist|episode|show)\/([^/]+)/,
+    );
 
     if (!match) {
       return null;
     }
 
-    return `https://open.spotify.com/embed/track/${match[1]}`;
+    const [, type, id] = match;
+
+    return `https://open.spotify.com/embed/${type}/${id}`;
   } catch {
     return null;
   }
 }
+
+/* ========================================================= */
+/* YOUTUBE */
+/* ========================================================= */
+
+function getYouTubeEmbedUrl(url: string) {
+  try {
+    const parsedUrl = new URL(url);
+
+    let videoId: string | null = null;
+
+    const hostname = parsedUrl.hostname.toLowerCase();
+
+    if (hostname === "youtu.be") {
+      videoId = parsedUrl.pathname.slice(1).split("/")[0];
+    }
+
+    if (
+      hostname === "youtube.com" ||
+      hostname === "www.youtube.com" ||
+      hostname === "m.youtube.com"
+    ) {
+      if (parsedUrl.pathname === "/watch") {
+        videoId = parsedUrl.searchParams.get("v");
+      }
+
+      if (parsedUrl.pathname.startsWith("/shorts/")) {
+        videoId = parsedUrl.pathname.split("/shorts/")[1]?.split("/")[0];
+      }
+
+      if (parsedUrl.pathname.startsWith("/embed/")) {
+        videoId = parsedUrl.pathname.split("/embed/")[1]?.split("/")[0];
+      }
+
+      if (parsedUrl.pathname.startsWith("/live/")) {
+        videoId = parsedUrl.pathname.split("/live/")[1]?.split("/")[0];
+      }
+    }
+
+    if (!videoId) {
+      return null;
+    }
+
+    return `https://www.youtube.com/embed/${videoId}`;
+  } catch {
+    return null;
+  }
+}
+
+/* ========================================================= */
+/* EMAIL */
+/* ========================================================= */
+
+function getEmailHref(value: string) {
+  const email = value.trim();
+
+  if (email.toLowerCase().startsWith("mailto:")) {
+    return email;
+  }
+
+  return `mailto:${email}`;
+}
+
+/* ========================================================= */
+/* SECTION TITLE */
+/* ========================================================= */
+
+function SectionTitle({
+  children,
+  color,
+}: {
+  children: React.ReactNode;
+  color: string;
+}) {
+  return (
+    <h2
+      className="mb-[1rem] text-[1rem] font-semibold"
+      style={{
+        color,
+      }}
+    >
+      {children}
+    </h2>
+  );
+}
+
+/* ========================================================= */
+/* UNAVAILABLE */
+/* ========================================================= */
 
 function ProfileUnavailable({
   privateProfile = false,
@@ -171,12 +333,22 @@ function ProfileUnavailable({
   );
 }
 
+/* ========================================================= */
+/* PAGE */
+/* ========================================================= */
+
 export default async function UserProfilePage({ params }: Props) {
   const { user: username } = await params;
 
+  const backendUrl = process.env.BACKEND_URL;
+
+  if (!backendUrl) {
+    return <ProfileUnavailable />;
+  }
+
   const url = new URL(
     `profiles/public/${encodeURIComponent(username)}/`,
-    process.env.BACKEND_URL,
+    backendUrl.endsWith("/") ? backendUrl : `${backendUrl}/`,
   );
 
   let response: Response;
@@ -197,8 +369,7 @@ export default async function UserProfilePage({ params }: Props) {
 
   try {
     responseToJson = await response.json();
-
-    console.log("Public profile:", responseToJson);
+    console.log(responseToJson);
   } catch {
     return <ProfileUnavailable />;
   }
@@ -207,15 +378,64 @@ export default async function UserProfilePage({ params }: Props) {
     return <ProfileUnavailable privateProfile />;
   }
 
-  const spotifyUrl = getSpotifyEmbedUrl(responseToJson.music?.value ?? "");
+  /* ========================================================= */
+  /* COLORS */
+  /* ========================================================= */
+
+  const primaryButtonColor = responseToJson.button_bg_primary || "#171717";
+
+  const secondaryButtonColor = responseToJson.button_bg_secondary || "#F5F5F5";
+
+  const primaryButtonText = responseToJson.button_text_primary || "#FFFFFF";
+
+  const secondaryButtonText = responseToJson.button_text_secondary || "#171717";
+
+  const primaryText = responseToJson.text_primary || "#171717";
+
+  const secondaryText = responseToJson.text_secondary || "#737373";
+
+  const backgroundColor = responseToJson.background_color || "#FFFFFF";
+
+  /* ========================================================= */
+  /* SPOTIFY */
+  /* ========================================================= */
+
+  const spotifyValue = responseToJson.music?.enabled
+    ? responseToJson.music.value
+    : "";
+
+  const spotifyUrl = getSpotifyEmbedUrl(spotifyValue);
+
+  /* ========================================================= */
+  /* GOOGLE ANALYTICS */
+  /* ========================================================= */
 
   const googleAnalyticsId = responseToJson.google_analytics_id?.trim();
 
+  /* ========================================================= */
+  /* EMAIL */
+  /* ========================================================= */
+
+  const emailSocial = responseToJson.social_links.find(
+    (social) => social.enabled && social.type.toLowerCase() === "email",
+  );
+
+  /* ========================================================= */
+  /* SOCIALS */
+  /* ========================================================= */
+
+  const socialLinks = responseToJson.social_links.filter(
+    (social) =>
+      social.enabled &&
+      social.type.toLowerCase() !== "email" &&
+      social.type.toLowerCase() !== "spotify",
+  );
+
   return (
     <>
-      {/* ========================================================= */}
+      {/* ===================================================== */}
       {/* GOOGLE ANALYTICS */}
-      {/* ========================================================= */}
+      {/* ===================================================== */}
 
       {googleAnalyticsId && (
         <>
@@ -242,14 +462,44 @@ export default async function UserProfilePage({ params }: Props) {
         </>
       )}
 
-      <main className="min-h-screen bg-[#F8F9FB] px-4 py-10">
+      {/* ===================================================== */}
+      {/* PAGE */}
+      {/* ===================================================== */}
+
+      <main
+        className="min-h-screen px-4 py-10"
+        style={
+          {
+            backgroundColor,
+            "--contact-primary": primaryButtonColor,
+            "--contact-secondary": secondaryText,
+          } as CSSProperties
+        }
+      >
         <div className="mx-auto w-full max-w-md">
-          <span className="mb-6 block text-center text-xl font-semibold uppercase text-neutral-500">
+          {/* ================================================= */}
+          {/* PROFILE */}
+          {/* ================================================= */}
+
+          <span
+            className="mb-6 block text-center text-xl font-semibold uppercase"
+            style={{
+              color: secondaryText,
+            }}
+          >
             Perfil
           </span>
 
-          <div className="flex flex-col items-center rounded-3xl bg-white px-6 py-8 shadow-sm">
-            {/* Foto */}
+          <div
+            className="flex flex-col items-center rounded-3xl px-6 py-8 shadow-sm"
+            style={{
+              backgroundColor,
+            }}
+          >
+            {/* =============================================== */}
+            {/* PROFILE INFORMATION */}
+            {/* =============================================== */}
+
             <Image
               src={
                 responseToJson.profile_image || "/images/user-placeholder.svg"
@@ -261,95 +511,273 @@ export default async function UserProfilePage({ params }: Props) {
               }
               width={102}
               height={102}
-              className="rounded-xl object-cover"
+              className="h-[6.375rem] w-[6.375rem] rounded-[.625rem] object-cover"
             />
 
-            {/* Nome */}
-            <h1 className="mt-5 text-lg font-bold text-neutral-900">
+            <h1
+              className="mt-[1.125rem] text-[.9375rem] font-bold"
+              style={{
+                color: primaryText,
+              }}
+            >
               {responseToJson.display_name ||
                 responseToJson.owner_name ||
-                "username"}
+                "Nome não definido"}
             </h1>
 
-            {/* Subtitulo */}
-            <p className="mt-1 text-center text-sm text-neutral-500">
-              {responseToJson.subtitle || "Nenhum subtítulo definido"}
+            <p
+              className="w-full break-words text-center text-[.75rem]"
+              style={{
+                color: secondaryText,
+              }}
+            >
+              {responseToJson.subtitle || "Sem subtítulo"}
             </p>
 
-            {/* Currículo */}
+            {/* =============================================== */}
+            {/* ANEXO */}
+            {/* =============================================== */}
+
             {responseToJson.resume?.enabled && responseToJson.resume?.file && (
-              <a
-                href={responseToJson.resume.file}
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-8 flex h-11 w-full items-center justify-center gap-3 rounded-2xl border border-neutral-300 transition hover:bg-neutral-100"
-              >
-                <FileText className="h-5 w-5" />
+              <section className="mt-[1.875rem] w-full">
+                <SectionTitle color={primaryText}>Anexo</SectionTitle>
 
-                <span className="font-semibold">Baixar currículo</span>
-              </a>
+                <a
+                  href={responseToJson.resume.file}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-[2.375rem] w-full items-center justify-center gap-x-[.75rem] rounded-[.875rem] border-2 px-[.75rem] text-[.875rem] font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md"
+                  style={{
+                    backgroundColor: primaryButtonColor,
+                    borderColor: primaryButtonColor,
+                    color: primaryButtonText,
+                  }}
+                >
+                  <FileText size={16} />
+
+                  <span>Baixar anexo</span>
+                </a>
+              </section>
             )}
 
-            {/* Spotify */}
-            {responseToJson.music?.enabled && spotifyUrl && (
-              <SpotifyEmbed url={spotifyUrl} />
-            )}
+            {/* =============================================== */}
+            {/* MUSIC / SPOTIFY */}
+            {/* =============================================== */}
 
-            {/* Redes sociais */}
-            <ul className="w-full space-y-4">
-              {responseToJson.social_links
-                .filter((social) => social.enabled)
-                .map((social) => {
-                  const label = getSocialLabel(social.value);
+            {responseToJson.music?.enabled &&
+              responseToJson.music?.value &&
+              spotifyUrl && (
+                <section className="mt-[1.875rem] w-full">
+                  <SectionTitle color={primaryText}>Música</SectionTitle>
 
-                  return (
-                    <li
-                      key={social.id}
-                      className="flex h-11 items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-100 px-4"
-                    >
-                      <Globe className="h-5 w-5 text-neutral-600" />
+                  <SpotifyEmbed url={spotifyUrl} />
+                </section>
+              )}
 
-                      <a
-                        href={social.value}
-                        className="font-medium"
-                        target="_blank"
-                        rel="noopener noreferrer"
+            {/* =============================================== */}
+            {/* PORTFOLIO IMAGENS */}
+            {/* =============================================== */}
+
+            {responseToJson.portfolio_images_enabled &&
+              responseToJson.portfolio_images?.length > 0 && (
+                <section className="mt-[1.875rem] w-full">
+                  <SectionTitle color={primaryText}>Portfólio</SectionTitle>
+
+                  <div className="grid grid-cols-3 gap-3">
+                    {responseToJson.portfolio_images.map((item) => (
+                      <div
+                        key={item.id}
+                        className="aspect-square overflow-hidden rounded-xl bg-neutral-200"
                       >
-                        {label}
-                      </a>
-                    </li>
-                  );
-                })}
-            </ul>
+                        <Image
+                          src={item.image}
+                          alt={item.caption || item.title || "Portfólio"}
+                          width={300}
+                          height={300}
+                          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
 
-            {/* Botões */}
-            <div className="mt-6 w-full space-y-4">
-              {responseToJson.buttons
-                .filter((button) => button.enabled)
-                .map((button) => {
-                  const { icon: Icon, label, href } = getButtonData(button);
+            {/* =============================================== */}
+            {/* PORTFOLIO VÍDEOS */}
+            {/* =============================================== */}
 
-                  return (
-                    <a
-                      key={button.id}
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex h-11 w-full items-center justify-center gap-3 rounded-2xl bg-neutral-900 text-white transition hover:bg-neutral-800"
-                    >
-                      <Icon className="h-5 w-5" />
+            {responseToJson.portfolio_videos_enabled &&
+              responseToJson.portfolio_videos?.length > 0 && (
+                <section className="mt-[1.875rem] w-full">
+                  <SectionTitle color={primaryText}>Vídeos</SectionTitle>
 
-                      <span className="font-semibold">{label}</span>
-                    </a>
-                  );
-                })}
-            </div>
+                  <div className="flex w-full flex-col gap-3">
+                    {responseToJson.portfolio_videos.map((video) => {
+                      const embedUrl = getYouTubeEmbedUrl(video.youtube_url);
 
-            {/* Footer */}
-            <p className="mt-8 text-sm text-neutral-500">
+                      if (!embedUrl) {
+                        return null;
+                      }
+
+                      return (
+                        <div
+                          key={video.id}
+                          className="aspect-video w-full overflow-hidden rounded-xl bg-neutral-200"
+                        >
+                          <iframe
+                            src={embedUrl}
+                            title="Vídeo do YouTube"
+                            className="h-full w-full"
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+            {/* =============================================== */}
+            {/* SOCIALS */}
+            {/* =============================================== */}
+
+            {socialLinks.length > 0 && (
+              <section className="mt-[1.875rem] w-full">
+                <SectionTitle color={primaryText}>Redes sociais</SectionTitle>
+
+                <ul className="flex w-full flex-col space-y-[1.125rem]">
+                  {socialLinks.map((social) => {
+                    const label = getSocialLabel(social.value);
+                    const Icon = getSocialIcon(social.type);
+
+                    return (
+                      <li key={social.id}>
+                        <a
+                          href={social.value}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex h-[2.375rem] w-full items-center gap-x-[.75rem] rounded-[.875rem] px-[.75rem] transition-all duration-200 hover:scale-105"
+                          style={{
+                            backgroundColor: secondaryButtonColor,
+                            color: secondaryButtonText,
+                          }}
+                        >
+                          <Icon size={18} />
+
+                          <span className="font-medium">{label}</span>
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            )}
+
+            {/* =============================================== */}
+            {/* CONTACT FORM */}
+            {/* =============================================== */}
+
+            {responseToJson.contact_enabled && (
+              <section className="mt-[1.875rem] w-full">
+                <SectionTitle color={primaryText}>
+                  Entre em contato
+                </SectionTitle>
+
+                <ContactForm
+                  customUrl={responseToJson.custom_url}
+                  primaryColor={primaryButtonColor}
+                  primaryTextColor={primaryText}
+                  secondaryTextColor={secondaryText}
+                />
+              </section>
+            )}
+
+            {/* =============================================== */}
+            {/* EMAIL */}
+            {/* =============================================== */}
+
+            {emailSocial && (
+              <section className="mt-[1.875rem] w-full">
+                <SectionTitle color={primaryText}>E-mail</SectionTitle>
+
+                <a
+                  href={getEmailHref(emailSocial.value)}
+                  className="flex h-[2.375rem] w-full items-center justify-center gap-x-[.75rem] rounded-[.875rem] border-2 px-[.75rem] text-[.875rem] font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md"
+                  style={{
+                    backgroundColor: primaryButtonColor,
+                    borderColor: primaryButtonColor,
+                    color: primaryButtonText,
+                  }}
+                >
+                  <MailOpen size={18} />
+
+                  <span>Enviar email</span>
+                </a>
+              </section>
+            )}
+
+            {/* =============================================== */}
+            {/* BUTTONS */}
+            {/* =============================================== */}
+
+            {responseToJson.buttons.some((button) => button.enabled) && (
+              <section className="mt-[1.875rem] w-full">
+                <SectionTitle color={primaryText}>Links</SectionTitle>
+
+                <ul className="w-full space-y-[1rem]">
+                  {responseToJson.buttons
+                    .filter((button) => button.enabled)
+                    .map((button) => {
+                      const { icon: Icon, label, href } = getButtonData(button);
+
+                      return (
+                        <li key={button.id}>
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex h-[2.375rem] w-full items-center justify-center gap-x-[.75rem] rounded-[.875rem] px-[.75rem] transition-all duration-200 hover:scale-105"
+                            style={{
+                              backgroundColor: primaryButtonColor,
+                              color: primaryButtonText,
+                            }}
+                          >
+                            <Icon size={16} />
+
+                            <span className="text-[.875rem] font-semibold">
+                              {label}
+                            </span>
+                          </a>
+                        </li>
+                      );
+                    })}
+                </ul>
+              </section>
+            )}
+
+            {/* =============================================== */}
+            {/* FOOTER */}
+            {/* =============================================== */}
+
+            <p
+              className="mt-[1.875rem] font-medium"
+              style={{
+                color: secondaryText,
+              }}
+            >
               Feito com{" "}
-              <span className="font-bold text-neutral-900">Rencard</span>
+              <Link
+                href="/"
+                className="font-bold hover:underline"
+                style={{
+                  color: primaryText,
+                }}
+              >
+                Rencard
+              </Link>
             </p>
           </div>
         </div>

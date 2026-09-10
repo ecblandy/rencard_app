@@ -1,11 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-
 import { HttpClient, HttpParams } from '@angular/common/http';
 
 import { environment } from '../../../../../../environments/environments';
 
 import { User } from '../../../../../shared/types/user.model';
-
 import { PaginatedResponse } from '../../../../../shared/types/pagionation';
 
 import { SubscriptionSummary } from '../../types/subscription-summary';
@@ -21,9 +19,7 @@ import {
 import { UserFilters } from '../../types/user-filter';
 
 import { PhysicalSummary } from '../../types/physical-summary';
-
 import { PhysicalCard } from '../../types/physical-card';
-
 import { PhysicalFilters } from '../../types/physical-filter';
 
 import {
@@ -117,30 +113,18 @@ export class ApiAdmin {
     });
   }
 
-  /**
-   * GET /coupons/admin/coupons/<id>/
-   */
   couponId(couponId: string | number) {
     return this.http.get<Coupon>(`${this.baseUrl}/coupons/admin/coupons/${couponId}/`);
   }
 
-  /**
-   * POST /coupons/admin/coupons/
-   */
   createCoupon(payload: CouponCreatePayload) {
     return this.http.post<Coupon>(`${this.baseUrl}/coupons/admin/coupons/`, payload);
   }
 
-  /**
-   * PATCH /coupons/admin/coupons/<id>/
-   */
   updateCoupon(couponId: string | number, payload: CouponUpdatePayload) {
     return this.http.patch<Coupon>(`${this.baseUrl}/coupons/admin/coupons/${couponId}/`, payload);
   }
 
-  /**
-   * DELETE /coupons/admin/coupons/<id>/
-   */
   deleteCoupon(couponId: string | number) {
     return this.http.delete<void>(`${this.baseUrl}/coupons/admin/coupons/${couponId}/`);
   }
@@ -168,16 +152,10 @@ export class ApiAdmin {
     });
   }
 
-  /**
-   * GET /users/affiliates/<id>/
-   */
   affiliateId(id: number) {
     return this.http.get<Affiliate>(`${this.baseUrl}/users/affiliates/${id}/`);
   }
 
-  /**
-   * POST /users/affiliates/
-   */
   createAffiliate(payload: AffiliateCreatePayload) {
     return this.http.post<AffiliateCreateResponse>(`${this.baseUrl}/users/affiliates/`, payload);
   }
@@ -186,24 +164,10 @@ export class ApiAdmin {
   // FÍSICO
   // ============================================================
 
-  /**
-   * GET /physical/admin/cards/summary/
-   */
   physicalSummary() {
     return this.http.get<PhysicalSummary>(`${this.baseUrl}/physical/admin/cards/summary/`);
   }
 
-  /**
-   * GET /physical/admin/cards/
-   *
-   * Filtros:
-   * - q
-   * - status
-   *
-   * Paginação:
-   * - page
-   * - page_size
-   */
   physicalCards(
     params: PhysicalFilters & {
       page: number;
@@ -227,25 +191,10 @@ export class ApiAdmin {
     });
   }
 
-  /**
-   * GET /physical/admin/cards/<id>/
-   */
   physicalId(physicalId: string) {
     return this.http.get<PhysicalCard>(`${this.baseUrl}/physical/admin/cards/${physicalId}/`);
   }
 
-  /**
-   * PATCH /physical/admin/cards/<id>/
-   *
-   * A API aceita atualização parcial.
-   *
-   * Payload documentado:
-   *
-   * {
-   *   "status": "in_production",
-   *   "shipping_code": "BR123456789"
-   * }
-   */
   updatePhysicalCards(payload: Pick<Partial<PhysicalCard>, 'id' | 'status' | 'shipping_code'>) {
     if (!payload.id) {
       throw new Error('ID do cartão é obrigatório para atualização.');
@@ -274,9 +223,6 @@ export class ApiAdmin {
   // SCANS
   // ============================================================
 
-  /**
-   * GET /physical/admin/scans/
-   */
   listScans(params: { page: number; page_size: number }) {
     const httpParams = new HttpParams()
       .set('page', params.page.toString())
@@ -291,9 +237,6 @@ export class ApiAdmin {
   // ASSIGNMENTS
   // ============================================================
 
-  /**
-   * GET /physical/admin/assignments/
-   */
   listAssignments(params: { page: number; page_size: number }) {
     const httpParams = new HttpParams()
       .set('page', params.page.toString())

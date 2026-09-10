@@ -79,6 +79,8 @@
           <!-- DATAS -->
 
           <div class="grid grid-cols-2 max-sm:grid-cols-1 gap-3">
+            <!-- DATA DE INÍCIO -->
+
             <div>
               <app-label>Data de início</app-label>
 
@@ -98,6 +100,8 @@
                 </ul>
               }
             </div>
+
+            <!-- DATA DE TÉRMINO -->
 
             <div>
               <app-label>Data de término</app-label>
@@ -166,8 +170,6 @@
               <div>
                 <app-label>Valor do desconto</app-label>
 
-                <!-- PERCENTUAL -->
-
                 @if (couponForm.discount_type().value() === 'percent') {
                   <app-input
                     placeholder="Ex: 10"
@@ -177,11 +179,7 @@
                     [formField]="couponForm.discount_value"
                     [allowNegativeNumbers]="false"
                   ></app-input>
-                }
-
-                <!-- VALOR FIXO -->
-
-                @else if (couponForm.discount_type().value() === 'amount') {
+                } @else if (couponForm.discount_type().value() === 'amount') {
                   <app-input
                     placeholder="Ex: 10,00"
                     mask="separator.2"
@@ -326,8 +324,6 @@
             <div>
               <app-label>Valor da comissão</app-label>
 
-              <!-- PERCENTUAL -->
-
               @if (couponForm.commission_type().value() === 'percent') {
                 <app-input
                   placeholder="Ex: 15"
@@ -337,11 +333,7 @@
                   [formField]="couponForm.commission_value"
                   [allowNegativeNumbers]="false"
                 ></app-input>
-              }
-
-              <!-- VALOR FIXO -->
-
-              @else if (couponForm.commission_type().value() === 'amount') {
+              } @else if (couponForm.commission_type().value() === 'amount') {
                 <app-input
                   placeholder="Ex: 20,00"
                   mask="separator.2"
