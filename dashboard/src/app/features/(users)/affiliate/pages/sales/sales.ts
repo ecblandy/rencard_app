@@ -82,7 +82,7 @@ export class Sales {
     this.currentPage.set(1);
   }
 
-  formatPriceFromCents(cents: number) {
+  formatPrice(cents: number) {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
