@@ -5,6 +5,7 @@ import { X, Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Button from "../ui/button";
 import clsx from "clsx";
+import Link from "next/link";
 
 const navLinks = [
   { label: "Produtos", href: "#products" },
@@ -76,7 +77,7 @@ export default function HamburgerMenu() {
               <div className="h-px w-full bg-neutral-200" />
 
               <div className="flex flex-col gap-3">
-                <a href="/app/auth/signin" onClick={() => setOpen(false)}>
+                <Link href="/app/auth/signin" onClick={() => setOpen(false)}>
                   <Button
                     sizeH="sm"
                     variant="custom"
@@ -84,12 +85,12 @@ export default function HamburgerMenu() {
                   >
                     Entrar
                   </Button>
-                </a>
-                <a href="/app/auth/signup" onClick={() => setOpen(false)}>
+                </Link>
+                <Link href="/app/auth/signup" onClick={() => setOpen(false)}>
                   <Button sizeH="sm" variant="default" className="w-full">
                     Cadastrar
                   </Button>
-                </a>
+                </Link>
               </div>
             </motion.div>
           </>
