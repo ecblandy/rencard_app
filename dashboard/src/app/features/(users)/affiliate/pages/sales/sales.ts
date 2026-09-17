@@ -82,11 +82,11 @@ export class Sales {
     this.currentPage.set(1);
   }
 
-  formatPrice(price: number) {
+  formatPriceFromCents(cents: number) {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
-    }).format(price);
+    }).format(cents / 100);
   }
 
   getStatusStyles(status: string): { bgColor: string; textColor: string } {

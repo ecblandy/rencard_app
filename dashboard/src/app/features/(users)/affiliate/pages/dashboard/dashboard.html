@@ -1,1 +1,159 @@
-<p>dashboard works!</p>
+<section>
+  <div class="flex flex-col gap-[2.5625rem]">
+    <!-- =================================================== -->
+    <!-- CABEÇALHO                                            -->
+    <!-- =================================================== -->
+
+    <div class="flex flex-col gap-2">
+      <h1
+        class="font-urbanist font-bold text-[2rem] leading-tight text-black max-sm:text-[1.75rem]"
+      >
+        Bem-vindo ao seu painel
+      </h1>
+
+      <p class="font-manrope text-neutral-soft">
+        Acompanhe os principais indicadores do seu desempenho como afiliado.
+      </p>
+    </div>
+
+    <!-- =================================================== -->
+    <!-- ERRO                                                  -->
+    <!-- =================================================== -->
+
+    @if (error()) {
+      <div class="flex flex-col gap-1 rounded-[0.75rem] border border-neutral-soft bg-white p-5">
+        <strong class="font-manrope font-semibold text-black">
+          Não foi possível carregar o dashboard
+        </strong>
+
+        <span class="font-manrope text-sm text-neutral-soft">
+          {{ error() }}
+        </span>
+      </div>
+    }
+
+    <!-- =================================================== -->
+    <!-- LOADING                                               -->
+    <!-- =================================================== -->
+
+    @if (loading()) {
+      <div class="grid grid-cols-2 gap-[1.3125rem] max-sm:grid-cols-1">
+        <div
+          class="flex min-h-[13rem] animate-pulse flex-col gap-[0.75rem] rounded-[0.75rem] border border-neutral-soft bg-white p-6"
+        >
+          <div class="h-[2.5rem] w-[2.5rem] rounded-[0.5rem] bg-neutral-100"></div>
+
+          <div class="mt-1 h-4 w-36 rounded bg-neutral-100"></div>
+
+          <div class="h-10 w-20 rounded bg-neutral-100"></div>
+
+          <div class="h-4 w-64 max-w-full rounded bg-neutral-100"></div>
+        </div>
+
+        <div
+          class="flex min-h-[13rem] animate-pulse flex-col gap-[0.75rem] rounded-[0.75rem] border border-neutral-soft bg-white p-6"
+        >
+          <div class="h-[2.5rem] w-[2.5rem] rounded-[0.5rem] bg-neutral-100"></div>
+
+          <div class="mt-1 h-4 w-36 rounded bg-neutral-100"></div>
+
+          <div class="h-10 w-32 rounded bg-neutral-100"></div>
+
+          <div class="h-4 w-64 max-w-full rounded bg-neutral-100"></div>
+        </div>
+      </div>
+    }
+
+    <!-- =================================================== -->
+    <!-- DASHBOARD                                             -->
+    <!-- =================================================== -->
+
+    @if (!loading() && dashboard(); as data) {
+      <!-- ================================================ -->
+      <!-- MÉTRICAS                                           -->
+      <!-- ================================================ -->
+
+      <div class="grid grid-cols-2 gap-[1.3125rem] max-sm:grid-cols-1">
+        <!-- ============================================== -->
+        <!-- VENDAS CONFIRMADAS                              -->
+        <!-- ============================================== -->
+
+        <div
+          class="flex flex-col gap-[0.5rem] rounded-[0.75rem] border border-neutral-soft bg-white p-6"
+        >
+          <div
+            class="flex h-[2.5rem] w-[2.5rem] items-center justify-center rounded-[0.5rem] bg-neutral-extra-soft"
+          >
+            <span class="font-urbanist text-lg font-bold"> # </span>
+          </div>
+
+          <span class="font-manrope font-semibold text-neutral-soft"> Vendas confirmadas </span>
+
+          <strong class="font-urbanist text-[2.5rem] font-bold leading-none">
+            {{ data.confirmed_sales_count }}
+          </strong>
+
+          <p class="font-manrope text-sm text-neutral-soft">
+            Total de vendas confirmadas através do seu trabalho como afiliado.
+          </p>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- COMISSÃO DISPONÍVEL                             -->
+        <!-- ============================================== -->
+
+        <div
+          class="flex flex-col gap-[0.5rem] rounded-[0.75rem] border border-neutral-soft bg-white p-6"
+        >
+          <div
+            class="flex h-[2.5rem] w-[2.5rem] items-center justify-center rounded-[0.5rem] bg-neutral-extra-soft"
+          >
+            <span class="font-urbanist text-base font-bold"> R$ </span>
+          </div>
+
+          <span class="font-manrope font-semibold text-neutral-soft"> Comissão disponível </span>
+
+          <strong class="font-urbanist text-[2.5rem] font-bold leading-none">
+            {{ formatPrice(data.available_commission_cents) }}
+          </strong>
+
+          <p class="font-manrope text-sm text-neutral-soft">
+            Valor disponível de comissão pelas vendas confirmadas.
+          </p>
+        </div>
+      </div>
+
+      <!-- ================================================ -->
+      <!-- RESUMO                                             -->
+      <!-- ================================================ -->
+
+      <div class="flex flex-col gap-5 rounded-[0.75rem] border border-neutral-soft bg-white p-6">
+        <div class="flex flex-col gap-1">
+          <h2 class="font-urbanist text-xl font-bold text-black">Seu desempenho</h2>
+
+          <p class="font-manrope text-sm text-neutral-soft">
+            Acompanhe de forma rápida os resultados gerados pelo seu trabalho como afiliado.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6 border-t border-neutral-100 pt-5 max-sm:grid-cols-1">
+          <div class="flex flex-col gap-1">
+            <span class="font-manrope text-sm text-neutral-soft"> Vendas confirmadas </span>
+
+            <strong class="font-urbanist text-xl font-bold text-black">
+              {{ data.confirmed_sales_count }}
+            </strong>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <span class="font-manrope text-sm text-neutral-soft"> Comissão disponível </span>
+
+            <strong class="font-urbanist text-xl font-bold text-black">
+              {{ formatPrice(data.available_commission_cents) }}
+            </strong>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</section>

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
+
 import { ApiAffiliate } from '../api/api-affiliate';
-import { tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -8,11 +8,24 @@ import { tap } from 'rxjs';
 export class AffiliateServices {
   private readonly api = inject(ApiAffiliate);
 
-  fetchSales(params: { page: number; page_size: number }) {
-    return this.api.sales(params).pipe(tap((info) => console.log(info)));
+  /**
+   * Dashboard
+   */
+  fetchDashboard() {
+    return this.api.dashboard();
   }
 
+  /**
+   * Cupons
+   */
   fetchCoupons(params: { page: number; page_size: number }) {
-    return this.api.coupons(params).pipe(tap((info) => console.log(info)));
+    return this.api.coupons(params);
+  }
+
+  /**
+   * Vendas
+   */
+  fetchSales(params: { page: number; page_size: number }) {
+    return this.api.sales(params);
   }
 }

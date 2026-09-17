@@ -1,5 +1,7 @@
 <app-modal [isOpen]="isOpen()" (close)="onClose()">
-  <div class="w-full max-w-[50rem] max-h-[92vh] overflow-hidden bg-white rounded-2xl shadow-xl">
+  <div
+    class="w-full max-w-[50rem] max-h-[92vh] overflow-hidden bg-white rounded-2xl shadow-xl flex flex-col"
+  >
     <!-- Header -->
     <div class="px-6 py-6 md:px-8 md:py-7 border-b border-neutral-100">
       <div class="space-y-1.5">
@@ -17,11 +19,27 @@
           Preencha os dados abaixo para cadastrar um novo afiliado e configurar seus dados de
           recebimento.
         </p>
+
+        <!-- Informação importante -->
+        <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+          <p class="font-manrope text-sm leading-5 text-amber-900">
+            <strong>⚠️ Informação importante:</strong>
+            todo afiliado criado receberá inicialmente a senha
+            <strong>Senha@123!</strong>. Após entrar na plataforma e concluir a verificação do
+            e-mail, é <strong>obrigatório alterar essa senha</strong>.
+          </p>
+
+          <p class="mt-2 font-manrope text-sm leading-5 text-amber-900">
+            <strong
+              >Confirme se o e-mail informado está correto antes de cadastrar o parceiro</strong
+            >, pois pode não ser possível realizar a troca do e-mail posteriormente.
+          </p>
+        </div>
       </div>
     </div>
 
     <!-- Content -->
-    <div class="max-h-[calc(92vh-9.5rem)] overflow-y-auto">
+    <div class="flex-1 min-h-0 overflow-y-auto">
       <form novalidate (submit)="onSubmit($event)" class="px-6 py-7 md:px-8 md:py-8">
         <div class="space-y-10">
           <!-- ================================================== -->
