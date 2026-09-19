@@ -2,6 +2,10 @@ import { UserRole } from '../../types/user-role';
 
 export interface SidebarLink {
   label: string;
+  /**
+   * Caminho relativo ao base href da aplicação (/app/).
+   * NÃO incluir o prefixo "/app" aqui: o Angular já o adiciona sozinho.
+   */
   path: string;
   icon?: string;
 }
@@ -10,37 +14,37 @@ export const SIDEBAR_LINKS: Record<UserRole, SidebarLink[]> = {
   admin: [
     {
       label: 'Dashboard',
-      path: '/app/admin/dashboard',
+      path: '/admin/dashboard',
       icon: 'lucideLayoutDashboard',
     },
     {
       label: 'Cupons',
-      path: '/app/admin/coupons',
+      path: '/admin/coupons',
       icon: 'bootstrapTicketPerforated',
     },
     {
       label: 'Cartões físicos',
-      path: '/app/admin/physical',
+      path: '/admin/physical',
       icon: 'monoCreditCard',
     },
     {
       label: 'Clientes',
-      path: '/app/admin/users-and-subscriptions',
+      path: '/admin/users-and-subscriptions',
       icon: 'lucideUser',
     },
     {
       label: 'Parceiros',
-      path: '/app/admin/partners',
+      path: '/admin/partners',
       icon: 'remixSuitcase2Line',
     },
     {
       label: 'Integrações',
-      path: '/app/admin/integrations',
+      path: '/admin/integrations',
       icon: 'bootstrapLink',
     },
     {
       label: 'Configurações',
-      path: '/app/admin/settings',
+      path: '/admin/settings',
       icon: 'lucideSettings',
     },
   ],
@@ -48,27 +52,27 @@ export const SIDEBAR_LINKS: Record<UserRole, SidebarLink[]> = {
   affiliate: [
     {
       label: 'Dashboard',
-      path: '/app/affiliate/dashboard',
+      path: '/affiliate/dashboard',
       icon: 'lucideLayoutDashboard',
     },
     {
       label: 'Pagamentos',
-      path: '/app/affiliate/payment',
+      path: '/affiliate/payment',
       icon: 'monoCreditCard',
     },
     {
       label: 'Minhas vendas',
-      path: '/app/affiliate/sales',
+      path: '/affiliate/sales',
       icon: 'monoCreditCard',
     },
     {
       label: 'Cupons',
-      path: '/app/affiliate/coupons',
+      path: '/affiliate/coupons',
       icon: 'monoCreditCard',
     },
     {
       label: 'Configurações',
-      path: '/app/affiliate/settings',
+      path: '/affiliate/settings',
       icon: 'lucideSettings',
     },
   ],
@@ -76,37 +80,37 @@ export const SIDEBAR_LINKS: Record<UserRole, SidebarLink[]> = {
   client: [
     {
       label: 'Dashboard',
-      path: '/app/client/dashboard',
+      path: '/client/dashboard',
       icon: 'lucideLayoutDashboard',
     },
     {
       label: 'Assinatura',
-      path: '/app/client/billing/preview',
+      path: '/client/billing/preview',
       icon: 'lucideCrown',
     },
     {
       label: 'Perfil',
-      path: '/app/client/profile',
+      path: '/client/profile',
       icon: 'lucideUser',
     },
     {
       label: 'Códigos & Apps',
-      path: '/app/client/apps',
+      path: '/client/apps',
       icon: 'lucideQrCode',
     },
     {
       label: 'Configurações',
-      path: '/app/client/settings',
+      path: '/client/settings',
       icon: 'lucideSettings',
     },
     {
       label: 'Suporte',
-      path: '/app/client/support',
+      path: '/client/support',
       icon: 'bootstrapHeadset',
     },
     {
       label: 'Entrega',
-      path: '/app/client/delivery-information',
+      path: '/client/delivery-information',
       icon: 'lucideTruck',
     },
   ],

@@ -4,7 +4,8 @@
   <main
     class="bg-[linear-gradient(270deg,#FBFBFB_35%,#F5F5F5_100%)] p-[3.75rem] max-lg:p-[1.25rem] max-w-[1200px] w-full ml-[14.8125rem] max-lg:ml-0 flex-1"
   >
-    <app-header class="sm:hidden" [links]="links()"></app-header>
+    <!-- lg:hidden acompanha o max-lg:hidden da sidebar: sem faixa sem navegação entre 640px e 1023px -->
+    <app-header class="lg:hidden" [links]="links()"></app-header>
 
     <router-outlet></router-outlet>
   </main>

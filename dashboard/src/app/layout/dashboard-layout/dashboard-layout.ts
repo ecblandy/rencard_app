@@ -1,3 +1,4 @@
+import { Location } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
@@ -15,6 +16,7 @@ import { SIDEBAR_LINKS } from '../../shared/components/sidebar/sidebar.config';
 })
 export class DashboardLayout {
   private readonly authState = inject(AuthState);
+  private readonly location = inject(Location);
 
   links = computed<MenuLink[]>(() => {
     const user = this.authState.user();
@@ -27,7 +29,10 @@ export class DashboardLayout {
 
     return sidebarLinks.map((link) => ({
       label: link.label,
-      href: link.path,
+      // O header usa <a href> (requisição real ao servidor), então o href
+      // precisa incluir o base href (/app/). prepareExternalUrl faz isso e
+      // continua correto se o base href mudar (ex.: ng serve com base "/").
+      href: this.location.prepareExternalUrl(link.path),
     }));
   });
 }
