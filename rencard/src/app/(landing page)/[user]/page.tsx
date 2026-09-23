@@ -22,6 +22,7 @@ import type { CSSProperties } from "react";
 
 import SpotifyEmbed from "./components/spotify-embed";
 import ContactForm from "./components/contact-form";
+import TrackedLink from "./components/tracked-link";
 
 type Props = {
   params: Promise<{ user: string }>;
@@ -69,6 +70,7 @@ export interface SocialLink {
   type: string;
   value: string;
   enabled: boolean;
+  tracked_url: string | null;
 }
 
 export interface ProfileButton {
@@ -77,6 +79,7 @@ export interface ProfileButton {
   type: string;
   value: string;
   enabled: boolean;
+  tracked_url: string | null;
 }
 
 export interface PortfolioImage {
@@ -169,7 +172,7 @@ function getSocialIcon(type: string) {
 /* ========================================================= */
 
 function getButtonData(button: ProfileButton) {
-  switch (button.type.toLowerCase()) {
+  switch (button.type.toLowerCase().trim()) {
     case "whatsapp":
       return {
         icon: MessageCircle,
@@ -670,10 +673,9 @@ export default async function UserProfilePage({ params }: Props) {
 
                     return (
                       <li key={social.id}>
-                        <a
+                        <TrackedLink
                           href={social.value}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          trackedUrl={social.tracked_url}
                           className="flex h-[2.375rem] w-full items-center gap-x-[.75rem] rounded-[.875rem] px-[.75rem] transition-all duration-200 hover:scale-105"
                           style={{
                             backgroundColor: secondaryButtonColor,
@@ -683,7 +685,7 @@ export default async function UserProfilePage({ params }: Props) {
                           <Icon size={18} />
 
                           <span className="font-medium">{label}</span>
-                        </a>
+                        </TrackedLink>
                       </li>
                     );
                   })}
@@ -718,8 +720,10 @@ export default async function UserProfilePage({ params }: Props) {
               <section className="mt-[1.875rem] w-full">
                 <SectionTitle color={primaryText}>E-mail</SectionTitle>
 
-                <a
+                <TrackedLink
                   href={getEmailHref(emailSocial.value)}
+                  trackedUrl={emailSocial.tracked_url}
+                  target="_self"
                   className="flex h-[2.375rem] w-full items-center justify-center gap-x-[.75rem] rounded-[.875rem] border-2 px-[.75rem] text-[.875rem] font-semibold shadow-sm transition-all duration-200 hover:scale-105 hover:shadow-md"
                   style={{
                     backgroundColor: primaryButtonColor,
@@ -730,7 +734,7 @@ export default async function UserProfilePage({ params }: Props) {
                   <MailOpen size={18} />
 
                   <span>Enviar email</span>
-                </a>
+                </TrackedLink>
               </section>
             )}
 
@@ -748,12 +752,13 @@ export default async function UserProfilePage({ params }: Props) {
                     .map((button) => {
                       const { icon: Icon, label, href } = getButtonData(button);
 
+                      const isPix = button.type.toLowerCase().trim() === "pix";
+
                       return (
                         <li key={button.id}>
-                          <a
+                          <TrackedLink
                             href={href}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                            trackedUrl={isPix ? null : button.tracked_url}
                             className="flex h-[2.375rem] w-full items-center justify-center gap-x-[.75rem] rounded-[.875rem] px-[.75rem] transition-all duration-200 hover:scale-105"
                             style={{
                               backgroundColor: primaryButtonColor,
@@ -765,7 +770,7 @@ export default async function UserProfilePage({ params }: Props) {
                             <span className="text-[.875rem] font-semibold">
                               {label}
                             </span>
-                          </a>
+                          </TrackedLink>
                         </li>
                       );
                     })}
