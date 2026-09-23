@@ -5,6 +5,10 @@ FROM node:20-alpine AS next-build
 
 WORKDIR /workspace
 
+# Disponibiliza a variável durante o build do Next
+ARG NEXT_PUBLIC_BACKEND_URL
+ENV NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL
+
 COPY rencard/package.json rencard/package-lock.json ./
 COPY rencard/next.config.ts rencard/postcss.config.mjs rencard/tsconfig.json ./
 COPY rencard/public ./public
