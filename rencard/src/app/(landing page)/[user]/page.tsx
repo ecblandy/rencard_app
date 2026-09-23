@@ -13,6 +13,8 @@ import {
   ExternalLink,
 } from "lucide-react";
 
+import { SiTiktok, SiThreads, SiDiscord, SiTelegram } from "react-icons/si";
+
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
@@ -125,7 +127,7 @@ function getSocialLabel(url: string) {
 /* ========================================================= */
 
 function getSocialIcon(type: string) {
-  switch (type.toLowerCase()) {
+  switch (type.toLowerCase().trim()) {
     case "instagram":
       return Instagram;
 
@@ -144,6 +146,18 @@ function getSocialIcon(type: string) {
 
     case "github":
       return Github;
+
+    case "tiktok":
+      return SiTiktok;
+
+    case "threads":
+      return SiThreads;
+
+    case "discord":
+      return SiDiscord;
+
+    case "telegram":
+      return SiTelegram;
 
     default:
       return Globe;
@@ -651,6 +665,7 @@ export default async function UserProfilePage({ params }: Props) {
                 <ul className="flex w-full flex-col space-y-[1.125rem]">
                   {socialLinks.map((social) => {
                     const label = getSocialLabel(social.value);
+
                     const Icon = getSocialIcon(social.type);
 
                     return (
