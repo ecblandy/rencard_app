@@ -67,3 +67,10 @@ export interface TemporaryCartItem {
   product: number;
   quantity: number;
 }
+
+export interface OnboardingResumePaymentResponse {
+  order_id: number;
+  checkout_url: string;
+  checkout_created_at: string;
+  checkout_expires_at: string;
+}

@@ -54,4 +54,8 @@ export class PaymentService {
   renewPlan() {
     return this.api.renewPlan().pipe(tap(() => console.log('Plan renewed')));
   }
+
+  resumeOnboardingPayment() {
+    return this.api.resumeOnboardingPayment();
+  }
 }

@@ -1,8 +1,8 @@
 <header
-  class="flex items-center justify-center min-h-[5.125rem] max-[26.875rem]:min-h-15 bg-[linear-gradient(360deg,#FBFBFB_35%,#F5F5F5_100%)] w-full"
+  class="flex min-h-[5.125rem] w-full items-center justify-center bg-[linear-gradient(360deg,#FBFBFB_35%,#F5F5F5_100%)] max-[26.875rem]:min-h-15"
 >
   <div
-    class="flex items-center justify-between p-[30px] max-[26.875rem]:px-0 max-[26.875rem]:py-[.75rem] max-[26.875rem]:mx-[1rem] bg-[#FBFBFB66] border-b border-neutral-extra-soft max-[26.875rem]:w-[23.75rem] w-full"
+    class="flex w-full items-center justify-between border-b border-neutral-extra-soft bg-[#FBFBFB66] p-[30px] max-[26.875rem]:mx-[1rem] max-[26.875rem]:w-[23.75rem] max-[26.875rem]:px-0 max-[26.875rem]:py-[.75rem]"
   >
     <!-- Logo -->
     <a href="/">
@@ -10,19 +10,25 @@
     </a>
 
     <div class="flex items-center justify-center sm:hidden">
-      <button (click)="toggle()" [attr.aria-label]="isOpen() ? 'Fechar menu' : 'Abrir menu'">
+      <button
+        type="button"
+        (click)="toggle()"
+        [attr.aria-label]="isOpen() ? 'Fechar menu' : 'Abrir menu'"
+      >
         <ng-icon [name]="isOpen() ? 'lucideX' : 'lucideMenu'" size="24" />
       </button>
     </div>
 
     @if (isOpen()) {
       <div class="fixed inset-0 z-50 flex flex-col bg-white sm:hidden">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-200">
+        <div class="flex items-center justify-between border-b border-neutral-200 px-5 py-4">
           <img src="/images/rencard-logo.svg" alt="logo rencard" width="145" height="36" />
+
           <button
+            type="button"
             (click)="toggle()"
             aria-label="Fechar menu"
-            class="p-1 rounded-md text-neutral-800 hover:bg-neutral-100 transition-colors"
+            class="rounded-md p-1 text-neutral-800 transition-colors hover:bg-neutral-100"
           >
             <ng-icon name="lucideX" size="22" />
           </button>
@@ -33,12 +39,24 @@
             <a
               [href]="link.href"
               (click)="toggle()"
-              class="flex items-center justify-between px-5 py-[0.875rem] text-[15px] font-medium text-neutral-900 hover:bg-neutral-100 transition-colors border-b border-neutral-100"
+              class="flex items-center justify-between border-b border-neutral-100 px-5 py-[0.875rem] text-[15px] font-medium text-neutral-900 transition-colors hover:bg-neutral-100"
             >
               {{ link.label }}
+
               <ng-icon name="lucideArrowRight" size="16" class="text-neutral-400" />
             </a>
           }
+
+          <!-- Logout -->
+          <button
+            type="button"
+            (click)="onLogout()"
+            class="flex items-center justify-between border-b border-neutral-100 px-5 py-[0.875rem] text-left text-[15px] font-medium text-neutral-900 transition-colors hover:bg-neutral-100"
+          >
+            <span>Sair</span>
+
+            <ng-icon name="lucideLogOut" size="16" class="text-neutral-400" />
+          </button>
         </nav>
       </div>
     }

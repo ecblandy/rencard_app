@@ -93,10 +93,7 @@ export class ClientService {
     );
   }
 
-  updateResume(payload: {
-    file: File | null;
-    enabled: boolean;
-  }) {
+  updateResume(payload: { file: File | null; enabled: boolean }) {
     return this.api.updateResume(payload).pipe(
       tap((response) => {
         this.profileStore.setProfileFromAPI(response);
@@ -109,24 +106,16 @@ export class ClientService {
   // =========================================================
 
   fetchPlans() {
-    console.log(
-      '1 - Entrou no ClientService.fetchPlans()',
-    );
+    console.log('1 - Entrou no ClientService.fetchPlans()');
 
     return this.api.fetchPlans().pipe(
       tap({
         next: (response) => {
-          console.log(
-            '2 - Resposta da API:',
-            response,
-          );
+          console.log('2 - Resposta da API:', response);
         },
 
         error: (error) => {
-          console.error(
-            '2 - Erro na API:',
-            error,
-          );
+          console.error('2 - Erro na API:', error);
         },
       }),
     );
@@ -136,23 +125,15 @@ export class ClientService {
   // CRIAR ASSINATURA
   // =========================================================
 
-  createSubscription(
-    data: CreateSubscriptionRequest,
-  ) {
+  createSubscription(data: CreateSubscriptionRequest) {
     return this.api.createSubscription(data).pipe(
       tap({
         next: (response) => {
-          console.log(
-            '3 - Resposta da API ao criar assinatura:',
-            response,
-          );
+          console.log('3 - Resposta da API ao criar assinatura:', response);
         },
 
         error: (error) => {
-          console.error(
-            '3 - Erro na API ao criar assinatura:',
-            error,
-          );
+          console.error('3 - Erro na API ao criar assinatura:', error);
         },
       }),
     );
@@ -163,24 +144,16 @@ export class ClientService {
   // =========================================================
 
   checkPendingSubscription() {
-    console.log(
-      '4 - Entrou no ClientService.checkPendingSubscription()',
-    );
+    console.log('4 - Entrou no ClientService.checkPendingSubscription()');
 
     return this.api.checkPendingSubscription().pipe(
       tap({
         next: (response) => {
-          console.log(
-            '5 - Resposta da API ao verificar assinatura pendente:',
-            response,
-          );
+          console.log('5 - Resposta da API ao verificar assinatura pendente:', response);
         },
 
         error: (error) => {
-          console.error(
-            '5 - Erro na API ao verificar assinatura pendente:',
-            error,
-          );
+          console.error('5 - Erro na API ao verificar assinatura pendente:', error);
         },
       }),
     );
@@ -191,24 +164,16 @@ export class ClientService {
   // =========================================================
 
   refreshProfile() {
-    console.log(
-      '6 - Recarregando usuário autenticado...',
-    );
+    console.log('6 - Recarregando usuário autenticado...');
 
     return this.auth.loadUser().pipe(
       tap({
         next: (user) => {
-          console.log(
-            '7 - Usuário atualizado:',
-            user,
-          );
+          console.log('7 - Usuário atualizado:', user);
         },
 
         error: (error) => {
-          console.error(
-            '7 - Erro ao atualizar usuário:',
-            error,
-          );
+          console.error('7 - Erro ao atualizar usuário:', error);
         },
       }),
     );
@@ -219,48 +184,24 @@ export class ClientService {
   // =========================================================
 
   cancelSubscriptionOrPaymentLink() {
-    console.log(
-      '8 - Entrou no ClientService.cancelSubscriptionOrPaymentLink()',
+    console.log('8 - Entrou no ClientService.cancelSubscriptionOrPaymentLink()');
+
+    return this.api.cancelSubscriptionOrPaymentLink().pipe(
+      tap((response) => {
+        console.log('9 - Resposta da API ao cancelar assinatura ou link:', response);
+      }),
+
+      switchMap((response) => {
+        console.log('10 - Recarregando usuário após cancelamento...');
+
+        return this.auth.loadUser().pipe(
+          tap((user) => {
+            console.log('11 - Usuário atualizado após cancelamento:', user);
+          }),
+
+          map(() => response),
+        );
+      }),
     );
-
-    return this.api
-      .cancelSubscriptionOrPaymentLink()
-      .pipe(
-        tap((response) => {
-          console.log(
-            '9 - Resposta da API ao cancelar assinatura ou link:',
-            response,
-          );
-        }),
-
-        /*
-         * Depois que o backend cancela:
-         *
-         * 1. Busca o usuário novamente.
-         * 2. Auth.loadUser() atualiza o AuthState.
-         * 3. Os computed() do Preview são recalculados.
-         */
-
-        switchMap((response) => {
-          console.log(
-            '10 - Recarregando usuário após cancelamento...',
-          );
-
-          return this.auth.loadUser().pipe(
-            tap((user) => {
-              console.log(
-                '11 - Usuário atualizado após cancelamento:',
-                user,
-              );
-            }),
-
-            /*
-             * Mantém a resposta original
-             * do cancelamento.
-             */
-            map(() => response),
-          );
-        }),
-      );
   }
 }

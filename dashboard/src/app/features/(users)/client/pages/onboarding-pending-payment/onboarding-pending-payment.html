@@ -1,0 +1,189 @@
+<div class="fixed inset-0 z-[999] flex items-center justify-center bg-neutral-50 p-4 sm:p-6">
+  <div
+    class="w-full max-w-lg overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-xl"
+  >
+    <!-- Header -->
+    <div class="px-6 pt-8 text-center sm:px-10 sm:pt-10">
+      <!-- Ícone de pagamento pendente -->
+      <div class="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50">
+        <div class="flex h-11 w-11 items-center justify-center rounded-full bg-amber-100">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-amber-600"
+          >
+            <circle cx="12" cy="12" r="9"></circle>
+            <polyline points="12 7 12 12 15 14"></polyline>
+          </svg>
+        </div>
+      </div>
+
+      <h1 class="font-urbanist text-xl font-semibold tracking-tight text-neutral-900 sm:text-2xl">
+        Seu pagamento está pendente
+      </h1>
+
+      <p class="mx-auto mt-3 max-w-md font-manrope text-sm leading-6 text-neutral-500 sm:text-base">
+        Seu pedido foi criado, mas o pagamento ainda não foi concluído. Finalize o pagamento para
+        liberar o acesso ao seu Rencard.
+      </p>
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="space-y-5 px-6 py-7 sm:px-10 sm:py-8">
+      @if (isLoading()) {
+        <!-- Loading -->
+        <div
+          class="flex flex-col items-center justify-center rounded-2xl border border-neutral-100 bg-neutral-50 px-5 py-8"
+        >
+          <app-loader></app-loader>
+
+          <p class="mt-4 font-manrope text-sm text-neutral-500">Preparando seu pagamento...</p>
+        </div>
+      } @else if (errorMessage()) {
+        <!-- Erro -->
+        <div class="rounded-2xl border border-red-100 bg-red-50 p-4 sm:p-5">
+          <div class="flex items-start gap-3">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-100">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="text-red-600"
+              >
+                <path
+                  d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"
+                ></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
+            </div>
+
+            <div class="min-w-0">
+              <p class="font-manrope text-sm font-semibold text-red-800">
+                Não foi possível preparar o pagamento
+              </p>
+
+              <p class="mt-1 font-manrope text-xs leading-5 text-red-600">
+                {{ errorMessage() }}
+              </p>
+            </div>
+          </div>
+
+          <app-button variant="outline" sizeH="sm" class="mt-4 w-full" (click)="retry()">
+            Tentar novamente
+          </app-button>
+        </div>
+      } @else {
+        <!-- Status do pagamento -->
+        <div class="rounded-2xl border border-amber-100 bg-amber-50/60 p-4 sm:p-5">
+          <div class="flex items-center gap-3">
+            <div
+              class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="text-amber-600"
+              >
+                <circle cx="12" cy="12" r="9"></circle>
+                <polyline points="12 7 12 12 15 14"></polyline>
+              </svg>
+            </div>
+
+            <div>
+              <p class="font-manrope text-sm font-semibold text-neutral-800">
+                Pagamento aguardando conclusão
+              </p>
+
+              <p class="mt-1 font-manrope text-xs leading-5 text-neutral-500">
+                Você pode continuar de onde parou.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botão principal -->
+        <app-button
+          variant="default"
+          sizeH="xl"
+          class="w-full"
+          [disabled]="isRedirecting()"
+          (click)="goToPayment()"
+        >
+          @if (isRedirecting()) {
+            <span class="flex items-center justify-center gap-2">
+              <span
+                class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
+              ></span>
+
+              Abrindo pagamento...
+            </span>
+          } @else {
+            Ir para o pagamento
+          }
+        </app-button>
+
+        <p class="text-center font-manrope text-xs leading-5 text-neutral-400">
+          Você será redirecionado para o ambiente seguro de pagamento.
+        </p>
+      }
+
+      <!-- Verificação de pagamento -->
+      <button
+        type="button"
+        class="group flex w-full items-center justify-center gap-2 py-1 font-manrope text-sm font-medium text-blue-600 transition-colors hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+        [disabled]="isCheckingStatus()"
+        (click)="refreshStatus()"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="15"
+          height="15"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          [class.animate-spin]="isCheckingStatus()"
+        >
+          <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"></path>
+          <path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"></path>
+        </svg>
+
+        {{ isCheckingStatus() ? 'Verificando pagamento...' : 'Já paguei, verificar status' }}
+      </button>
+    </div>
+
+    <!-- Footer -->
+    <div class="border-t border-neutral-100 bg-neutral-50/70 px-6 py-5 sm:px-10">
+      <button
+        type="button"
+        class="w-full font-manrope text-xs text-neutral-400 transition-colors hover:text-neutral-600"
+        (click)="logout()"
+      >
+        Sair da conta
+      </button>
+    </div>
+  </div>
+</div>

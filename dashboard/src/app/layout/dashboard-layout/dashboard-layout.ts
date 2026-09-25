@@ -1,11 +1,14 @@
 import { Location } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { toast } from 'ngx-sonner';
 
 import { Sidebar } from '../../shared/components/sidebar/sidebar';
 import { UiHeader, MenuLink } from '../../shared/ui/header/header';
 
 import { AuthState } from '../../features/auth/services/state/auth/auth-state';
+import { Auth } from '../../features/auth/services/facade/auth';
 import { SIDEBAR_LINKS } from '../../shared/components/sidebar/sidebar.config';
 
 @Component({
@@ -16,6 +19,8 @@ import { SIDEBAR_LINKS } from '../../shared/components/sidebar/sidebar.config';
 })
 export class DashboardLayout {
   private readonly authState = inject(AuthState);
+  private readonly auth = inject(Auth);
+  private readonly router = inject(Router);
   private readonly location = inject(Location);
 
   links = computed<MenuLink[]>(() => {
@@ -29,10 +34,34 @@ export class DashboardLayout {
 
     return sidebarLinks.map((link) => ({
       label: link.label,
-      // O header usa <a href> (requisição real ao servidor), então o href
-      // precisa incluir o base href (/app/). prepareExternalUrl faz isso e
-      // continua correto se o base href mudar (ex.: ng serve com base "/").
       href: this.location.prepareExternalUrl(link.path),
     }));
   });
+
+  async onLogout() {
+    const loadingToast = toast.loading('Saindo...', {
+      description: 'Você está sendo desconectado.',
+    });
+
+    try {
+      await firstValueFrom(this.auth.logout());
+
+      toast.success('Até logo!', {
+        description: 'Sessão encerrada com sucesso.',
+        id: loadingToast,
+      });
+
+      this.router.navigate(['/auth/signin']);
+    } catch (error) {
+      console.error('[DashboardLayout] erro no logout:', error);
+
+      toast.error('Erro ao sair', {
+        description: 'Não foi possível fazer logout.',
+        id: loadingToast,
+      });
+
+      this.authState.clear();
+      this.router.navigate(['/auth/signin']);
+    }
+  }
 }

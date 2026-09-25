@@ -1,5 +1,6 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { rxResource, toSignal } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import { map } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toast } from 'ngx-sonner';
@@ -32,7 +33,14 @@ const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
 
 const ACCEPTED_LOGO_TYPES = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
 
+// Fallback usado quando o navegador/SO não informa (ou informa errado) o
+// `file.type` do arquivo — isso acontece com frequência para SVG e, em
+// alguns Windows/Android mal configurados, também para PNG/JPG.
+const ACCEPTED_LOGO_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.svg', '.webp'];
+
 const CEP_DEBOUNCE_MS = 500;
+
+const DEFAULT_COUPON_ERROR_MESSAGE = 'Cupom inválido ou expirado.';
 
 @Component({
   selector: 'app-products',
@@ -115,7 +123,19 @@ export class Products {
       const cep = this.cepDigits();
       const hasPhysical = this.hasPhysicalProductSelected();
 
-      if (cep.length !== 8 || !hasPhysical) {
+      // IMPORTANTE: lemos o carrinho "cru" aqui (e não só o computed
+      // booleano acima) de propósito. Um computed() só notifica quem o
+      // observa quando o VALOR dele muda — se a cliente marcar/desmarcar a
+      // personalização com logo enquanto um cartão continua selecionado,
+      // `hasPhysicalProductSelected()` continua `true` antes e depois, e
+      // esse effect nunca seria re-executado. Só que `resetShipping()`
+      // (chamado dentro de `selectItem()`) já zerou o frete — e sem o
+      // effect reagir, o frete some e nunca mais volta sozinho. Lendo
+      // `selectedItems()` diretamente garantimos que QUALQUER alteração no
+      // carrinho reagenda o recálculo, enquanto o CEP já estiver completo.
+      const items = this.selectedItems();
+
+      if (cep.length !== 8 || !hasPhysical || items.length === 0) {
         return;
       }
 
@@ -155,6 +175,10 @@ export class Products {
   readonly aditionalProducts = computed(() => this.productsResource.value()?.additional ?? []);
 
   readonly resourceError = computed(() => this.productsResource.error());
+
+  reloadProducts() {
+    this.productsResource.reload();
+  }
 
   // =========================================================
   // MODO DE SELEÇÃO
@@ -294,6 +318,15 @@ export class Products {
 
   readonly couponResponse = signal<CouponValidateResponse | null>(null);
 
+  // Mensagem específica devolvida pelo backend (ex: "Cupom aplicável
+  // apenas a cartões.", "Cupom inativo ou expirado.", "Cupom não
+  // aplicável para o onboarding."). Cada tipo de cupom tem um motivo de
+  // falha diferente, então não faz sentido mostrar sempre o mesmo texto
+  // genérico.
+  readonly couponErrorMessage = signal<string | null>(null);
+
+  private couponRequestId = 0;
+
   applyCoupon() {
     const code = this.couponCode().trim();
 
@@ -302,33 +335,80 @@ export class Products {
     }
 
     this.couponStatus.set('loading');
+    this.couponErrorMessage.set(null);
 
     const items: ShippingItem[] = this.selectedItems().map((item) => ({
       product: parseInt(item.id, 10),
       quantity: 1,
     }));
 
+    const requestId = ++this.couponRequestId;
+
     this.paymentService.validateCoupon(code, items).subscribe({
       next: (response: CouponValidateResponse) => {
+        // Ignora respostas "atrasadas" de uma chamada antiga caso a cliente
+        // já tenha editado o cupom ou o carrinho de novo nesse meio-tempo.
+        if (requestId !== this.couponRequestId) {
+          return;
+        }
+
         this.couponResponse.set(response);
         this.couponStatus.set('valid');
+        this.couponErrorMessage.set(null);
 
         toast.success('Cupom aplicado com sucesso!');
       },
 
-      error: () => {
+      error: (error: HttpErrorResponse) => {
+        if (requestId !== this.couponRequestId) {
+          return;
+        }
+
         this.couponResponse.set(null);
         this.couponStatus.set('invalid');
 
-        toast.error('Cupom inválido ou expirado.');
+        const message = this.extractCouponErrorMessage(error);
+
+        this.couponErrorMessage.set(message);
+
+        toast.error(message);
       },
     });
   }
 
+  // Extrai a mensagem específica que o backend devolveu para o cupom.
+  // O backend segue o padrão do Django REST Framework: erro de campo vem
+  // como uma lista de strings, ex:
+  //   { "coupon_code": ["Cupom aplicável apenas a cartões."] }
+  // Isso cobre todos os casos documentados: código ausente, cupom
+  // inválido, inativo/expirado, não aplicável ao onboarding, e os casos
+  // específicos de cartão/tag.
+  private extractCouponErrorMessage(error: HttpErrorResponse): string {
+    const body = error?.error;
+
+    const fieldErrors = body?.coupon_code;
+
+    if (Array.isArray(fieldErrors) && typeof fieldErrors[0] === 'string' && fieldErrors[0].trim()) {
+      return fieldErrors[0];
+    }
+
+    // Alguns erros (500, timeout, CORS, resposta fora do padrão) não vêm
+    // nesse formato. Nesses casos caímos numa mensagem genérica em vez de
+    // mostrar "undefined" ou "[object Object]" pra cliente.
+    if (typeof body?.detail === 'string' && body.detail.trim()) {
+      return body.detail;
+    }
+
+    return DEFAULT_COUPON_ERROR_MESSAGE;
+  }
+
   private resetCoupon() {
+    this.couponRequestId++;
+
     this.couponCode.set('');
     this.couponStatus.set('idle');
     this.couponResponse.set(null);
+    this.couponErrorMessage.set(null);
   }
 
   // =========================================================
@@ -353,6 +433,19 @@ export class Products {
     return this.isSelected(id) && !this.logoFiles()[id];
   }
 
+  private isAcceptedLogoFile(file: File): boolean {
+    if (ACCEPTED_LOGO_TYPES.includes(file.type)) {
+      return true;
+    }
+
+    // Alguns navegadores/SO não preenchem (ou preenchem errado) o
+    // `file.type` — principalmente para SVG. Nesse caso, confiamos na
+    // extensão do arquivo em vez de recusar um arquivo válido.
+    const name = file.name.toLowerCase();
+
+    return ACCEPTED_LOGO_EXTENSIONS.some((extension) => name.endsWith(extension));
+  }
+
   onLogoSelected(id: string, event: Event) {
     const input = event.target as HTMLInputElement;
 
@@ -362,10 +455,21 @@ export class Products {
       return;
     }
 
-    if (!ACCEPTED_LOGO_TYPES.includes(file.type)) {
+    if (!this.isAcceptedLogoFile(file)) {
       this.logoErrors.update((errors) => ({
         ...errors,
         [id]: 'Formato inválido. Use PNG, JPG, SVG ou WEBP.',
+      }));
+
+      input.value = '';
+
+      return;
+    }
+
+    if (file.size === 0) {
+      this.logoErrors.update((errors) => ({
+        ...errors,
+        [id]: 'Arquivo vazio ou corrompido. Tente novamente.',
       }));
 
       input.value = '';
@@ -393,6 +497,11 @@ export class Products {
       ...files,
       [id]: file,
     }));
+
+    // Limpa o input mesmo em caso de sucesso: assim, se a cliente remover e
+    // selecionar o MESMO arquivo de novo depois, o "change" dispara de novo
+    // normalmente (o navegador não dispara change se o value não mudou).
+    input.value = '';
   }
 
   removeLogo(id: string) {
@@ -451,7 +560,7 @@ export class Products {
     return this.selectedItems().some((item) => item.id === id);
   }
 
-  selectItem(item: { id: string; price: number }) {
+  selectItem(item: { id: string; price: number; type?: string }) {
     const existingIndex = this.selectedItems().findIndex(
       (selectedItem) => selectedItem.id === item.id,
     );
@@ -460,6 +569,23 @@ export class Products {
       this.selectedItems.update((items) => items.filter((_, index) => index !== existingIndex));
 
       this.removeLogo(item.id);
+
+      // Se o item desmarcado era um cartão e não sobrou nenhum cartão
+      // selecionado, a personalização com logo deixa de fazer sentido (a UI
+      // dela some). Sem isso, um adicional de logo ficava "fantasma": ainda
+      // selecionado no carrinho, com arquivo enviado, mas sem nenhum cartão
+      // vinculado — bagunçando o frete e a validação do botão Continuar.
+      if (item.type === 'card' && !this.hasCardSelected()) {
+        for (const additional of this.aditionalProducts()) {
+          const additionalId = additional.id.toString();
+
+          if (this.isSelected(additionalId)) {
+            this.selectedItems.update((items) => items.filter((i) => i.id !== additionalId));
+
+            this.removeLogo(additionalId);
+          }
+        }
+      }
     } else {
       this.selectedItems.update((items) => [...items, item]);
     }
@@ -491,6 +617,8 @@ export class Products {
 
   readonly selectedShipping = signal<ShippingOption | null>(null);
 
+  private shippingRequestId = 0;
+
   readonly shippingOptions = computed(
     () => this.shippingCalculationResponse()?.shipping_options ?? [],
   );
@@ -500,13 +628,17 @@ export class Products {
   }
 
   private resetShipping() {
-    this.shippingCalculationResponse.set(null);
+    // Invalida qualquer chamada de frete que ainda esteja "em voo": a
+    // resposta dela será ignorada quando chegar (ver calculateShipping()).
+    this.shippingRequestId++;
 
+    this.shippingCalculationResponse.set(null);
     this.selectedShipping.set(null);
+    this.isCalculatingShipping.set(false);
   }
 
   readonly hasPhysicalProductSelected = computed(
-    () => this.selectionMode() === 'fisico' && this.selectedItems().length > 0,
+    () => this.selectionMode() === 'fisico' && this.physicalSelectedItems().length > 0,
   );
 
   private physicalSelectedItems = computed(() =>
@@ -553,6 +685,8 @@ export class Products {
       items: shippingItems,
     };
 
+    const requestId = ++this.shippingRequestId;
+
     this.isCalculatingShipping.set(true);
 
     const loadingToast = toast.loading('Aguarde, buscando informações...', {
@@ -561,6 +695,14 @@ export class Products {
 
     this.paymentService.searchShipping(shippingData).subscribe({
       next: (response: ShippingCalculationResponse) => {
+        // Uma chamada mais recente pode ter sido disparada (CEP ou
+        // carrinho mudaram de novo) enquanto esta ainda estava em
+        // andamento. Se não formos mais a chamada "atual", ignoramos a
+        // resposta para não sobrescrever dados novos com dados velhos.
+        if (requestId !== this.shippingRequestId) {
+          return;
+        }
+
         toast.success('Informações encontradas', {
           description: '',
           id: loadingToast,
@@ -574,6 +716,10 @@ export class Products {
       },
 
       error: (error) => {
+        if (requestId !== this.shippingRequestId) {
+          return;
+        }
+
         toast.error('Erro ao buscar informações', {
           description: '',
           id: loadingToast,
@@ -590,7 +736,7 @@ export class Products {
   // PODE CONTINUAR?
   // =========================================================
 
-  canContinue(): boolean {
+  readonly canContinue = computed(() => {
     if (this.selectionMode() === 'digital') {
       return this.selectedItems().length > 0;
     }
@@ -612,7 +758,7 @@ export class Products {
     }
 
     return false;
-  }
+  });
 
   // =========================================================
   // ENVIO FINAL

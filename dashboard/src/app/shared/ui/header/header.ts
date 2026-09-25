@@ -1,4 +1,5 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, input, output, signal } from '@angular/core';
+
 import { NgIcon } from '@ng-icons/core';
 
 export interface MenuLink {
@@ -14,10 +15,15 @@ export interface MenuLink {
 })
 export class UiHeader {
   links = input<MenuLink[]>([]);
+  logout = output<void>();
 
   isOpen = signal(false);
 
   toggle() {
     this.isOpen.update((v) => !v);
+  }
+
+  onLogout() {
+    this.logout.emit();
   }
 }

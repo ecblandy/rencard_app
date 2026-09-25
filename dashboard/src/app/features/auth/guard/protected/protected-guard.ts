@@ -4,6 +4,11 @@ import { AuthState } from '../../services/state/auth/auth-state';
 import { AuthApi } from '../../services/api/auth-api';
 import { catchError, map, of, switchMap } from 'rxjs';
 
+// Precisa bater com o caminho da rota adicionada em client.routes.ts
+// (veja o item 5 abaixo). Se o prefixo usado para montar as rotas de
+// cliente no app.routes.ts não for "client", ajuste aqui também.
+const PENDING_PAYMENT_ROUTE = '/client/onboarding/pending-payment';
+
 export const protectedGuard: CanActivateFn = (route, state) => {
   const authState = inject(AuthState);
   const authApi = inject(AuthApi);
@@ -14,11 +19,6 @@ export const protectedGuard: CanActivateFn = (route, state) => {
     return false;
   };
 
-  const redirectToConfirmEmail = () => {
-    router.navigate(['/auth/confirm-email']);
-    return false;
-  };
-
   const checkRoleAccess = (userRole: string, requiredRoles?: string[]) => {
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;
@@ -26,6 +26,33 @@ export const protectedGuard: CanActivateFn = (route, state) => {
 
     if (!requiredRoles.includes(userRole)) {
       redirectBasedOnRole(userRole, router);
+      return false;
+    }
+
+    return true;
+  };
+
+  /**
+   * Bloqueia acesso a QUALQUER rota protegida enquanto houver pagamento
+   * de onboarding pendente (pedido criado, mas ainda não pago).
+   *
+   * Só se aplica a clientes: admin e afiliado nunca passam pelo fluxo de
+   * compra de produto, então não têm esse campo populado.
+   *
+   * A própria página de pagamento pendente é a exceção — sem isso, o
+   * guard entraria num loop de redirecionamento infinito ao tentar
+   * navegar até ela.
+   */
+  const checkPendingOnboardingPayment = (user: {
+    role: string;
+    onboarding?: { next_action?: string | null } | null;
+  }) => {
+    const hasPendingPayment =
+      user.role === 'client' && user.onboarding?.next_action === 'resume_payment';
+
+    if (hasPendingPayment && !state.url.startsWith(PENDING_PAYMENT_ROUTE)) {
+      router.navigate([PENDING_PAYMENT_ROUTE]);
+
       return false;
     }
 
@@ -44,6 +71,10 @@ export const protectedGuard: CanActivateFn = (route, state) => {
     // if (!user.active_access_grant) {
     //   return redirectToConfirmEmail();
     // }
+
+    if (!checkPendingOnboardingPayment(user)) {
+      return false;
+    }
 
     const allowedRoles = route.data?.['roles'] as string[] | undefined;
     return checkRoleAccess(user.role, allowedRoles);
@@ -66,6 +97,10 @@ export const protectedGuard: CanActivateFn = (route, state) => {
       //   redirectToConfirmEmail();
       //   return false;
       // }
+
+      if (!checkPendingOnboardingPayment(user)) {
+        return false;
+      }
 
       const allowedRoles = route.data?.['roles'] as string[] | undefined;
       return checkRoleAccess(user.role, allowedRoles);

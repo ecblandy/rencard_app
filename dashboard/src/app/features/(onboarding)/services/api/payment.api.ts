@@ -6,6 +6,7 @@ import { Plan, PlansResponse } from '../../../../shared/types/plan-model';
 import { ProductResponse } from '../../../../shared/types/product-model';
 import {
   CouponValidateResponse,
+  OnboardingResumePaymentResponse,
   Shipping,
   ShippingCalculationResponse,
   ShippingItem,
@@ -68,5 +69,12 @@ export class PaymentApi {
 
   renewPlan() {
     return this.http.post(`${this.baseUrl}/payments/subscriptions/renew/`, {});
+  }
+
+  resumeOnboardingPayment(): Observable<OnboardingResumePaymentResponse> {
+    return this.http.post<OnboardingResumePaymentResponse>(
+      `${this.baseUrl}/payments/orders/onboarding/resume/`,
+      {},
+    );
   }
 }

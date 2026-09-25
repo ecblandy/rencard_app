@@ -42,6 +42,22 @@ export const clientRoutes: Routes = [
       ),
   },
 
+  // =========================================================
+  // PAGAMENTO DE ONBOARDING PENDENTE
+  // Sem canActivate próprio aqui: quem decide mandar o usuário pra cá é o
+  // protectedGuard (aplicado no nível pai das rotas de client). Essa rota
+  // só precisa existir para ele ter pra onde redirecionar.
+  // =========================================================
+
+  {
+    path: 'onboarding/pending-payment',
+    title: 'Pagamento pendente – Rencard',
+    loadComponent: () =>
+      import('../pages/onboarding-pending-payment/onboarding-pending-payment').then(
+        (m) => m.OnboardingPendingPayment,
+      ),
+  },
+
   {
     path: 'billing',
     children: [

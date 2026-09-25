@@ -1,4 +1,4 @@
-<section>
+<section class="mt-[1.25rem]">
   @if (isLoadingCoupon()) {
     <div class="flex min-h-[50vh] items-center justify-center">
       <app-loader></app-loader>
@@ -16,9 +16,9 @@
     </button>
 
     <!-- Header -->
-    <div class="my-10 flex items-center justify-between">
-      <div class="flex items-center gap-x-4">
-        <span class="font-urbanist text-[2.5rem] font-bold">
+    <div class="my-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+      <div class="flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2">
+        <span class="break-all font-urbanist text-[2.5rem] font-bold">
           {{ couponState().code }}
         </span>
 
@@ -27,7 +27,7 @@
         </p>
       </div>
 
-      <div class="flex items-center gap-x-2">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
         <app-button type="button" variant="outline" (click)="open()"> Editar </app-button>
 
         @if (couponState().status === 'active' || couponState().status === 'inactive') {
@@ -43,7 +43,7 @@
     </div>
 
     <!-- Conteúdo -->
-    <div class="mb-10 grid grid-cols-3 gap-8">
+    <div class="mb-10 grid grid-cols-1 gap-8 lg:grid-cols-3">
       <!-- Resumo -->
       <app-surface classes="bg-white">
         <div class="flex flex-col">
@@ -56,7 +56,7 @@
             <div class="font-manrope">
               <h2 class="text-neutral-medium">Afiliado</h2>
 
-              <p class="font-semibold">
+              <p class="break-words font-semibold">
                 {{ couponState().affiliate_name || 'N/A' }}
               </p>
             </div>
@@ -65,13 +65,13 @@
             <div class="font-manrope">
               <h2 class="text-neutral-medium">E-mail</h2>
 
-              <p class="font-semibold">
+              <p class="break-all font-semibold">
                 {{ couponState().affiliate_email || 'N/A' }}
               </p>
             </div>
 
             <!-- Desconto / Comissão -->
-            <div class="grid grid-cols-2 gap-x-6">
+            <div class="grid grid-cols-1 gap-y-6 gap-x-6 sm:grid-cols-2">
               <!-- Desconto -->
               <div>
                 <h2 class="text-neutral-medium">Desconto</h2>
@@ -95,7 +95,7 @@
             <div class="font-manrope">
               <h2 class="text-neutral-medium">Aplicável à</h2>
 
-              <p class="font-semibold">
+              <p class="break-words font-semibold">
                 {{ couponState().applicable_to }}
               </p>
             </div>
@@ -112,7 +112,9 @@
           <!-- Conteúdo -->
           <div class="mt-6 flex flex-col gap-y-6">
             <!-- Total de usos -->
-            <div class="flex items-center gap-x-2 rounded-[.625rem] bg-[#F5F5F5] px-4 py-2">
+            <div
+              class="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-[.625rem] bg-[#F5F5F5] px-4 py-2"
+            >
               <span class="text-neutral-medium"> Total de usos: </span>
 
               <p class="font-semibold">
@@ -121,7 +123,9 @@
             </div>
 
             <!-- Receita total -->
-            <div class="flex items-center gap-x-2 rounded-[.625rem] bg-[#F5F5F5] px-4 py-2">
+            <div
+              class="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-[.625rem] bg-[#F5F5F5] px-4 py-2"
+            >
               <span class="text-neutral-medium"> Receita total: </span>
 
               <p class="font-semibold">
@@ -130,7 +134,9 @@
             </div>
 
             <!-- Comissão total -->
-            <div class="flex items-center gap-x-2 rounded-[.625rem] bg-[#F5F5F5] px-4 py-2">
+            <div
+              class="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-[.625rem] bg-[#F5F5F5] px-4 py-2"
+            >
               <span class="text-neutral-medium"> Comissão total: </span>
 
               <p class="font-semibold">
@@ -183,7 +189,7 @@
           <div class="flex flex-col gap-y-2">
             <span class="text-neutral-medium"> Tipo de chave PIX </span>
 
-            <p class="font-semibold uppercase">
+            <p class="break-words font-semibold uppercase">
               {{ couponState().affiliate_payment?.pix_key_type || 'N/A' }}
             </p>
           </div>
@@ -192,7 +198,7 @@
           <div class="flex flex-col gap-y-2">
             <span class="text-neutral-medium"> Chave PIX </span>
 
-            <p class="font-semibold">
+            <p class="break-all font-semibold">
               {{ couponState().affiliate_payment?.pix_key || 'N/A' }}
             </p>
           </div>
@@ -215,7 +221,7 @@
 
   <!-- Modal de confirmação de exclusão -->
   <app-modal [isOpen]="deleteModalOpen()" (close)="closeDeleteModal()">
-    <div class="bg-white rounded-[.625rem] w-100 max-w-[calc(100vw-2rem)] p-6 max-sm:p-4">
+    <div class="w-100 max-w-[calc(100vw-2rem)] rounded-[.625rem] bg-white p-6 max-sm:p-4">
       <h2 class="font-urbanist text-xl font-bold">Excluir cupom</h2>
 
       <p class="mt-2 font-manrope text-sm text-neutral-medium">
@@ -228,7 +234,7 @@
         <app-button
           type="button"
           variant="outline"
-          class="flex-1 w-full"
+          class="w-full flex-1"
           [disabled]="isDeleting()"
           (click)="closeDeleteModal()"
         >
@@ -237,7 +243,7 @@
 
         <app-button
           type="button"
-          class="flex-1 w-full"
+          class="w-full flex-1"
           [disabled]="isDeleting()"
           (click)="confirmDelete()"
         >

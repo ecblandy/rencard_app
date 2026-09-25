@@ -6,6 +6,8 @@ export interface Plan {
   type: string;
   description?: string;
   features?: string[];
+  price_cents?: number;
+  active?: boolean;
 }
 
 export interface Permissions {
@@ -37,6 +39,12 @@ export interface ActivePlan {
   end_at?: string;
   features?: string[];
   payment_method?: string | null;
+  price_cents?: number;
+  active?: boolean;
+}
+
+export interface Onboarding {
+  next_action?: string | null;
 }
 
 export interface User extends Address {
@@ -44,6 +52,9 @@ export interface User extends Address {
   full_name: string;
   active_access_grant: ActiveGrant | null;
   active_plan: ActivePlan | null;
+
+  onboarding?: Onboarding;
+
   email: string;
   password: string;
   role: UserRole;
@@ -55,11 +66,22 @@ export interface User extends Address {
   country: string;
   profile_image: string | null;
   terms_accepted: boolean;
+
   physical?: PhysicalCard;
+
   last_payment_date?: string;
   next_charge_date?: string;
 
-  // 👇 Adicione os campos de PIX aqui
+  // Endereço / cadastro
+  street: string;
+  number: number | null;
+  neighborhood: string;
+  cep: string;
+  complement?: string;
+  city: string;
+  state: string;
+
+  // PIX
   pix_key?: string;
   pix_key_type?: string;
   pix_owner_name?: string;
@@ -75,6 +97,8 @@ export interface Address {
   state: string;
 }
 
-export type UserRegistration = Omit<User, 'role'> & { role: UserRole };
+export type UserRegistration = Omit<User, 'role'> & {
+  role: UserRole;
+};
 
 export type SignupDraft = Partial<UserRegistration>;
