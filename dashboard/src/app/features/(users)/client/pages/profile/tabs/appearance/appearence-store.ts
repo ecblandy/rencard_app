@@ -37,6 +37,11 @@ export class AppearanceStore {
     }));
   }
 
+  /**
+   * Sincroniza as cores do store com os dados do perfil vindo do backend.
+   * Usado após receber a resposta da API para garantir que o store
+   * está sempre sincronizado com o servidor.
+   */
   setFromProfile(profile: Partial<AppearanceSettings>) {
     this.settings.update((prev) => ({
       ...prev,
@@ -55,5 +60,24 @@ export class AppearanceStore {
 
       text_secondary: profile.text_secondary || prev.text_secondary,
     }));
+  }
+
+  /**
+   * Reseta todas as cores para os valores padrão.
+   * Útil para revertir mudanças não salvas.
+   */
+  resetColors() {
+    this.settings.set({
+      background_color: '#ffffff',
+
+      button_bg_primary: '#000000',
+      button_bg_secondary: '#f5f5f5',
+
+      button_text_primary: '#ffffff',
+      button_text_secondary: '#000000',
+
+      text_primary: '#000000',
+      text_secondary: '#6b7280',
+    });
   }
 }

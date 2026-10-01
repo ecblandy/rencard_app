@@ -15,10 +15,6 @@
       <p class="mt-4 text-gray-600">Carregando produtos, aguarde...</p>
     </div>
   } @else if (resourceError()) {
-    <!-- ========================================================= -->
-    <!-- ERRO AO CARREGAR PRODUTOS -->
-    <!-- ========================================================= -->
-
     <div class="flex flex-col items-center justify-center mt-10 sm:mt-[6.25rem] text-center gap-4">
       <p class="font-manrope text-neutral-medium">
         Não foi possível carregar os produtos agora. Verifique sua conexão e tente novamente.
@@ -153,15 +149,12 @@
 
                       <!-- ================================================= -->
                       <!-- PERSONALIZAÇÃO -->
-                      <!-- SOMENTE ABAIXO DO CARD -->
                       <!-- ================================================= -->
 
                       @if (product.type === 'card' && showAdditionalProducts()) {
                         <div class="w-full mt-4">
                           @for (additional of aditionalProducts(); track additional.id) {
                             <app-surface classes="w-full bg-[#F5F5F5] p-4 sm:p-[1.5rem]">
-                              <!-- Cabeçalho -->
-
                               <div class="flex items-start sm:items-center gap-x-3 sm:gap-x-[1rem]">
                                 <input
                                   type="checkbox"
@@ -186,8 +179,6 @@
                                   </p>
                                 </div>
                               </div>
-
-                              <!-- Upload da logo -->
 
                               @if (isSelected(additional.id.toString())) {
                                 <div class="mt-4 sm:mt-[1rem] space-y-2 sm:space-y-[.5rem]">
@@ -363,6 +354,11 @@
                       (input)="onCepInput($event)"
                     />
 
+                    <p class="text-xs font-manrope text-neutral-medium">
+                      Se você adicionar ou remover cartão/tag depois de calcular o frete, será
+                      necessário escolher uma opção novamente.
+                    </p>
+
                     @if (cepDigits().length > 0 && cepDigits().length < 8) {
                       <p class="text-xs sm:text-sm font-manrope text-neutral-medium">
                         Digite os 8 dígitos do CEP.
@@ -373,6 +369,36 @@
                       <p class="text-xs sm:text-sm font-manrope text-neutral-medium">
                         Calculando frete...
                       </p>
+                    } @else if (shippingErrorMessage()) {
+                      <div class="space-y-2">
+                        <p class="text-xs sm:text-sm font-manrope text-red-500">
+                          {{ shippingErrorMessage() }}
+                        </p>
+
+                        <app-button
+                          variant="outline"
+                          sizeH="sm"
+                          class="w-full"
+                          (click)="calculateShipping()"
+                        >
+                          Tentar novamente
+                        </app-button>
+                      </div>
+                    } @else if (cepDigits().length === 8 && shippingOptions().length === 0) {
+                      <div class="space-y-2">
+                        <p class="text-xs sm:text-sm font-manrope text-neutral-medium">
+                          Nenhuma opção de frete encontrada para esse CEP ainda.
+                        </p>
+
+                        <app-button
+                          variant="outline"
+                          sizeH="sm"
+                          class="w-full"
+                          (click)="calculateShipping()"
+                        >
+                          Calcular novamente
+                        </app-button>
+                      </div>
                     }
 
                     @if (shippingOptions().length > 0) {
@@ -423,6 +449,12 @@
                               {{ formatPrice(option.price_cents) }}
                             </p>
                           </div>
+                        }
+
+                        @if (selectedShipping() === null) {
+                          <p class="text-xs sm:text-sm font-manrope text-amber-600">
+                            Escolha uma opção acima para continuar.
+                          </p>
                         }
                       </div>
                     }
@@ -541,6 +573,26 @@
             </app-surface>
           }
         }
+      }
+
+      <!-- ========================================================= -->
+      <!-- O QUE FALTA PARA CONTINUAR -->
+      <!-- ========================================================= -->
+
+      @if (pendingRequirements().length > 0) {
+        <div class="mt-6 sm:mt-[2rem] rounded-lg bg-amber-50 border border-amber-200 p-3 sm:p-4">
+          <p class="text-xs sm:text-sm font-manrope font-medium text-amber-800 mb-1">
+            Para continuar:
+          </p>
+
+          <ul class="list-disc list-inside space-y-1">
+            @for (requirement of pendingRequirements(); track requirement) {
+              <li class="text-xs sm:text-sm font-manrope text-amber-700">
+                {{ requirement }}
+              </li>
+            }
+          </ul>
+        </div>
       }
 
       <!-- ========================================================= -->

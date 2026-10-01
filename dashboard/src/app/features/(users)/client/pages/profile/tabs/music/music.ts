@@ -1,4 +1,5 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { switchMap } from 'rxjs';
 import { Surface } from '../../../../../../../shared/components/surface/surface';
 import { SurfaceTitle } from '../../../../../components/surface-title/surface-title';
 import { NgIcon } from '@ng-icons/core';
@@ -9,6 +10,7 @@ import { MUSIC_CARD, MusicFormModel, MusicModel } from './music.config';
 import { toast } from 'ngx-sonner';
 import { ClientService } from '../../../../services/facade/client.service';
 import { ProfileStore } from '../../services/store/profile.store';
+import { ProfileService } from '../../services/facade/profile.service';
 import { form } from '@angular/forms/signals';
 
 @Component({
@@ -18,7 +20,8 @@ import { form } from '@angular/forms/signals';
   styleUrl: './music.css',
 })
 export class Music {
-  private readonly clientServices = inject(ClientService);
+  private readonly clientService = inject(ClientService);
+  private readonly profileService = inject(ProfileService);
   profileStore = inject(ProfileStore);
 
   music = signal<MusicModel>({ ...MUSIC_CARD });
@@ -35,33 +38,54 @@ export class Music {
       this.music.set({ ...MUSIC_CARD, enabled: storeMusic.enabled });
       this.musicModel.set({ music: storeMusic.value });
     }
-
-    effect(() => {
-      const value = this.musicForm.music().value() ?? '';
-      this.profileStore.updateMusic(value, this.music().enabled);
-    });
   }
+
   private getFieldValue(): string {
     const state = this.musicForm.music();
     return state.value() ?? '';
   }
 
+  /**
+   * Salva usando o endpoint original (ClientService) e, em seguida,
+   * busca o perfil completo para o store refletir o que realmente
+   * foi gravado no backend.
+   */
+  private saveMusic(value: string, enabled: boolean) {
+    return this.clientService
+      .updateMusic({ value, enabled })
+      .pipe(switchMap(() => this.profileService.fetchProfile()));
+  }
+
   toggleEnabled(value: boolean) {
     this.music.update((item) => ({ ...item, enabled: value }));
+
+    // sincroniza o switch (que lê do store) imediatamente
+    const currentMusic = this.profileStore.profile().music;
+    this.profileStore.updateMusic(currentMusic?.value ?? this.getFieldValue(), value);
   }
 
   onSubmit(event: Event) {
     event.preventDefault();
 
     if (!this.music().enabled) {
-      this.clientServices.updateMusic({ value: '', enabled: false }).subscribe({
+      const loadingToast = toast.loading('Aguarde, salvando...', { description: '' });
+
+      this.saveMusic('', false).subscribe({
         next: () => {
           this.music.update((item) => ({ ...item, enabled: false }));
+
           toast.success('Pronto! Tudo atualizado.', {
             description: 'Música atualizada com sucesso!',
+            id: loadingToast,
           });
         },
-        error: () => toast.error('Ops! Algo deu errado.', { description: 'Tente novamente.' }),
+        error: (error) => {
+          console.error('[Music] Erro ao salvar:', error);
+          toast.error('Ops! Algo deu errado.', {
+            description: 'Tente novamente.',
+            id: loadingToast,
+          });
+        },
       });
       return;
     }
@@ -77,16 +101,17 @@ export class Music {
 
     const loadingToast = toast.loading('Aguarde, tentando atualizar...', { description: '' });
 
-    this.clientServices.updateMusic({ value, enabled: true }).subscribe({
+    this.saveMusic(value, true).subscribe({
       next: () => {
         this.music.update((item) => ({ ...item, enabled: true, value }));
+
         toast.success('Pronto! Tudo atualizado.', {
           description: 'Música atualizada com sucesso!',
           id: loadingToast,
         });
       },
-      error: (error: any) => {
-        console.error('Erro ao atualizar música:', error);
+      error: (error) => {
+        console.error('[Music] Erro ao salvar:', error);
         toast.error('Ops! Algo deu errado.', {
           description: 'Não foi possível atualizar sua música. Tente novamente.',
           id: loadingToast,

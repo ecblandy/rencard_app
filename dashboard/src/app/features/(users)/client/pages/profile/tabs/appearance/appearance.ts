@@ -6,8 +6,7 @@ import { SurfaceTitle } from '../../../../../components/surface-title/surface-ti
 import { AppearanceSettings, AppearanceStore } from './appearence-store';
 
 import { toast } from 'ngx-sonner';
-
-import { ProfileApi } from '../../services/api/profile-api';
+import { ProfileService } from '../../services/facade/profile.service';
 
 interface ColorField {
   key: keyof AppearanceSettings;
@@ -24,7 +23,7 @@ interface ColorField {
 export class Appearance {
   readonly store = inject(AppearanceStore);
 
-  private readonly api = inject(ProfileApi);
+  private readonly profileService = inject(ProfileService);
 
   readonly colorFields: ColorField[] = [
     {
@@ -69,11 +68,13 @@ export class Appearance {
   }
 
   save() {
-    this.api.updateAppearance(this.store.settings()).subscribe({
-      next: () => {
+    this.profileService.updateAppearance(this.store.settings()).subscribe({
+      next: (profile) => {
+        console.log('[Appearance] Salvo com sucesso:', profile);
         toast.success('Aparência salva!');
       },
-      error: () => {
+      error: (error) => {
+        console.error('[Appearance] Erro ao salvar:', error);
         toast.error('Erro ao salvar aparência.');
       },
     });

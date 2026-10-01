@@ -33,14 +33,14 @@ const MAX_LOGO_SIZE_BYTES = 5 * 1024 * 1024;
 
 const ACCEPTED_LOGO_TYPES = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
 
-// Fallback usado quando o navegador/SO não informa (ou informa errado) o
-// `file.type` do arquivo — isso acontece com frequência para SVG e, em
-// alguns Windows/Android mal configurados, também para PNG/JPG.
 const ACCEPTED_LOGO_EXTENSIONS = ['.png', '.jpg', '.jpeg', '.svg', '.webp'];
 
 const CEP_DEBOUNCE_MS = 500;
 
 const DEFAULT_COUPON_ERROR_MESSAGE = 'Cupom inválido ou expirado.';
+
+const DEFAULT_SHIPPING_ERROR_MESSAGE =
+  'Não foi possível calcular o frete para esse CEP. Tente novamente.';
 
 @Component({
   selector: 'app-products',
@@ -121,25 +121,31 @@ export class Products {
 
     effect((onCleanup) => {
       const cep = this.cepDigits();
-      const hasPhysical = this.hasPhysicalProductSelected();
 
-      // IMPORTANTE: lemos o carrinho "cru" aqui (e não só o computed
-      // booleano acima) de propósito. Um computed() só notifica quem o
-      // observa quando o VALOR dele muda — se a cliente marcar/desmarcar a
-      // personalização com logo enquanto um cartão continua selecionado,
-      // `hasPhysicalProductSelected()` continua `true` antes e depois, e
-      // esse effect nunca seria re-executado. Só que `resetShipping()`
-      // (chamado dentro de `selectItem()`) já zerou o frete — e sem o
-      // effect reagir, o frete some e nunca mais volta sozinho. Lendo
-      // `selectedItems()` diretamente garantimos que QUALQUER alteração no
-      // carrinho reagenda o recálculo, enquanto o CEP já estiver completo.
-      const items = this.selectedItems();
+      // IMPORTANTE:
+      // O frete observa somente os produtos físicos.
+      //
+      // A logo continua em selectedItems(), mas não faz parte
+      // desta chave. Portanto:
+      //
+      // cartão selecionado -> calcula
+      // tag selecionada -> calcula
+      // cartão/tag removido -> calcula
+      // CEP alterado -> calcula
+      // logo adicionada -> NÃO calcula
+      // logo removida -> NÃO calcula
+      const physicalSelectionKey = this.physicalSelectionKey();
 
-      if (cep.length !== 8 || !hasPhysical || items.length === 0) {
+      if (cep.length !== 8 || !physicalSelectionKey) {
         return;
       }
 
-      const timeoutId = setTimeout(() => this.calculateShipping(), CEP_DEBOUNCE_MS);
+      this.isCalculatingShipping.set(true);
+      this.shippingErrorMessage.set(null);
+
+      const timeoutId = setTimeout(() => {
+        this.calculateShipping();
+      }, CEP_DEBOUNCE_MS);
 
       onCleanup(() => {
         clearTimeout(timeoutId);
@@ -318,11 +324,6 @@ export class Products {
 
   readonly couponResponse = signal<CouponValidateResponse | null>(null);
 
-  // Mensagem específica devolvida pelo backend (ex: "Cupom aplicável
-  // apenas a cartões.", "Cupom inativo ou expirado.", "Cupom não
-  // aplicável para o onboarding."). Cada tipo de cupom tem um motivo de
-  // falha diferente, então não faz sentido mostrar sempre o mesmo texto
-  // genérico.
   readonly couponErrorMessage = signal<string | null>(null);
 
   private couponRequestId = 0;
@@ -346,8 +347,6 @@ export class Products {
 
     this.paymentService.validateCoupon(code, items).subscribe({
       next: (response: CouponValidateResponse) => {
-        // Ignora respostas "atrasadas" de uma chamada antiga caso a cliente
-        // já tenha editado o cupom ou o carrinho de novo nesse meio-tempo.
         if (requestId !== this.couponRequestId) {
           return;
         }
@@ -376,13 +375,6 @@ export class Products {
     });
   }
 
-  // Extrai a mensagem específica que o backend devolveu para o cupom.
-  // O backend segue o padrão do Django REST Framework: erro de campo vem
-  // como uma lista de strings, ex:
-  //   { "coupon_code": ["Cupom aplicável apenas a cartões."] }
-  // Isso cobre todos os casos documentados: código ausente, cupom
-  // inválido, inativo/expirado, não aplicável ao onboarding, e os casos
-  // específicos de cartão/tag.
   private extractCouponErrorMessage(error: HttpErrorResponse): string {
     const body = error?.error;
 
@@ -392,15 +384,16 @@ export class Products {
       return fieldErrors[0];
     }
 
-    // Alguns erros (500, timeout, CORS, resposta fora do padrão) não vêm
-    // nesse formato. Nesses casos caímos numa mensagem genérica em vez de
-    // mostrar "undefined" ou "[object Object]" pra cliente.
     if (typeof body?.detail === 'string' && body.detail.trim()) {
       return body.detail;
     }
 
     return DEFAULT_COUPON_ERROR_MESSAGE;
   }
+
+  // =========================================================
+  // RESET DO CUPOM
+  // =========================================================
 
   private resetCoupon() {
     this.couponRequestId++;
@@ -409,6 +402,16 @@ export class Products {
     this.couponStatus.set('idle');
     this.couponResponse.set(null);
     this.couponErrorMessage.set(null);
+  }
+
+  private invalidateCoupon() {
+    this.couponRequestId++;
+
+    if (this.couponStatus() !== 'idle') {
+      this.couponStatus.set('idle');
+      this.couponResponse.set(null);
+      this.couponErrorMessage.set(null);
+    }
   }
 
   // =========================================================
@@ -438,9 +441,6 @@ export class Products {
       return true;
     }
 
-    // Alguns navegadores/SO não preenchem (ou preenchem errado) o
-    // `file.type` — principalmente para SVG. Nesse caso, confiamos na
-    // extensão do arquivo em vez de recusar um arquivo válido.
     const name = file.name.toLowerCase();
 
     return ACCEPTED_LOGO_EXTENSIONS.some((extension) => name.endsWith(extension));
@@ -498,9 +498,6 @@ export class Products {
       [id]: file,
     }));
 
-    // Limpa o input mesmo em caso de sucesso: assim, se a cliente remover e
-    // selecionar o MESMO arquivo de novo depois, o "change" dispara de novo
-    // normalmente (o navegador não dispara change se o value não mudou).
     input.value = '';
   }
 
@@ -565,16 +562,23 @@ export class Products {
       (selectedItem) => selectedItem.id === item.id,
     );
 
+    // Só produtos da lista de products() são físicos.
+    // O adicional de logo não é físico para o cálculo
+    // de frete.
+    const isPhysicalItem = this.products().some((product) => product.id.toString() === item.id);
+
+    // Guardamos ANTES de alterar o carrinho.
+    // Assim sabemos se realmente existia um frete
+    // selecionado que será invalidado.
+    const hadShippingSelected = this.selectedShipping() !== null;
+
     if (existingIndex > -1) {
       this.selectedItems.update((items) => items.filter((_, index) => index !== existingIndex));
 
       this.removeLogo(item.id);
 
-      // Se o item desmarcado era um cartão e não sobrou nenhum cartão
-      // selecionado, a personalização com logo deixa de fazer sentido (a UI
-      // dela some). Sem isso, um adicional de logo ficava "fantasma": ainda
-      // selecionado no carrinho, com arquivo enviado, mas sem nenhum cartão
-      // vinculado — bagunçando o frete e a validação do botão Continuar.
+      // Se removeu o último cartão, remove também
+      // a personalização de logo.
       if (item.type === 'card' && !this.hasCardSelected()) {
         for (const additional of this.aditionalProducts()) {
           const additionalId = additional.id.toString();
@@ -590,8 +594,44 @@ export class Products {
       this.selectedItems.update((items) => [...items, item]);
     }
 
-    this.resetShipping();
-    this.resetCoupon();
+    // =======================================================
+    // FRETE
+    // =======================================================
+    //
+    // Somente cartão/tag invalidam o frete.
+    //
+    // A logo não passa por esse bloco porque isPhysicalItem
+    // será false para o adicional.
+    if (isPhysicalItem) {
+      this.resetShipping();
+
+      // Só mostramos o toast quando:
+      //
+      // 1. já havia uma opção de frete escolhida;
+      // 2. a alteração foi de um produto físico;
+      // 3. ainda existe produto físico selecionado.
+      //
+      // Isso cobre exatamente o caso:
+      //
+      // cartão
+      // -> escolheu frete
+      // -> adicionou tag
+      // -> frete precisa ser escolhido novamente
+      //
+      // Mas não gera toast quando a pessoa está apenas
+      // começando o fluxo.
+      if (hadShippingSelected && this.hasPhysicalProductSelected()) {
+        toast.info('Você alterou os produtos físicos. Escolha novamente uma opção de frete.', {
+          id: 'shipping-selection-reset',
+        });
+      }
+    }
+
+    // =======================================================
+    // CUPOM
+    // =======================================================
+
+    this.invalidateCoupon();
   }
 
   // =========================================================
@@ -617,6 +657,8 @@ export class Products {
 
   readonly selectedShipping = signal<ShippingOption | null>(null);
 
+  readonly shippingErrorMessage = signal<string | null>(null);
+
   private shippingRequestId = 0;
 
   readonly shippingOptions = computed(
@@ -628,13 +670,16 @@ export class Products {
   }
 
   private resetShipping() {
-    // Invalida qualquer chamada de frete que ainda esteja "em voo": a
-    // resposta dela será ignorada quando chegar (ver calculateShipping()).
+    // Invalida requisições em andamento.
     this.shippingRequestId++;
 
     this.shippingCalculationResponse.set(null);
+
     this.selectedShipping.set(null);
+
     this.isCalculatingShipping.set(false);
+
+    this.shippingErrorMessage.set(null);
   }
 
   readonly hasPhysicalProductSelected = computed(
@@ -645,6 +690,17 @@ export class Products {
     this.selectedItems().filter((item) =>
       this.products().some((product) => product.id.toString() === item.id),
     ),
+  );
+
+  // Chave composta APENAS pelos produtos físicos.
+  //
+  // Isso impede que adicionar/remover logo
+  // dispare o effect de cálculo do frete.
+  private physicalSelectionKey = computed(() =>
+    this.physicalSelectedItems()
+      .map((item) => item.id)
+      .sort()
+      .join('|'),
   );
 
   readonly cepDisplay = computed(() => this.formatCep(this.cepDigits()));
@@ -689,48 +745,108 @@ export class Products {
 
     this.isCalculatingShipping.set(true);
 
-    const loadingToast = toast.loading('Aguarde, buscando informações...', {
-      description: '',
-    });
+    this.shippingErrorMessage.set(null);
 
     this.paymentService.searchShipping(shippingData).subscribe({
       next: (response: ShippingCalculationResponse) => {
-        // Uma chamada mais recente pode ter sido disparada (CEP ou
-        // carrinho mudaram de novo) enquanto esta ainda estava em
-        // andamento. Se não formos mais a chamada "atual", ignoramos a
-        // resposta para não sobrescrever dados novos com dados velhos.
+        // Ignora resposta antiga.
         if (requestId !== this.shippingRequestId) {
           return;
         }
-
-        toast.success('Informações encontradas', {
-          description: '',
-          id: loadingToast,
-        });
 
         this.shippingCalculationResponse.set(response);
 
+        // Sempre exige nova escolha quando o cálculo
+        // de frete foi feito novamente.
         this.selectedShipping.set(null);
 
         this.isCalculatingShipping.set(false);
+
+        this.shippingErrorMessage.set(null);
       },
 
-      error: (error) => {
+      error: (error: HttpErrorResponse) => {
+        // Ignora erro de uma requisição antiga.
         if (requestId !== this.shippingRequestId) {
           return;
         }
 
-        toast.error('Erro ao buscar informações', {
-          description: '',
-          id: loadingToast,
-        });
+        const message = this.extractShippingErrorMessage(error);
 
         console.error('Erro ao buscar informações:', error);
 
         this.isCalculatingShipping.set(false);
+
+        this.shippingErrorMessage.set(message);
       },
     });
   }
+
+  private extractShippingErrorMessage(error: HttpErrorResponse): string {
+    const body = error?.error;
+
+    const fieldNames = ['postal_code', 'items', 'non_field_errors'];
+
+    for (const field of fieldNames) {
+      const fieldErrors = body?.[field];
+
+      if (
+        Array.isArray(fieldErrors) &&
+        typeof fieldErrors[0] === 'string' &&
+        fieldErrors[0].trim()
+      ) {
+        return fieldErrors[0];
+      }
+    }
+
+    if (typeof body?.detail === 'string' && body.detail.trim()) {
+      return body.detail;
+    }
+
+    return DEFAULT_SHIPPING_ERROR_MESSAGE;
+  }
+
+  // =========================================================
+  // O QUE FALTA PARA CONTINUAR?
+  // =========================================================
+
+  readonly pendingRequirements = computed<string[]>(() => {
+    const requirements: string[] = [];
+
+    if (this.selectionMode() === null) {
+      requirements.push('Selecione "Cartão e Tag" ou "Apenas Digital" acima.');
+
+      return requirements;
+    }
+
+    if (this.selectedItems().length === 0) {
+      requirements.push('Selecione ao menos um produto.');
+
+      return requirements;
+    }
+
+    if (this.selectionMode() === 'fisico') {
+      if (this.cepDigits().length < 8) {
+        requirements.push('Informe o CEP completo para calcular o frete.');
+      } else if (this.isCalculatingShipping()) {
+        requirements.push('Aguarde o cálculo do frete...');
+      } else if (this.shippingErrorMessage()) {
+        requirements.push('Não foi possível calcular o frete. Tente novamente abaixo.');
+      } else if (this.selectedShipping() === null) {
+        requirements.push('Escolha uma opção de frete.');
+      }
+
+      const logoAdditional = this.selectedLogoAdditional();
+
+      if (logoAdditional && this.isLogoMissing(logoAdditional.id.toString())) {
+        requirements.push(
+          'Envie uma imagem para a personalização com logo (ou desmarque essa opção).',
+        );
+      }
+    }
+
+    return requirements;
+  });
 
   // =========================================================
   // PODE CONTINUAR?

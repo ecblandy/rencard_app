@@ -160,7 +160,9 @@ export class ProfileStore {
 
         pending_plan: data.pending_plan ?? current.pending_plan,
 
-        music: data.music ?? current.music,
+        // 👇 CORRIGIDO: se o backend mandar null, respeita o null.
+        // Só mantém o valor atual quando o campo NÃO veio na resposta.
+        music: data.music !== undefined ? data.music : current.music,
 
         resume: data.resume ?? current.resume,
       };
@@ -176,7 +178,6 @@ export class ProfileStore {
 
     this.appearanceStore.setFromProfile(updatedProfile);
   }
-
   updateProfile(data: Partial<ProfileModel>) {
     this.profile.update((state) => ({
       ...state,

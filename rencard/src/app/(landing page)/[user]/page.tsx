@@ -526,13 +526,13 @@ export default async function UserProfilePage({ params }: Props) {
                 responseToJson.owner_name ||
                 "Usuário"
               }
-              width={102}
-              height={102}
-              className="h-[6.375rem] w-[6.375rem] rounded-[.625rem] object-cover"
+              width={128}
+              height={128}
+              className="h-32 w-32 rounded-[.75rem] object-cover"
             />
 
             <h1
-              className="mt-[1.125rem] text-[.9375rem] font-bold"
+              className="mt-[1.25rem] text-[1.25rem] font-bold leading-7"
               style={{
                 color: primaryText,
               }}
@@ -543,7 +543,7 @@ export default async function UserProfilePage({ params }: Props) {
             </h1>
 
             <p
-              className="w-full break-words text-center text-[.75rem]"
+              className="mt-1 w-full max-w-sm break-words text-center text-[.875rem] leading-6"
               style={{
                 color: secondaryText,
               }}

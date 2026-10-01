@@ -15,6 +15,8 @@ import {
   Resume,
 } from '../../../../../../../shared/types/profile-model';
 
+import { AppearanceSettings } from '../../tabs/appearance/appearence-store';
+
 interface UpdateSettingsPayload {
   custom_url: string;
   is_private: boolean;
@@ -98,6 +100,20 @@ export class ProfileService {
 
     return this.profileApi.updateProfile(formData).pipe(
       tap((profile: ProfileModel) => {
+        this.profileStore.setProfileFromAPI(profile);
+      }),
+    );
+  }
+
+  // =========================================================
+  // APPEARANCE
+  // =========================================================
+
+  updateAppearance(payload: AppearanceSettings): Observable<ProfileModel> {
+    return this.profileApi.updateAppearance(payload).pipe(
+      tap((profile: ProfileModel) => {
+        console.log('[Appearance] PATCH:', profile);
+
         this.profileStore.setProfileFromAPI(profile);
       }),
     );
@@ -235,5 +251,29 @@ export class ProfileService {
         this.profileStore.setProfileFromAPI(profile);
       }),
     );
+  }
+
+  updateMusic(payload: { value: string; enabled: boolean }): Observable<ProfileModel> {
+    return this.profileApi.updateProfile(this.createMusicFormData(payload)).pipe(
+      tap((profile: ProfileModel) => {
+        console.log('[Music] PATCH:', profile);
+
+        this.profileStore.setProfileFromAPI(profile);
+      }),
+    );
+  }
+
+  private createMusicFormData(payload: { value: string; enabled: boolean }): FormData {
+    const formData = new FormData();
+
+    formData.append(
+      'music',
+      JSON.stringify({
+        value: payload.value,
+        enabled: payload.enabled,
+      }),
+    );
+
+    return formData;
   }
 }
