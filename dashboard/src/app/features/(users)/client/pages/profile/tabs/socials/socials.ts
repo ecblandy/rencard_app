@@ -40,10 +40,12 @@ export class Socials {
   private initialized = false;
 
   constructor() {
-    // 1. Hidrata UMA VEZ quando o profile chega do backend
+    // 1. Hidrata UMA VEZ quando o profile REAL chega do backend
     effect(() => {
       const profile = this.profileStore.profile();
-      if (this.initialized || !profile?.social_links?.length) return;
+
+      // id === 0 significa que ainda é o EMPTY_PROFILE (backend não respondeu)
+      if (this.initialized || !profile?.id) return;
 
       this.initialized = true;
 
@@ -64,7 +66,7 @@ export class Socials {
         spotify: '',
       };
 
-      profile.social_links.forEach((link) => {
+      (profile.social_links ?? []).forEach((link) => {
         const key = keyMap[link.type] ?? (link.type as keyof SocialsFormModel);
         if (key in model) model[key] = link.value;
       });
@@ -73,7 +75,7 @@ export class Socials {
 
       this.socials.update((list) =>
         list.map((social) => {
-          const fromBackend = profile.social_links.find(
+          const fromBackend = (profile.social_links ?? []).find(
             (l) => (keyMap[l.type] ?? l.type) === social.key,
           );
           return fromBackend ? { ...social, enabled: fromBackend.enabled } : social;
@@ -103,27 +105,25 @@ export class Socials {
       this.profileStore.updateProfile({ social_links: socials_list });
     });
   }
-  // 1) Atualiza `socials` imutavelmente quando trocar o switch
+
+  // Atualiza `socials` imutavelmente quando trocar o switch
   toggleEnabled(index: number, value: boolean) {
     this.socials.update((list) =>
       list.map((item, i) => (i === index ? { ...item, enabled: value } : item)),
     );
   }
 
-  // 2) Pega o value seguro do FieldState ou do socialsModel (fallback)
+  // Pega o value seguro do FieldState ou do socialsModel (fallback)
   private getFieldValue(key: keyof SocialsFormModel): string {
     const fieldFn = this.socialsForm[key] as unknown as () => any;
     if (typeof fieldFn === 'function') {
       try {
         const state = fieldFn();
-        // state.value() é a API que você usa no template
         return typeof state?.value === 'function' ? (state.value() ?? '') : '';
       } catch {
-        // em caso de qualquer problema, usa o modelo direto
         return this.socialsModel()[key] ?? '';
       }
     }
-    // fallback ao modelo bruto
     return this.socialsModel()[key] ?? '';
   }
 
@@ -131,13 +131,14 @@ export class Socials {
     event.preventDefault();
 
     const socialsArray = this.socials();
-    const enabledSocials = socialsArray.filter((s) => s.enabled);
 
     // Valida manualmente só os habilitados
-    const invalid = enabledSocials.filter((s) => {
-      const value = this.getFieldValue(s.key as keyof SocialsFormModel);
-      return !value || value.trim().length < 3;
-    });
+    const invalid = socialsArray
+      .filter((s) => s.enabled)
+      .filter((s) => {
+        const value = this.getFieldValue(s.key as keyof SocialsFormModel);
+        return !value || value.trim().length < 3;
+      });
 
     if (invalid.length > 0) {
       const labels = invalid.map((s) => s.label).join(', ');
@@ -147,24 +148,28 @@ export class Socials {
       return;
     }
 
-    const social_links_filtered = enabledSocials.map((s) => {
-      let value = this.getFieldValue(s.key);
+    // Envia habilitadas (enabled: true) E desabilitadas que tenham valor (enabled: false),
+    // para o backend saber que foram desligadas.
+    const social_links_payload = socialsArray
+      .map((s) => {
+        let value = (this.getFieldValue(s.key as keyof SocialsFormModel) ?? '').trim();
 
-      if (s.key === 'email' && !value.startsWith('mailto:')) {
-        value = `mailto:${value}`;
-      }
+        if (s.key === 'email' && value && !value.startsWith('mailto:')) {
+          value = `mailto:${value}`;
+        }
 
-      return {
-        id: 0,
-        type: s.key,
-        value,
-        enabled: true,
-      };
-    });
+        return {
+          id: 0,
+          type: s.key,
+          value,
+          enabled: s.enabled, // 👈 respeita o estado real do switch
+        };
+      })
+      .filter((s) => s.enabled || s.value.length > 0);
 
     const loadingToast = toast.loading('Aguarde, tentando atualizar...', { description: '' });
 
-    this.clientServices.enableSocials(social_links_filtered).subscribe({
+    this.clientServices.enableSocials(social_links_payload).subscribe({
       next: () => {
         toast.success('Pronto! Tudo atualizado.', {
           description: 'Redes sociais atualizadas com sucesso!',

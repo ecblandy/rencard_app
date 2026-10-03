@@ -21,6 +21,18 @@ import {
   PortfolioVideos,
 } from '../../../../../../../shared/types/profile-model';
 
+// =========================================================
+// LIMITES DE UPLOAD
+// =========================================================
+
+const MAX_IMAGES = 6;
+
+/** Ajuste para o limite real do seu backend / Cloudinary. */
+const MAX_IMAGE_SIZE_MB = 5;
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
+
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
 interface PendingImage {
   file: File;
   preview: string;
@@ -101,6 +113,32 @@ export class Portfolio implements OnDestroy {
   // IMAGENS
   // =========================================================
 
+  /**
+   * Separa os arquivos selecionados em válidos e inválidos
+   * (tipo não permitido ou tamanho acima do limite).
+   */
+  private validateFiles(files: File[]): {
+    valid: File[];
+    invalidType: string[];
+    tooLarge: string[];
+  } {
+    const valid: File[] = [];
+    const invalidType: string[] = [];
+    const tooLarge: string[] = [];
+
+    for (const file of files) {
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        invalidType.push(file.name);
+      } else if (file.size > MAX_IMAGE_SIZE_BYTES) {
+        tooLarge.push(file.name);
+      } else {
+        valid.push(file);
+      }
+    }
+
+    return { valid, invalidType, tooLarge };
+  }
+
   onImagesSelected(event: Event) {
     const input = event.target as HTMLInputElement;
 
@@ -110,19 +148,48 @@ export class Portfolio implements OnDestroy {
 
     const currentImages = this.profile().portfolio_images.images;
 
-    const remaining = 6 - currentImages.length;
+    const remaining = MAX_IMAGES - currentImages.length;
 
     if (remaining <= 0) {
       input.value = '';
 
       toast.warning('Limite atingido', {
-        description: 'Você pode adicionar no máximo 6 imagens.',
+        description: `Você pode adicionar no máximo ${MAX_IMAGES} imagens.`,
       });
 
       return;
     }
 
-    const files = Array.from(input.files).slice(0, remaining);
+    /**
+     * Valida tipo e tamanho ANTES de gerar qualquer preview.
+     */
+    const { valid, invalidType, tooLarge } = this.validateFiles(Array.from(input.files));
+
+    if (invalidType.length > 0) {
+      toast.error('Formato não permitido', {
+        description: `Use JPG, PNG ou WebP. Recusado: ${invalidType.join(', ')}`,
+      });
+    }
+
+    if (tooLarge.length > 0) {
+      toast.error('Imagem muito grande', {
+        description: `O limite é ${MAX_IMAGE_SIZE_MB} MB por imagem. Recusado: ${tooLarge.join(', ')}`,
+      });
+    }
+
+    if (valid.length === 0) {
+      input.value = '';
+
+      return;
+    }
+
+    if (valid.length > remaining) {
+      toast.warning('Limite de imagens', {
+        description: `Só cabem mais ${remaining}. As demais foram ignoradas.`,
+      });
+    }
+
+    const files = valid.slice(0, remaining);
 
     const newPendingImages: PendingImage[] = files.map((file, index) => ({
       file,
@@ -333,8 +400,14 @@ export class Portfolio implements OnDestroy {
       error: (error: HttpErrorResponse) => {
         console.error('[Portfolio] Erro ao salvar imagens:', error);
 
+        // 413 = o servidor recusou por tamanho (limite do backend/proxy)
+        const description =
+          error.status === 413
+            ? 'Uma das imagens é grande demais para o servidor. Use uma imagem menor.'
+            : 'Não foi possível salvar as imagens.';
+
         toast.error('Erro ao salvar imagens', {
-          description: 'Não foi possível salvar as imagens.',
+          description,
           id: loadingToast,
         });
       },

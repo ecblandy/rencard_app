@@ -107,4 +107,11 @@ export class ClientApi {
   cancelSubscriptionOrPaymentLink() {
     return this.http.post(`${this.baseUrl}/payments/subscriptions/cancel/`, {});
   }
+
+  registerShare(customUrl: string) {
+    return this.http.post(
+      `${this.baseUrl}/analytics/profiles/${encodeURIComponent(customUrl)}/share/`,
+      {},
+    );
+  }
 }

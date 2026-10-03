@@ -204,4 +204,18 @@ export class ClientService {
       }),
     );
   }
+
+  registerShare(customUrl: string) {
+    return this.api.registerShare(customUrl).pipe(
+      tap({
+        next: (response) => {
+          console.log('Register Share Response:', response);
+        },
+
+        error: (error) => {
+          console.error('Register Share Error:', error);
+        },
+      }),
+    );
+  }
 }
