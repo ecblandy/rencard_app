@@ -11,6 +11,59 @@ import { ProfileStore } from '../../services/store/profile.store';
 import { ClientService } from '../../../../services/facade/client.service';
 import { toast } from 'ngx-sonner';
 
+type SocialFieldInfo = {
+  placeholder: string;
+  hint: string;
+};
+
+const SOCIAL_FIELD_INFO: Record<string, SocialFieldInfo> = {
+  instagram: {
+    placeholder: 'https://instagram.com/seuusuario',
+    hint: 'Cole o link completo do seu perfil no Instagram.',
+  },
+  tiktok: {
+    placeholder: 'https://tiktok.com/@seuusuario',
+    hint: 'Cole o link completo do seu perfil no TikTok.',
+  },
+  linkedin: {
+    placeholder: 'https://linkedin.com/in/seuusuario',
+    hint: 'Cole o link completo do seu perfil no LinkedIn.',
+  },
+  facebook: {
+    placeholder: 'https://facebook.com/seuusuario',
+    hint: 'Cole o link completo do seu perfil no Facebook.',
+  },
+  youtube: {
+    placeholder: 'https://youtube.com/@seucanal',
+    hint: 'Cole o link completo do seu canal no YouTube.',
+  },
+  telegram: {
+    placeholder: 'https://t.me/seuusuario',
+    hint: 'Cole o link completo do seu perfil no Telegram.',
+  },
+  email: {
+    placeholder: 'seuemail@exemplo.com',
+    hint: 'Informe apenas o endereço de e-mail. O prefixo "mailto:" é adicionado automaticamente.',
+  },
+  x: {
+    placeholder: 'https://x.com/seuusuario',
+    hint: 'Cole o link completo do seu perfil no X.',
+  },
+  website: {
+    placeholder: 'https://seusite.com.br',
+    hint: 'Cole o link completo do seu portfólio ou site.',
+  },
+  spotify: {
+    placeholder: 'https://open.spotify.com/artist/seuid',
+    hint: 'Cole o link completo do seu perfil no Spotify.',
+  },
+};
+
+const DEFAULT_FIELD_INFO: SocialFieldInfo = {
+  placeholder: 'https://',
+  hint: 'Cole o link completo.',
+};
+
 @Component({
   selector: 'app-socials',
   imports: [Surface, SurfaceTitle, NgIcon, SwitchButton, UiInput, UiButton],
@@ -104,6 +157,11 @@ export class Socials {
 
       this.profileStore.updateProfile({ social_links: socials_list });
     });
+  }
+
+  // Retorna placeholder e mensagem de ajuda para cada rede
+  fieldInfo(key: string): SocialFieldInfo {
+    return SOCIAL_FIELD_INFO[key] ?? DEFAULT_FIELD_INFO;
   }
 
   // Atualiza `socials` imutavelmente quando trocar o switch

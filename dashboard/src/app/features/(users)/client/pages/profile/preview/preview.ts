@@ -126,9 +126,18 @@ export class Preview {
         return;
       }
 
-      const clean = value.replace(/\/intl-[a-z]{2}\//, '/').split('?')[0];
+      /**
+       * Usa a mesma regra da página pública:
+       * aceita apenas track, album, playlist, episode e show,
+       * com ou sem prefixo de idioma.
+       */
+      const embedUrl = this.toSpotifyEmbedUrl(value);
 
-      const embedUrl = clean.replace('open.spotify.com/', 'open.spotify.com/embed/');
+      if (!embedUrl) {
+        this.spotifyEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(''));
+
+        return;
+      }
 
       this.spotifyEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl));
     });
@@ -289,6 +298,37 @@ export class Preview {
   // =========================================================
   // SPOTIFY
   // =========================================================
+
+  /**
+   * Converte o link colado pela cliente para a URL de embed.
+   *
+   * Aceita links com ou sem prefixo de idioma (/intl-pt/)
+   * e com ou sem protocolo. Retorna null para links inválidos
+   * ou para tipos que não tocam a música completa (ex: artist).
+   */
+  private toSpotifyEmbedUrl(value: string): string | null {
+    try {
+      const url = new URL(
+        value.trim().startsWith('http') ? value.trim() : `https://${value.trim()}`,
+      );
+
+      if (url.hostname.replace(/^www\./, '') !== 'open.spotify.com') {
+        return null;
+      }
+
+      const match = url.pathname.match(
+        /^\/(?:intl-[a-z]{2}(?:-[a-z]{2})?\/)?(track|album|playlist|episode|show)\/([A-Za-z0-9]+)/,
+      );
+
+      if (!match) {
+        return null;
+      }
+
+      return `https://open.spotify.com/embed/${match[1]}/${match[2]}`;
+    } catch {
+      return null;
+    }
+  }
 
   isSpotifyUserProfile(url: string): boolean {
     try {

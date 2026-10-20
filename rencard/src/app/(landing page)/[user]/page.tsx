@@ -802,6 +802,16 @@ export default async function UserProfilePage({ params }: Props) {
           </div>
         </div>
       </main>
+
+      <iframe
+        data-testid="embed-iframe"
+        src="https://open.spotify.com/embed/album/7xMg8wzaLpyNfRPSfbFd2S?utm_source=generator&theme=0&si=20f0a3b4f8d040e1"
+        width="100%"
+        height="352"
+        frameBorder="0"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+        loading="lazy"
+      ></iframe>
     </>
   );
 }

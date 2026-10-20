@@ -25,11 +25,15 @@
             @let field = socialsForm[social.key]();
 
             <app-input
-              placeholder="@exemplo"
+              [placeholder]="fieldInfo(social.key).placeholder"
               sizeH="sm"
               class="block mt-[1.1875rem]"
               [formField]="socialsForm[social.key]"
             ></app-input>
+
+            <p class="text-[.875rem] text-[#6b6b6b] mt-[.5rem]">
+              {{ fieldInfo(social.key).hint }}
+            </p>
 
             @if (field.touched() && field.invalid()) {
               <ul>
