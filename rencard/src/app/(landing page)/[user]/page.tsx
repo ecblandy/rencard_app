@@ -109,17 +109,28 @@ export interface Music {
 /* SOCIAL LABEL */
 /* ========================================================= */
 
-function getSocialLabel(url: string) {
+function getSocialLabel(url: string): string {
   try {
-    const parsedUrl = new URL(url);
+    const normalizedUrl = url.startsWith("http") ? url : `https://${url}`;
+
+    const parsedUrl = new URL(normalizedUrl);
+
+    const hostname = parsedUrl.hostname.replace(/^www\./, "").toLowerCase();
 
     const pathname = parsedUrl.pathname.replace(/^\/|\/$/g, "");
 
-    if (!pathname) {
-      return parsedUrl.hostname.replace("www.", "");
+    // Telegram Web: ignora rotas internas como /k/
+    if (hostname === "web.telegram.org") {
+      return hostname;
     }
 
-    return pathname.split("/").pop() || parsedUrl.hostname;
+    // Se não houver caminho, retorna o domínio
+    if (!pathname) {
+      return hostname;
+    }
+
+    // Retorna o último segmento da URL
+    return pathname.split("/").pop() || hostname;
   } catch {
     return url;
   }
@@ -802,16 +813,6 @@ export default async function UserProfilePage({ params }: Props) {
           </div>
         </div>
       </main>
-
-      <iframe
-        data-testid="embed-iframe"
-        src="https://open.spotify.com/embed/album/7xMg8wzaLpyNfRPSfbFd2S?utm_source=generator&theme=0&si=20f0a3b4f8d040e1"
-        width="100%"
-        height="352"
-        frameBorder="0"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy"
-      ></iframe>
     </>
   );
 }

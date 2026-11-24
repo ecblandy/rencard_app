@@ -48,7 +48,7 @@ const PROBLEM_TYPES: ProblemType[] = [
   },
 ];
 
-const WHATSAPP_NUMBER = '5571994027893';
+const WHATSAPP_NUMBER = '5534996870223';
 
 const DESCRIPTION_MIN_LENGTH = 10;
 
