@@ -3,12 +3,15 @@ import { Component, effect, inject, signal } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { NgIcon } from '@ng-icons/core';
+
 import { toast } from 'ngx-sonner';
 
 import { Surface } from '../../../../../../shared/components/surface/surface';
+
 import { UiButton } from '../../../../../../shared/ui/button/button';
 
 import { ProfileStore } from '../services/store/profile.store';
+
 import { AppearanceStore } from '../tabs/appearance/appearence-store';
 
 interface SocialLink {
@@ -20,9 +23,7 @@ interface SocialLink {
 
 @Component({
   selector: 'app-preview',
-
   imports: [Surface, NgIcon, UiButton],
-
   templateUrl: './preview.html',
   styleUrl: './preview.css',
 })
@@ -36,10 +37,10 @@ export class Preview {
   readonly profile = this.store.profile;
 
   // =========================================================
-  // SPOTIFY
+  // MUSIC
   // =========================================================
 
-  readonly spotifyEmbedUrl = signal<SafeResourceUrl>(
+  readonly musicEmbedUrl = signal<SafeResourceUrl>(
     this.sanitizer.bypassSecurityTrustResourceUrl(''),
   );
 
@@ -47,39 +48,15 @@ export class Preview {
   // YOUTUBE
   // =========================================================
 
-  /**
-   * Guarda as URLs sanitizadas dos vídeos.
-   *
-   * IMPORTANTE:
-   * Não criamos SafeResourceUrl diretamente no template.
-   *
-   * Isso evita que o Angular receba uma nova referência
-   * de URL a cada change detection e recrie o iframe.
-   *
-   * Estrutura:
-   *
-   * {
-   *   1: SafeResourceUrl,
-   *   2: SafeResourceUrl,
-   * }
-   */
   readonly youtubeEmbedUrls = signal<Record<number, SafeResourceUrl>>({});
 
-  /**
-   * IDs dos vídeos que já terminaram de carregar.
-   *
-   * Usado somente para controlar o fade-in do iframe.
-   */
   readonly loadedVideoIds = signal<Set<number>>(new Set());
 
-  /**
-   * IDs das imagens que já terminaram de carregar.
-   */
   readonly loadedImageIds = signal<Set<number>>(new Set());
 
   constructor() {
     // =======================================================
-    // YOUTUBE
+    // YOUTUBE PORTFOLIO
     // =======================================================
 
     effect(() => {
@@ -90,10 +67,6 @@ export class Preview {
       for (const video of videos) {
         const videoId = this.getYoutubeVideoId(video.youtube_url);
 
-        /**
-         * Se a URL não for válida, não criamos um iframe
-         * apontando para uma URL inválida.
-         */
         if (!videoId) {
           urls[video.id] = this.sanitizer.bypassSecurityTrustResourceUrl('');
 
@@ -105,41 +78,25 @@ export class Preview {
         urls[video.id] = this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
       }
 
-      /**
-       * Atualiza todas as URLs de uma vez.
-       *
-       * Esse signal só muda quando o profile muda.
-       */
       this.youtubeEmbedUrls.set(urls);
     });
 
     // =======================================================
-    // SPOTIFY
+    // MUSIC: SPOTIFY + YOUTUBE MUSIC
     // =======================================================
 
     effect(() => {
       const value = this.profile().music?.value ?? '';
 
       if (!value || this.isSpotifyUserProfile(value)) {
-        this.spotifyEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(''));
+        this.musicEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(''));
 
         return;
       }
 
-      /**
-       * Usa a mesma regra da página pública:
-       * aceita apenas track, album, playlist, episode e show,
-       * com ou sem prefixo de idioma.
-       */
-      const embedUrl = this.toSpotifyEmbedUrl(value);
+      const embedUrl = this.toSpotifyEmbedUrl(value) ?? this.toYoutubeMusicEmbedUrl(value);
 
-      if (!embedUrl) {
-        this.spotifyEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(''));
-
-        return;
-      }
-
-      this.spotifyEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl));
+      this.musicEmbedUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl ?? ''));
     });
   }
 
@@ -158,7 +115,6 @@ export class Preview {
 
     try {
       new URL(social.value);
-
       return false;
     } catch {
       return social.value?.includes('@') ?? false;
@@ -267,6 +223,10 @@ export class Preview {
         return 'Spotify';
       }
 
+      if (hostname === 'music.youtube.com' || hostname === 'youtube.com') {
+        return 'YouTube Music';
+      }
+
       const socialDomains = [
         'instagram.com',
         'github.com',
@@ -300,11 +260,14 @@ export class Preview {
   // =========================================================
 
   /**
-   * Converte o link colado pela cliente para a URL de embed.
+   * Converte links do Spotify para URLs de embed.
    *
-   * Aceita links com ou sem prefixo de idioma (/intl-pt/)
-   * e com ou sem protocolo. Retorna null para links inválidos
-   * ou para tipos que não tocam a música completa (ex: artist).
+   * Aceita:
+   * - track
+   * - album
+   * - playlist
+   * - episode
+   * - show
    */
   private toSpotifyEmbedUrl(value: string): string | null {
     try {
@@ -367,6 +330,74 @@ export class Preview {
   }
 
   // =========================================================
+  // YOUTUBE MUSIC
+  // =========================================================
+
+  /**
+   * Converte links do YouTube Music para URLs de embed.
+   *
+   * Música:
+   * https://music.youtube.com/watch?v=VIDEO_ID
+   *
+   * Playlist:
+   * https://music.youtube.com/playlist?list=PLAYLIST_ID
+   */
+  private toYoutubeMusicEmbedUrl(value: string): string | null {
+    try {
+      const url = new URL(
+        value.trim().startsWith('http') ? value.trim() : `https://${value.trim()}`,
+      );
+
+      const hostname = url.hostname.replace(/^www\./, '');
+
+      if (hostname !== 'music.youtube.com') {
+        return null;
+      }
+
+      // =====================================================
+      // MÚSICA
+      // =====================================================
+
+      if (url.pathname === '/watch') {
+        const videoId = url.searchParams.get('v');
+
+        if (!videoId) {
+          return null;
+        }
+
+        return `https://www.youtube.com/embed/${encodeURIComponent(videoId)}`;
+      }
+
+      // =====================================================
+      // PLAYLIST / ÁLBUM
+      // =====================================================
+
+      if (url.pathname === '/playlist') {
+        const playlistId = url.searchParams.get('list');
+
+        if (!playlistId) {
+          return null;
+        }
+
+        const embedUrl = new URL('https://www.youtube.com/embed');
+
+        embedUrl.searchParams.set('listType', 'playlist');
+        embedUrl.searchParams.set('list', playlistId);
+
+        return embedUrl.toString();
+      }
+
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  isYoutubeMusicLink(url: string): boolean {
+    return this.toYoutubeMusicEmbedUrl(url) !== null;
+  }
+
+  // =========================================================
   // SOCIAL
   // =========================================================
 
@@ -403,19 +434,9 @@ export class Preview {
   }
 
   // =========================================================
-  // YOUTUBE
+  // YOUTUBE PORTFOLIO
   // =========================================================
 
-  /**
-   * Retorna o ID do vídeo do YouTube.
-   *
-   * Aceita:
-   *
-   * https://www.youtube.com/watch?v=ABC
-   * https://www.youtube.com/shorts/ABC
-   * https://www.youtube.com/embed/ABC
-   * https://youtu.be/ABC
-   */
   private getYoutubeVideoId(url: string): string | null {
     try {
       const parsedUrl = new URL(
@@ -424,34 +445,25 @@ export class Preview {
 
       const hostname = parsedUrl.hostname.replace(/^www\./, '');
 
-      // =====================================================
       // youtube.com/watch?v=...
-      // =====================================================
-
-      if (hostname === 'youtube.com' && parsedUrl.pathname === '/watch') {
+      if (
+        (hostname === 'youtube.com' || hostname === 'm.youtube.com') &&
+        parsedUrl.pathname === '/watch'
+      ) {
         return parsedUrl.searchParams.get('v');
       }
 
-      // =====================================================
       // youtube.com/shorts/...
-      // =====================================================
-
       if (hostname === 'youtube.com' && parsedUrl.pathname.startsWith('/shorts/')) {
         return parsedUrl.pathname.split('/')[2] ?? null;
       }
 
-      // =====================================================
       // youtube.com/embed/...
-      // =====================================================
-
       if (hostname === 'youtube.com' && parsedUrl.pathname.startsWith('/embed/')) {
         return parsedUrl.pathname.split('/')[2] ?? null;
       }
 
-      // =====================================================
       // youtu.be/...
-      // =====================================================
-
       if (hostname === 'youtu.be') {
         return parsedUrl.pathname.substring(1) || null;
       }
@@ -462,12 +474,6 @@ export class Preview {
     }
   }
 
-  /**
-   * Retorna a thumbnail do YouTube.
-   *
-   * Essa imagem fica atrás do iframe enquanto o
-   * player ainda está carregando.
-   */
   getYoutubeThumbnailUrl(url: string): string {
     const videoId = this.getYoutubeVideoId(url);
 
@@ -478,10 +484,6 @@ export class Preview {
     return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
   }
 
-  /**
-   * Chamado somente quando o iframe realmente terminou
-   * de carregar.
-   */
   onVideoLoad(id: number): void {
     this.loadedVideoIds.update((ids) => {
       if (ids.has(id)) {

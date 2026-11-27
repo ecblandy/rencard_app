@@ -8,9 +8,7 @@
   classes="flex flex-col items-center w-full px-[1.125rem]"
   [bgColor]="appearance.settings().background_color"
 >
-  <!-- ===================================================== -->
   <!-- PROFILE -->
-  <!-- ===================================================== -->
 
   <img
     [src]="profile().profile_image || '/images/user-placeholder.svg'"
@@ -32,9 +30,7 @@
     {{ profile().subtitle || 'Sem subtítulo' }}
   </h3>
 
-  <!-- ===================================================== -->
   <!-- ANEXO -->
-  <!-- ===================================================== -->
 
   @if (profile().resume?.enabled && profile().resume?.file) {
     <section class="w-full mt-[1.875rem]">
@@ -53,15 +49,12 @@
         (click)="downloadResume()"
       >
         <ng-icon name="lucideDownload" size="16"></ng-icon>
-
         <p>Baixar anexo</p>
       </div>
     </section>
   }
 
-  <!-- ===================================================== -->
   <!-- MUSIC -->
-  <!-- ===================================================== -->
 
   @if (profile().music?.enabled && profile().music?.value) {
     <section class="w-full mt-[1.875rem]">
@@ -80,16 +73,15 @@
           (click)="openSpotify()"
         >
           <ng-icon name="simpleSpotify" size="18"></ng-icon>
-
           <p class="font-urbanist font-medium">Minha conta</p>
         </div>
       } @else {
         <iframe
           data-testid="embed-iframe"
           style="border-radius: 12px"
-          [src]="spotifyEmbedUrl()"
+          [src]="musicEmbedUrl()"
           width="100%"
-          height="152"
+          [height]="isYoutubeMusicLink(profile().music!.value) ? 200 : 152"
           frameBorder="0"
           scrolling="no"
           allowfullscreen
@@ -101,9 +93,7 @@
     </section>
   }
 
-  <!-- ===================================================== -->
   <!-- PORTFOLIO IMAGENS -->
-  <!-- ===================================================== -->
 
   @if (profile().portfolio_images.enabled && profile().portfolio_images.images.length > 0) {
     <section class="w-full mt-[1.875rem]">
@@ -131,9 +121,7 @@
     </section>
   }
 
-  <!-- ===================================================== -->
   <!-- PORTFOLIO VÍDEOS -->
-  <!-- ===================================================== -->
 
   @if (profile().portfolio_videos.enabled && profile().portfolio_videos.videos.length > 0) {
     <section class="w-full mt-[1.875rem]">
@@ -147,10 +135,6 @@
       <ul class="flex flex-col gap-[1rem] w-full">
         @for (video of profile().portfolio_videos.videos; track video.id) {
           <li class="relative w-full h-[220px] overflow-hidden rounded-[.625rem] bg-neutral-200">
-            <!-- ================================================= -->
-            <!-- THUMBNAIL -->
-            <!-- ================================================= -->
-
             @if (!isVideoLoaded(video.id)) {
               <img
                 [src]="getYoutubeThumbnailUrl(video.youtube_url)"
@@ -158,10 +142,6 @@
                 class="absolute inset-0 w-full h-full object-cover"
               />
             }
-
-            <!-- ================================================= -->
-            <!-- YOUTUBE -->
-            <!-- ================================================= -->
 
             <iframe
               [src]="youtubeEmbedUrls()[video.id]"
@@ -191,9 +171,7 @@
     </section>
   }
 
-  <!-- ===================================================== -->
   <!-- SOCIALS -->
-  <!-- ===================================================== -->
 
   @if (getFilteredSocials().length > 0) {
     <section class="w-full mt-[1.875rem]">
@@ -225,9 +203,7 @@
     </section>
   }
 
-  <!-- ===================================================== -->
   <!-- FORMULÁRIO DE CONTATO -->
-  <!-- ===================================================== -->
 
   @if (profile().contact_enabled) {
     <section
@@ -243,10 +219,6 @@
       </h3>
 
       <div class="flex flex-col gap-[.75rem] w-full">
-        <!-- ================================================= -->
-        <!-- NOME COMPLETO -->
-        <!-- ================================================= -->
-
         <input
           type="text"
           placeholder="Nome completo"
@@ -255,10 +227,6 @@
           [style.color]="appearance.settings().text_primary"
           [style.border-color]="appearance.settings().text_secondary"
         />
-
-        <!-- ================================================= -->
-        <!-- E-MAIL -->
-        <!-- ================================================= -->
 
         <input
           type="email"
@@ -269,10 +237,6 @@
           [style.border-color]="appearance.settings().text_secondary"
         />
 
-        <!-- ================================================= -->
-        <!-- TELEFONE -->
-        <!-- ================================================= -->
-
         <input
           type="tel"
           placeholder="Telefone"
@@ -281,10 +245,6 @@
           [style.color]="appearance.settings().text_primary"
           [style.border-color]="appearance.settings().text_secondary"
         />
-
-        <!-- ================================================= -->
-        <!-- MENSAGEM -->
-        <!-- ================================================= -->
 
         <textarea
           placeholder="Mensagem"
@@ -295,10 +255,6 @@
           [style.border-color]="appearance.settings().text_secondary"
         ></textarea>
 
-        <!-- ================================================= -->
-        <!-- LOCALIZAÇÃO -->
-        <!-- ================================================= -->
-
         <input
           type="text"
           placeholder="Localização"
@@ -308,10 +264,6 @@
           [style.border-color]="appearance.settings().text_secondary"
         />
 
-        <!-- ================================================= -->
-        <!-- BOTÃO ENVIAR -->
-        <!-- ================================================= -->
-
         <button
           type="button"
           class="w-full flex items-center justify-center gap-2 rounded-xl px-4 py-3 font-semibold transition-opacity hover:opacity-90 cursor-pointer"
@@ -319,16 +271,13 @@
           [style.color]="appearance.settings().button_text_primary"
         >
           <ng-icon name="lucideSend" size="18"></ng-icon>
-
           Enviar mensagem
         </button>
       </div>
     </section>
   }
 
-  <!-- ===================================================== -->
   <!-- EMAIL -->
-  <!-- ===================================================== -->
 
   @if (getEmailSocial(); as emailSocial) {
     <section class="w-full mt-[1.875rem]">
@@ -347,15 +296,12 @@
         (click)="openEmailSocial(emailSocial.value)"
       >
         <ng-icon name="lucideMailOpen" size="18"></ng-icon>
-
         <p>Enviar email</p>
       </div>
     </section>
   }
 
-  <!-- ===================================================== -->
   <!-- BUTTONS -->
-  <!-- ===================================================== -->
 
   @if (profile().buttons.some(button => button.enabled)) {
     <section class="w-full mt-[1.875rem]">
@@ -387,9 +333,7 @@
     </section>
   }
 
-  <!-- ===================================================== -->
   <!-- FOOTER -->
-  <!-- ===================================================== -->
 
   <p
     class="font-manrope font-medium mt-[1.875rem]"
@@ -407,9 +351,7 @@
   </p>
 </app-surface>
 
-<!-- ======================================================= -->
 <!-- FULLSCREEN -->
-<!-- ======================================================= -->
 
 <app-button class="w-full mt-[1.875rem]" (click)="goToRecardPublickProfile()">
   Visualizar em tela cheia

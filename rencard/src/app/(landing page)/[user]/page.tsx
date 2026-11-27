@@ -18,6 +18,7 @@ import { SiTiktok, SiThreads, SiDiscord, SiTelegram } from "react-icons/si";
 import Image from "next/image";
 import Link from "next/link";
 import Script from "next/script";
+
 import type { CSSProperties } from "react";
 
 import SpotifyEmbed from "./components/spotify-embed";
@@ -101,44 +102,46 @@ export interface Music {
   enabled: boolean;
   id: number;
   profile: number;
-  type: "spotify";
+  type: string;
   value: string;
 }
 
-/* ========================================================= */
-/* SOCIAL LABEL */
-/* ========================================================= */
+// =========================================================
+// SOCIAL LABEL
+// =========================================================
 
-function getSocialLabel(url: string): string {
+function getSocialLabel(url: string, type?: string): string {
   try {
-    const normalizedUrl = url.startsWith("http") ? url : `https://${url}`;
-
+    const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
     const parsedUrl = new URL(normalizedUrl);
-
     const hostname = parsedUrl.hostname.replace(/^www\./, "").toLowerCase();
+    const pathname = parsedUrl.pathname.replace(/^\/+|\/+$/g, "");
 
-    const pathname = parsedUrl.pathname.replace(/^\/|\/$/g, "");
-
-    // Telegram Web: ignora rotas internas como /k/
-    if (hostname === "web.telegram.org") {
+    // Telegram: exibe o domínio (web.telegram.org), nunca a rota interna (/k/).
+    if (
+      type?.toLowerCase().trim() === "telegram" ||
+      hostname === "web.telegram.org" ||
+      hostname === "t.me" ||
+      hostname === "telegram.me"
+    ) {
       return hostname;
     }
 
-    // Se não houver caminho, retorna o domínio
+    // Para as demais redes, mantém o comportamento original:
+    // exibe o último trecho da URL ou o domínio quando não há caminho.
     if (!pathname) {
       return hostname;
     }
 
-    // Retorna o último segmento da URL
     return pathname.split("/").pop() || hostname;
   } catch {
     return url;
   }
 }
 
-/* ========================================================= */
-/* SOCIAL ICON */
-/* ========================================================= */
+// =========================================================
+// SOCIAL ICON
+// =========================================================
 
 function getSocialIcon(type: string) {
   switch (type.toLowerCase().trim()) {
@@ -178,9 +181,9 @@ function getSocialIcon(type: string) {
   }
 }
 
-/* ========================================================= */
-/* BUTTON DATA */
-/* ========================================================= */
+// =========================================================
+// BUTTON DATA
+// =========================================================
 
 function getButtonData(button: ProfileButton) {
   switch (button.type.toLowerCase().trim()) {
@@ -207,77 +210,164 @@ function getButtonData(button: ProfileButton) {
   }
 }
 
-/* ========================================================= */
-/* SPOTIFY */
-/* ========================================================= */
+// =========================================================
+// MUSIC URL
+// =========================================================
 
-function getSpotifyEmbedUrl(url: string) {
+function parseMusicUrl(value: string): URL | null {
   try {
-    const parsedUrl = new URL(url);
+    const normalizedValue = value.trim();
 
-    const hostname = parsedUrl.hostname.toLowerCase();
-
-    if (hostname !== "open.spotify.com") {
+    if (!normalizedValue) {
       return null;
     }
 
-    const pathname = parsedUrl.pathname;
-
-    const match = pathname.match(
-      /^\/(?:intl-[a-z]{2}\/)?(track|album|playlist|episode|show)\/([^/]+)/,
+    return new URL(
+      /^https?:\/\//i.test(normalizedValue)
+        ? normalizedValue
+        : `https://${normalizedValue}`,
     );
-
-    if (!match) {
-      return null;
-    }
-
-    const [, type, id] = match;
-
-    return `https://open.spotify.com/embed/${type}/${id}`;
   } catch {
     return null;
   }
 }
 
-/* ========================================================= */
-/* YOUTUBE */
-/* ========================================================= */
+// =========================================================
+// SPOTIFY
+// =========================================================
 
-function getYouTubeEmbedUrl(url: string) {
+function getSpotifyEmbedUrl(value: string): string | null {
+  const parsedUrl = parseMusicUrl(value);
+
+  if (!parsedUrl) {
+    return null;
+  }
+
+  const hostname = parsedUrl.hostname.replace(/^www\./, "").toLowerCase();
+
+  if (hostname !== "open.spotify.com") {
+    return null;
+  }
+
+  const match = parsedUrl.pathname.match(
+    /^\/(?:intl-[a-z]{2}(?:-[a-z]{2})?\/)?(track|album|playlist|episode|show)\/([A-Za-z0-9]+)/,
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const [, type, id] = match;
+
+  return `https://open.spotify.com/embed/${type}/${id}`;
+}
+
+// =========================================================
+// SPOTIFY USER PROFILE
+// =========================================================
+
+function getSpotifyUserProfileUrl(value: string): string | null {
+  const parsedUrl = parseMusicUrl(value);
+
+  if (!parsedUrl) {
+    return null;
+  }
+
+  const hostname = parsedUrl.hostname.replace(/^www\./, "").toLowerCase();
+  const pathname = parsedUrl.pathname.split("/").filter(Boolean);
+
+  if (hostname !== "open.spotify.com" || pathname[0] !== "user") {
+    return null;
+  }
+
+  return parsedUrl.toString();
+}
+
+// =========================================================
+// YOUTUBE MUSIC
+// =========================================================
+
+function getYouTubeMusicEmbedUrl(value: string): string | null {
+  const parsedUrl = parseMusicUrl(value);
+
+  if (!parsedUrl) {
+    return null;
+  }
+
+  const hostname = parsedUrl.hostname.replace(/^www\./, "").toLowerCase();
+
+  if (hostname !== "music.youtube.com") {
+    return null;
+  }
+
+  // Música individual: music.youtube.com/watch?v=VIDEO_ID
+  if (parsedUrl.pathname === "/watch") {
+    const videoId = parsedUrl.searchParams.get("v");
+
+    if (!videoId || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
+      return null;
+    }
+
+    return `https://www.youtube.com/embed/${videoId}`;
+  }
+
+  // Playlist ou álbum compartilhado: music.youtube.com/playlist?list=PLAYLIST_ID
+  if (parsedUrl.pathname === "/playlist") {
+    const playlistId = parsedUrl.searchParams.get("list");
+
+    if (!playlistId || !/^[A-Za-z0-9_-]+$/.test(playlistId)) {
+      return null;
+    }
+
+    const embedUrl = new URL("https://www.youtube.com/embed/videoseries");
+    embedUrl.searchParams.set("list", playlistId);
+
+    return embedUrl.toString();
+  }
+
+  return null;
+}
+
+// =========================================================
+// YOUTUBE PORTFOLIO
+// =========================================================
+
+function getYouTubeEmbedUrl(value: string): string | null {
   try {
-    const parsedUrl = new URL(url);
+    const normalizedValue = value.trim();
+    const parsedUrl = new URL(
+      /^https?:\/\//i.test(normalizedValue)
+        ? normalizedValue
+        : `https://${normalizedValue}`,
+    );
 
     let videoId: string | null = null;
-
-    const hostname = parsedUrl.hostname.toLowerCase();
+    const hostname = parsedUrl.hostname.replace(/^www\./, "").toLowerCase();
 
     if (hostname === "youtu.be") {
       videoId = parsedUrl.pathname.slice(1).split("/")[0];
     }
 
-    if (
-      hostname === "youtube.com" ||
-      hostname === "www.youtube.com" ||
-      hostname === "m.youtube.com"
-    ) {
+    if (hostname === "youtube.com" || hostname === "m.youtube.com") {
       if (parsedUrl.pathname === "/watch") {
         videoId = parsedUrl.searchParams.get("v");
       }
 
       if (parsedUrl.pathname.startsWith("/shorts/")) {
-        videoId = parsedUrl.pathname.split("/shorts/")[1]?.split("/")[0];
+        videoId =
+          parsedUrl.pathname.split("/shorts/")[1]?.split("/")[0] ?? null;
       }
 
       if (parsedUrl.pathname.startsWith("/embed/")) {
-        videoId = parsedUrl.pathname.split("/embed/")[1]?.split("/")[0];
+        videoId = parsedUrl.pathname.split("/embed/")[1]?.split("/")[0] ?? null;
       }
 
       if (parsedUrl.pathname.startsWith("/live/")) {
-        videoId = parsedUrl.pathname.split("/live/")[1]?.split("/")[0];
+        videoId = parsedUrl.pathname.split("/live/")[1]?.split("/")[0] ?? null;
       }
     }
 
-    if (!videoId) {
+    if (!videoId || !/^[A-Za-z0-9_-]{11}$/.test(videoId)) {
       return null;
     }
 
@@ -287,11 +377,11 @@ function getYouTubeEmbedUrl(url: string) {
   }
 }
 
-/* ========================================================= */
-/* EMAIL */
-/* ========================================================= */
+// =========================================================
+// EMAIL
+// =========================================================
 
-function getEmailHref(value: string) {
+function getEmailHref(value: string): string {
   const email = value.trim();
 
   if (email.toLowerCase().startsWith("mailto:")) {
@@ -301,9 +391,9 @@ function getEmailHref(value: string) {
   return `mailto:${email}`;
 }
 
-/* ========================================================= */
-/* SECTION TITLE */
-/* ========================================================= */
+// =========================================================
+// SECTION TITLE
+// =========================================================
 
 function SectionTitle({
   children,
@@ -324,9 +414,9 @@ function SectionTitle({
   );
 }
 
-/* ========================================================= */
-/* UNAVAILABLE */
-/* ========================================================= */
+// =========================================================
+// UNAVAILABLE
+// =========================================================
 
 function ProfileUnavailable({
   privateProfile = false,
@@ -361,9 +451,9 @@ function ProfileUnavailable({
   );
 }
 
-/* ========================================================= */
-/* PAGE */
-/* ========================================================= */
+// =========================================================
+// PAGE
+// =========================================================
 
 export default async function UserProfilePage({ params }: Props) {
   const { user: username } = await params;
@@ -406,51 +496,51 @@ export default async function UserProfilePage({ params }: Props) {
     return <ProfileUnavailable privateProfile />;
   }
 
-  /* ========================================================= */
-  /* COLORS */
-  /* ========================================================= */
+  // =========================================================
+  // COLORS
+  // =========================================================
 
   const primaryButtonColor = responseToJson.button_bg_primary || "#171717";
-
   const secondaryButtonColor = responseToJson.button_bg_secondary || "#F5F5F5";
-
   const primaryButtonText = responseToJson.button_text_primary || "#FFFFFF";
-
   const secondaryButtonText = responseToJson.button_text_secondary || "#171717";
-
   const primaryText = responseToJson.text_primary || "#171717";
-
   const secondaryText = responseToJson.text_secondary || "#737373";
-
   const backgroundColor = responseToJson.background_color || "#FFFFFF";
 
-  /* ========================================================= */
-  /* SPOTIFY */
-  /* ========================================================= */
+  // =========================================================
+  // MUSIC: SPOTIFY + YOUTUBE MUSIC
+  // =========================================================
 
-  const spotifyValue = responseToJson.music?.enabled
-    ? responseToJson.music.value
+  const musicValue = responseToJson.music?.enabled
+    ? (responseToJson.music.value?.trim() ?? "")
     : "";
 
-  const spotifyUrl = getSpotifyEmbedUrl(spotifyValue);
+  const spotifyUrl = getSpotifyEmbedUrl(musicValue);
+  const spotifyUserUrl = getSpotifyUserProfileUrl(musicValue);
+  const youtubeMusicEmbedUrl = getYouTubeMusicEmbedUrl(musicValue);
 
-  /* ========================================================= */
-  /* GOOGLE ANALYTICS */
-  /* ========================================================= */
+  const hasSupportedMusic = Boolean(
+    spotifyUrl || spotifyUserUrl || youtubeMusicEmbedUrl,
+  );
+
+  // =========================================================
+  // GOOGLE ANALYTICS
+  // =========================================================
 
   const googleAnalyticsId = responseToJson.google_analytics_id?.trim();
 
-  /* ========================================================= */
-  /* EMAIL */
-  /* ========================================================= */
+  // =========================================================
+  // EMAIL
+  // =========================================================
 
   const emailSocial = responseToJson.social_links.find(
     (social) => social.enabled && social.type.toLowerCase() === "email",
   );
 
-  /* ========================================================= */
-  /* SOCIALS */
-  /* ========================================================= */
+  // =========================================================
+  // SOCIALS
+  // =========================================================
 
   const socialLinks = responseToJson.social_links.filter(
     (social) =>
@@ -590,16 +680,48 @@ export default async function UserProfilePage({ params }: Props) {
             )}
 
             {/* =============================================== */}
-            {/* MUSIC / SPOTIFY */}
+            {/* MUSIC: SPOTIFY + YOUTUBE MUSIC */}
             {/* =============================================== */}
 
             {responseToJson.music?.enabled &&
-              responseToJson.music?.value &&
-              spotifyUrl && (
+              musicValue &&
+              hasSupportedMusic && (
                 <section className="mt-[1.875rem] w-full">
                   <SectionTitle color={primaryText}>Música</SectionTitle>
 
-                  <SpotifyEmbed url={spotifyUrl} />
+                  {spotifyUrl ? (
+                    <SpotifyEmbed url={spotifyUrl} />
+                  ) : spotifyUserUrl ? (
+                    <a
+                      href={spotifyUserUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex h-[2.375rem] w-full items-center justify-center gap-x-[.75rem] rounded-[.875rem] px-[.75rem] transition-all duration-200 hover:scale-105"
+                      style={{
+                        backgroundColor: secondaryButtonColor,
+                        color: secondaryButtonText,
+                      }}
+                    >
+                      <ExternalLink size={18} />
+                      <span className="font-medium">Minha conta</span>
+                    </a>
+                  ) : youtubeMusicEmbedUrl ? (
+                    <div className="w-full overflow-hidden rounded-xl">
+                      <iframe
+                        src={youtubeMusicEmbedUrl}
+                        title="Player do YouTube Music"
+                        width="100%"
+                        height="200"
+                        frameBorder="0"
+                        scrolling="no"
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture; web-share"
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        className="block w-full"
+                      />
+                    </div>
+                  ) : null}
                 </section>
               )}
 
@@ -678,8 +800,7 @@ export default async function UserProfilePage({ params }: Props) {
 
                 <ul className="flex w-full flex-col space-y-[1.125rem]">
                   {socialLinks.map((social) => {
-                    const label = getSocialLabel(social.value);
-
+                    const label = getSocialLabel(social.value, social.type);
                     const Icon = getSocialIcon(social.type);
 
                     return (
@@ -762,7 +883,6 @@ export default async function UserProfilePage({ params }: Props) {
                     .filter((button) => button.enabled)
                     .map((button) => {
                       const { icon: Icon, label, href } = getButtonData(button);
-
                       const isPix = button.type.toLowerCase().trim() === "pix";
 
                       return (
